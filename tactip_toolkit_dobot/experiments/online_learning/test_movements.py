@@ -58,7 +58,7 @@ def main():
             ex.robot.move_linear((0, 0, 0, 0, 0, 0))
 
             # test tap_at function
-            ex.tap_at(np.array([10, 5]), 110, meta)  # -110 to 110
+            common.tap_at(np.array([10, 5]), 110, ex.robot, ex.sensor, meta)  # -110 to 110
 
             ex.robot.move_linear((0, 0, 0, 0, 0, 0))
 

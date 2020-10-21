@@ -31,6 +31,8 @@ import tactip_toolkit_dobot.experiments.min_example.common as common
 
 # import tactip_toolkit_dobot.experiments.online_learning.experiment as experiment
 
+# import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
+
 
 np.set_printoptions(precision=2, suppress=True)
 
@@ -60,67 +62,39 @@ class Experiment:
         Collect a straight line of taps at 90deg to new_orient, at
         displacements specified in meta.
         """
-        for displacements in meta["line_range"]:
+        new_keypoints = [None] * len(meta["line_range"])
+        for i, displacements in enumerate(meta["line_range"]):
 
             next_test_location = new_location + displacements * np.array(
                 [np.cos(new_orient), np.sin(new_orient)]
             )
 
-            self.tap_at(next_test_location, new_orient, meta)
+            new_keypoints[i] = common.tap_at(
+                next_test_location, new_orient, self.robot, self.sensor, meta
+            )
+            self.add_to_alldata(new_keypoints[i])
 
-    def tap_at(self, location, orientation, meta):
+        return new_keypoints
+
+    def add_to_alldata(self, keypoints):
         """
-        Move to location and tap with the given orientation, adding the data
-        to self.all_raw_data
+
+        :param keypoints: needs to be raw data from the sensor, a single tap only
+        :return: void
         """
-        full_cartesian_location = np.array(
-            [location[0], location[1], 0, 0, 0, orientation]
-        )
+        if self.all_raw_data is None:
+            self.all_raw_data = []  # can't append to None, but needs to start as None
+        self.all_raw_data.append(keypoints)
 
-        # safety checks for workspace - NB, defined relative to workframe, not
-        # base frame, therefore will not be safe if workspace changes too much
-        if (
-            location[0] < -50
-            or location[0] > 100
-            or location[1] < -100
-            or location[1] > 100
-        ):
-            raise NameError("Location outside safe zone")
+    def find_edge_in_line(self, keypoints):
+        """
+        Identify the location of the edge
+        :param keypoints: raw data from a line of taps
+        :return:
+        """
 
-        if orientation > 110 or orientation < -110:
-            raise NameError("Orientation of end-effector out of bounds")
 
-        # also check its within robot limits
-        if self.robot.sync_robot.check_pose_is_valid(full_cartesian_location) is False:
-            raise NameError("Invalid pose for robot")
-
-        # make sure in work frame
-        self.robot.coord_frame = meta[
-            "work_frame"
-        ]  # should already be set, but just to make sure
-
-        # move to given position
-
-        self.robot.move_linear(full_cartesian_location)
-
-        # # change coordinate frame so origin is the new position
-        # self.robot.coord_frame = np.array(meta["work_frame"]) + full_cartesian_location
-
-        # change coordinate frame so origin is the new position
-        self.robot.coord_frame = meta["base_frame"]
-        self.robot.coord_frame = self.robot.pose
-
-        # tap relative to new origin, using 2 part tap movement specified in meta
-        self.robot.move_linear(meta["tap_move"][0])
-        keypoints = self.sensor.process(meta["num_frames"])
-        self.robot.move_linear(meta["tap_move"][1])
-
-        # return to work frame
-        self.robot.coord_frame = meta["work_frame"]
-
-        self.all_raw_data = []
-
-        return self.all_raw_data
+        pass
 
 
 def make_meta():
@@ -194,7 +168,7 @@ def make_meta():
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": 90,
         "STEP_LENGTH": 5,
-        "line_range": np.arange(-10, 11, 2).tolist(),  # in mm
+        "line_range": np.arange(-10, 11, 5).tolist(),  # in mm
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
         "comments": "testing",  # so you can identify runs later
     }
@@ -252,25 +226,26 @@ def main():
 
             # explore(meta["robot_type"], ex)
 
-            if meta["robot_type"] == "arm":
+            # if meta["robot_type"] == "arm":
 
-                new_orient, new_location = next_sensor_placement(ex, meta)
+            new_orient, new_location = next_sensor_placement(ex, meta)
 
-                if current_step == 0:  # first run
-                    ex.collect_line(new_location, new_orient, meta)
-                else:
-                    pass
-                    # do single tap
-                    # predict distance to edge
-                    # if exceed sensible limit
-                    # collect line
-                    # move distance
-                    # predict again
-                    # if bad
-                    # collect line
-
-            elif meta["robot_type"] == "quad":
+            if current_step == 0:  # first run
+                new_keypoints = ex.collect_line(new_location, new_orient, meta)
+                ex.find_edge_in_line(new_keypoints)
+            else:
                 pass
+                # do single tap
+                # predict distance to edge
+                # if exceed sensible limit
+                # collect line
+                # move distance
+                # predict again
+                # if bad
+                # collect line
+
+            # elif meta["robot_type"] == "quad":
+            #     pass
 
         # # Move to origin of work frame
         # robot.move_linear((0, 0, 0, 0, 0, 0))

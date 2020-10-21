@@ -28,6 +28,7 @@ from tactip_toolkit_dobot.experiments.online_learning.contour_following_2d impor
     Experiment,
     make_meta,
 )
+import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
 
 
 np.set_printoptions(precision=2, suppress=True)
@@ -48,13 +49,22 @@ def main():
 
         results = ex.collect_line([10, 0], 0, meta)
 
-        print("collected:")
-        print(results)
-
-        print("raw data")
-        print(ex.all_raw_data)
+        print("collected")
 
         common.go_home(ex.robot, meta)
+
+        best_frames = [None] * len(results)
+        for i, tap in enumerate(results):
+            best_frames[i] = dp.best_frame(np.array(tap))
+
+        # print("collected:")
+        # print(results)
+        #
+        # print("raw data")
+        # print(ex.all_raw_data)
+
+        print("best frames")
+        print(best_frames)
 
         # save data
         results_np = np.array(results)  # needed so can json.dump properly
