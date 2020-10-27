@@ -28,11 +28,6 @@ def load_data():
     return all_data
 
 
-
-
-
-
-
 if __name__ == "__main__":
     all_data = load_data()
     # print(len(all_data[0]))
@@ -104,11 +99,11 @@ if __name__ == "__main__":
 
     mus_test = model.optim_mu(disp_test, y_test)
 
-    print(f'in main, final mus {mus_test}')
+    print(f"in main, final mus {mus_test}")
     mu_real = np.linspace(mu_range[0], mu_range[1], len(disp_test))
-    print(f'in main, real mus {mu_real}')
+    print(f"in main, real mus {mu_real}")
 
     mu_error = mus_test - mu_real
 
     with np.printoptions(precision=3, suppress=True):
-        print(f'error in mu predictions {mu_error}')
+        print(f"error in mu predictions {mu_error}")

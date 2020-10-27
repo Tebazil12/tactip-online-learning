@@ -31,7 +31,7 @@ import tactip_toolkit_dobot.experiments.min_example.common as common
 
 # import tactip_toolkit_dobot.experiments.online_learning.experiment as experiment
 
-# import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
+import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
 
 
 np.set_printoptions(precision=2, suppress=True)
@@ -39,7 +39,7 @@ np.set_printoptions(precision=2, suppress=True)
 
 class Experiment:
     # keeps a record of the current orientation of the sensor on the robot
-    current_rotation = None
+    # current_rotation = None
 
     # actual global location in 2d (x,y) , only known with arm (so far)
     edge_locations = None
@@ -47,9 +47,12 @@ class Experiment:
     # all taps, in order of collection only (no nested organisation), with all
     # frames
     all_raw_data = None
+    all_tap_positions = None
 
     robot = None
     sensor = None
+
+    _num_line_saves = 0
 
     def __init__(self):
         pass
@@ -57,12 +60,30 @@ class Experiment:
     def bootstrap(self):
         pass
 
+    @property
+    def num_line_saves(self):
+        self._num_line_saves = self._num_line_saves + 1
+        return self._num_line_saves
+
+    @property
+    def current_rotation(self):
+        """
+        :return: current rotation in DEGREES
+        """
+        current_pose = self.robot.pose
+        return round(current_pose[5], 2)
+
     def collect_line(self, new_location, new_orient, meta):
         """
         Collect a straight line of taps at 90deg to new_orient, at
         displacements specified in meta.
+
+        :param new_orient: needs to be in RADIANS!
+        :returns: the best frames from each tap on the line (as n_taps x (2xn_pins) x 1)
         """
         new_keypoints = [None] * len(meta["line_range"])
+        best_frames = [None] * len(meta["line_range"])
+
         for i, displacements in enumerate(meta["line_range"]):
 
             next_test_location = new_location + displacements * np.array(
@@ -70,13 +91,31 @@ class Experiment:
             )
 
             new_keypoints[i] = common.tap_at(
-                next_test_location, new_orient, self.robot, self.sensor, meta
+                next_test_location,
+                np.rad2deg(new_orient),
+                self.robot,
+                self.sensor,
+                meta,
             )
-            self.add_to_alldata(new_keypoints[i])
+            self.add_to_alldata(
+                new_keypoints[i],
+                [next_test_location[0], next_test_location[1], np.rad2deg(new_orient)],
+            )
 
-        return new_keypoints
+            best_frames[i] = dp.best_frame(new_keypoints[i])
 
-    def add_to_alldata(self, keypoints):
+        # save data
+        # file_name = "data_line_" + str(self.num_line_saves).rjust(3, "0")
+        new_keypoints_np = np.array(new_keypoints)  # needed so can json.dump properly
+        common.save_data(
+            new_keypoints_np.tolist(),
+            meta,
+            name="data_line_" + str(self.num_line_saves).rjust(3, "0") + ".json",
+        )
+
+        return best_frames
+
+    def add_to_alldata(self, keypoints, position):
         """
 
         :param keypoints: needs to be raw data from the sensor, a single tap only
@@ -86,6 +125,11 @@ class Experiment:
             self.all_raw_data = []  # can't append to None, but needs to start as None
         self.all_raw_data.append(keypoints)
 
+        if self.all_tap_positions is None:
+            self.all_tap_positions = []
+        position_rounded = [round(num, 1) for num in position]
+        self.all_tap_positions.append(position_rounded)
+
     def find_edge_in_line(self, keypoints):
         """
         Identify the location of the edge
@@ -93,8 +137,7 @@ class Experiment:
         :return:
         """
 
-
-        pass
+        return [0,0]
 
 
 def make_meta():
@@ -166,11 +209,11 @@ def make_meta():
         "num_frames": 10,
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
-        "MAX_STEPS": 90,
+        "MAX_STEPS": 4,
         "STEP_LENGTH": 5,
-        "line_range": np.arange(-10, 11, 5).tolist(),  # in mm
+        "line_range": np.arange(-10, 11, 10).tolist(),  # in mm
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
-        "comments": "testing",  # so you can identify runs later
+        "comments": "first run with main loop instead of tests",  # so you can identify runs later
     }
 
     os.makedirs(os.path.join(meta["home_dir"], os.path.dirname(meta["meta_file"])))
@@ -186,8 +229,10 @@ def explore(robot_type, ex):
 
 def find_first_orient():
     # do 3 taps to find new_orient
+
+    # find best frames
     # set new_location too
-    pass
+    return 0, [0 ,0] #TODO implement real!
 
 
 def next_sensor_placement(ex, meta):
@@ -198,10 +243,10 @@ def next_sensor_placement(ex, meta):
     else:
         if len(ex.edge_locations) == 1:
             # use previous angle
-            new_orient = ex.current_rotation
+            new_orient = ex.current_rotation  # taken from current robot pose
         else:
             # interpolate previous two edge locations to find orientation
-            step = ex.edge_locations[-1] - ex.edge_locations[-2]
+            step = np.array(ex.edge_locations[-1]) - np.array(ex.edge_locations[-2])
             new_orient = -np.arctan2(step[0], step[1])
 
         step_vector = meta["STEP_LENGTH"] * np.array(
@@ -219,66 +264,58 @@ def main():
     with common.make_robot() as ex.robot, common.make_sensor(meta) as ex.sensor:
         common.init_robot(ex.robot, meta)
 
-        print("Main code...")
+        collect_more_data = True  # first loop should always collect data
 
         for current_step in range(0, meta["MAX_STEPS"]):
             print("------------ Main Loop -----------------")
 
-            # explore(meta["robot_type"], ex)
-
-            # if meta["robot_type"] == "arm":
-
             new_orient, new_location = next_sensor_placement(ex, meta)
 
-            if current_step == 0:  # first run
-                new_keypoints = ex.collect_line(new_location, new_orient, meta)
-                ex.find_edge_in_line(new_keypoints)
-            else:
-                pass
+            if collect_more_data is False:  # should only skip on first loop
                 # do single tap
                 # predict distance to edge
+
                 # if exceed sensible limit
-                # collect line
-                # move distance
-                # predict again
-                # if bad
-                # collect line
+                # ### collect_more_data = True
 
-            # elif meta["robot_type"] == "quad":
-            #     pass
+                if collect_more_data is False:
 
-        # # Move to origin of work frame
-        # robot.move_linear((0, 0, 0, 0, 0, 0))
-        #
-        # # # do a twist
-        # # robot.move_linear((0, 0, 0, 0, 0, 50))
-        # # robot.move_linear((0, 0, 0, 0, 0, -50))
-        # # robot.move_linear((0, 0, 0, 0, 0, 0))
-        #
-        # # do a tap, recording pin positions
-        # robot.move_linear(meta["tap_move"][0])
-        # keypoints = sensor.process(meta["num_frames"])
-        # robot.move_linear(meta["tap_move"][1])
-        #
-        # data = {"keypoints":keypoints.tolist()}
-        # common.save_data(data, meta)
-        #
-        # # show plot of tap taken
-        # # for i in range(0,10):
-        # #     plt.scatter(keypoints[i][:,0],keypoints[i][:,1] )
-        # #     plt.plot(keypoints[i][:,0],keypoints[i][:,1] )
-        # # plt.axis('equal')
-        # for i in range(0, len(keypoints[0])):
-        #     plt.scatter(keypoints[:, i, 0], keypoints[:, i, 1])
-        #     plt.plot(keypoints[:, i, 0], keypoints[:, i, 1])
-        # # plt.plot(keypoints[1][:,0],keypoints[1][:,1] )
-        # plt.scatter(keypoints[0][:, 0], keypoints[0][:, 1])
-        # plt.axis("equal")
-        # plt.show()
-        #
-        # common.go_home(robot, meta)
-        # print("Final pose in work frame: {}".format(robot.pose))
+                    # move distance
+                    # predict again
 
+                    # if bad
+                    # ### collect_more_data = True
+                    # else
+                    # ### note which to add location to list
+                    edge_location = [0, -10] # todo, add real logic
+
+            if collect_more_data is True:
+                new_taps = ex.collect_line(new_location, new_orient, meta)
+                edge_location = ex.find_edge_in_line(new_taps)
+
+                # note which to add to location to list (ex.edge_locations)
+
+            # actually add location to list (so as to not repeat self)
+            if ex.edge_locations is None:
+                ex.edge_locations =[]
+            ex.edge_locations.append(edge_location)
+
+            # exit clause for returning to first tap location
+
+            # save data every loop just to make sure data isn't lost
+            step_n_str = str(current_step).rjust(3, "0")
+            common.save_data(
+                ex.all_raw_data, meta, name="all_data_" + step_n_str + ".json"
+            )
+            common.save_data(
+                ex.all_tap_positions, meta, name="all_positions_" + step_n_str + ".json"
+            )
+
+            collect_more_data = False  # last thing in loop, reset for next loop
+
+    # save the final set of data
+    common.save_data(ex.all_raw_data, meta, name="all_data_final.json")
+    common.save_data(ex.all_tap_positions, meta, name="all_positions_final.json")
     print("Done, exiting")
 
 

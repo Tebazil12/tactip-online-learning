@@ -47,28 +47,28 @@ def main():
 
         print("Main code...")
 
-        results = ex.collect_line([10, 0], 0, meta)
+        results = ex.collect_line([10, 0], np.deg2rad(-45), meta)
 
         print("collected")
+        print(ex.current_rotation)
 
         common.go_home(ex.robot, meta)
+        print(ex.current_rotation)
 
-        best_frames = [None] * len(results)
-        for i, tap in enumerate(results):
-            best_frames[i] = dp.best_frame(np.array(tap))
 
-        # print("collected:")
-        # print(results)
+        print("collected:")
+        print(results)
         #
         # print("raw data")
         # print(ex.all_raw_data)
 
-        print("best frames")
-        print(best_frames)
+        # print("best frames")
+        # print(best_frames)
 
-        # save data
-        results_np = np.array(results)  # needed so can json.dump properly
-        common.save_data(results_np.tolist(), meta)
+        common.save_data(ex.all_raw_data, meta, name="all_data.json")
+        common.save_data(ex.all_tap_positions, meta, name="all_positions.json")
+
+
 
     print("Done, exiting")
 
