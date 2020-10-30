@@ -300,6 +300,11 @@ def main():
     with common.make_robot() as ex.robot, common.make_sensor(meta) as ex.sensor:
         common.init_robot(ex.robot, meta, do_homing=False)
 
+
+        # Collect / load reference tap
+        #todo copy matlab version
+
+
         collect_more_data = True  # first loop should always collect data
 
         for current_step in range(0, meta["MAX_STEPS"]):
@@ -309,7 +314,7 @@ def main():
 
             if collect_more_data is False:  # should only skip on first loop
                 # do single tap
-                ex.processed_tap_at(new_location, new_orient, meta)
+                tap_1, _ = ex.processed_tap_at(new_location, new_orient, meta)
 
                 # predict distance to edge
 
