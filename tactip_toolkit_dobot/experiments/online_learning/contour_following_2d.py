@@ -46,6 +46,8 @@ class Experiment:
 
     line_locations = []
 
+    neutral_tap = None
+
     # all taps, in order of collection only (no nested organisation), with all
     # frames
     all_raw_data = None
@@ -135,16 +137,24 @@ class Experiment:
         :return:
         """
 
-        return [0, 0]
+        return [0, 0]  # todo implement real code
 
-    def processed_tap_at(self, new_location, new_orient, meta):
+    def processed_tap_at(
+        self, new_location, new_orient, meta, neutral_tap=True, selection_criteria="Max"
+    ):
         """
 
         :param new_location:
         :param new_orient: needs to be in RADIANS
         :param meta:
+        :param neutral_tap: has 3 options - True (use self.neutral tap),
+        None (use no neutral tap, just the current tap), and a np.array of same length
+        as tap (use this instead of defaults)
         :return:
         """
+        # TODO neutral tap should be the default, though the None option for best
+        # frame should still be available
+
         keypoints = common.tap_at(
             new_location, new_orient, self.robot, self.sensor, meta
         )
@@ -154,8 +164,32 @@ class Experiment:
             [new_location[0], new_location[1], np.rad2deg(new_orient)],
         )
 
-        best_frames = dp.best_frame(keypoints)
+        if neutral_tap is True:
+            neutral_tap = self.neutral_tap
+
+        best_frames = dp.best_frame(
+            keypoints, neutral_tap=neutral_tap, selection_criteria=selection_criteria
+        )
         return best_frames, keypoints
+
+    def collect_ref_tap(self, meta):
+        ref_tap, _ = self.processed_tap_at(
+            [meta["ref_location"][0], meta["ref_location"][1]],
+            meta["ref_location"][2],
+            meta,
+        )
+        common.save_data(ref_tap, meta, "ref_tap.json")
+        return ref_tap
+
+    def collect_neutral_tap(self, meta):
+        # collect neutral, non-contact position (as reference for other taps)
+        self.neutral_tap, _ = self.processed_tap_at(
+            [-20, -80], 0, meta, selection_criteria="Mean", neutral_tap=None
+        )
+        # tODO, rework taps so can set z # TODO tap motion is not needed
+
+        common.save_data(self.neutral_tap, meta, name="neutral_tap.json")
+        # return neutral_tap
 
 
 def make_meta():
@@ -230,6 +264,8 @@ def make_meta():
         "MAX_STEPS": 3,
         "STEP_LENGTH": 5,
         "line_range": np.arange(-10, 11, 10).tolist(),  # in mm
+        "collect_ref_tap": True,
+        "ref_location": [0, 0, 0],  # [x,y,sensor angle]
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
         "comments": "first run with main loop instead of tests",  # so you can identify runs later
     }
@@ -300,36 +336,43 @@ def main():
     with common.make_robot() as ex.robot, common.make_sensor(meta) as ex.sensor:
         common.init_robot(ex.robot, meta, do_homing=False)
 
+        ex.collect_neutral_tap(meta)
 
         # Collect / load reference tap
-        #todo copy matlab version
-
+        if meta["collect_ref_tap"] is True:
+            ref_tap = ex.collect_ref_tap(meta)
+        else:
+            pass
+            # ref_tap = common.load_data( )
+            # todo load a ref tap, using a path specified in meta
 
         collect_more_data = True  # first loop should always collect data
 
         for current_step in range(0, meta["MAX_STEPS"]):
             print("------------ Main Loop -----------------")
 
-            new_orient, new_location = next_sensor_placement(ex, meta)
+            new_orient, new_location = next_sensor_placement(
+                ex, meta
+            )  # todo: make sure implemented
 
             if collect_more_data is False:  # should only skip on first loop
                 # do single tap
                 tap_1, _ = ex.processed_tap_at(new_location, new_orient, meta)
 
-                # predict distance to edge
+                # todo: predict distance to edge
 
-                # if exceed sensible limit
-                # ### collect_more_data = True
+                # todo: if exceed sensible limit
+                # todo: ### collect_more_data = True
 
                 if collect_more_data is False:
 
-                    # move distance
-                    # predict again
+                    # todo: move distance
+                    # todo: predict again
 
-                    # if bad
-                    # ### collect_more_data = True
-                    # else
-                    # ### note which to add location to list
+                    # todo: if bad
+                    # todo: ### collect_more_data = True
+                    # todo: else
+                    # todo: ### note which to add location to list
                     edge_location = [0, -10]  # todo, add real logic
 
             if collect_more_data is True:
@@ -338,14 +381,14 @@ def main():
                     new_taps, new_location, new_orient, meta
                 )
 
-                # note which to add to location to list (ex.edge_locations)
+                # todo: note which to add to location to list (ex.edge_locations)
 
             # actually add location to list (so as to not repeat self)
             if ex.edge_locations is None:
                 ex.edge_locations = []
             ex.edge_locations.append(edge_location)
 
-            # exit clause for returning to first tap location
+            # todo: exit clause for returning to first tap location
 
             # save data every loop just to make sure data isn't lost
             step_n_str = str(current_step).rjust(3, "0")

@@ -38,14 +38,18 @@ def add_mus(disps, mu_limits=[-1, 1], line_ordering=None):
     # print(x.shape)
     return x
 
-def best_frame(all_frames):
+def best_frame(all_frames, neutral_tap=None, selection_criteria="Max"):
     """
     For the given tap, select frame with the highest average pin displacement
     from the first frame. Takes in one tap, in form (16ish x 126 ish x 2)
     np.array, returns (1 x 126ish x 2) np.array
     """
     # make into pin displacement instead of absolute position
-    all_frames_disp = all_frames - all_frames[0]
+    if neutral_tap is None:
+        all_frames_disp = all_frames - all_frames[0]
+    else:
+        #todo safety check lengths of neutral and all frames...
+        all_frames_disp = all_frames - neutral_tap
 
     # Find frame where largest pin displacement takes place (on average)
     # #TODO this method is not the same as in MATLAB!
@@ -55,11 +59,21 @@ def best_frame(all_frames):
     # Find euclidean distance per frame
     distances_all_disps = np.linalg.norm(mean_disp_per_frame, axis=1)
 
-    # Find frame with max euclidean distance
-    result = np.where(distances_all_disps == np.amax(distances_all_disps))
-    max_frame_i = result[0][0]
+    if selection_criteria == "Max": #tap will be pin DISLACEMENTS (relative)
+        # Find frame with max euclidean distance
+        result = np.where(distances_all_disps == np.amax(distances_all_disps))
+        max_frame_i = result[0][0]
 
-    tap = all_frames_disp[max_frame_i]
+        tap = all_frames_disp[max_frame_i]
+
+    elif selection_criteria == "Mean": # tap will be pin POSITIONS (absolute)
+        # this way does not select a frame, but creates a new frame which is the average
+        tap = np.mean(all_frames,0)
+    else:
+        print(selection_criteria)
+        raise NameError("Selection criteria for frames is not recognised")
+
+
 
     return tap.reshape(tap.shape[0] * tap.shape[1])
 
