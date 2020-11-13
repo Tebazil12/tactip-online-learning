@@ -43,13 +43,16 @@ def best_frame(all_frames, neutral_tap=None, selection_criteria="Max"):
     For the given tap, select frame with the highest average pin displacement
     from the first frame. Takes in one tap, in form (16ish x 126 ish x 2)
     np.array, returns (1 x 126ish x 2) np.array
+
+    :param neutral_tap: needs to be flattened (will be expanded)
     """
     # make into pin displacement instead of absolute position
     if neutral_tap is None:
         all_frames_disp = all_frames - all_frames[0]
     else:
         #todo safety check lengths of neutral and all frames...
-        all_frames_disp = all_frames - neutral_tap
+        neutral_tap_2d = neutral_tap.reshape(int(neutral_tap.shape[0] / 2), 2)
+        all_frames_disp = all_frames - neutral_tap_2d
 
     # Find frame where largest pin displacement takes place (on average)
     # #TODO this method is not the same as in MATLAB!
