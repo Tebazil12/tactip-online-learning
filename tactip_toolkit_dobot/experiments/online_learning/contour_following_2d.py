@@ -129,13 +129,25 @@ class Experiment:
         position_rounded = [round(num, 1) for num in position]
         self.all_tap_positions.append(position_rounded)
 
-    def find_edge_in_line(self, keypoints, location, orient, meta):
+    def find_edge_in_line(self, taps, ref_tap, location, orient, meta):
         """
         Identify the location of the edge
+        :param taps: taps needs to be a line of processed taps taken in order
+        at known spacial intervals (as held in meta)
         :param keypoints: raw data from a line of taps
-        :param meta: the range of tap locations is held in here
+        :param meta: the range of tap locations is held in here (assuming always the same...)
         :return:
         """
+
+        #get dissim profile
+        dissim_profile = dp.calc_dissims(np.array(taps), ref_tap) # taps needs casting as the eulicd distance can be done on all at once (instead of looping list)
+
+        #plot dissim profile (NB, pauses experiemnt)
+        plt.plot(meta["line_range"], dissim_profile)
+        plt.show()
+
+        #find min in profile
+
 
         return [0, 0]  # todo implement real code
 
@@ -263,7 +275,7 @@ def make_meta():
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": 3,
         "STEP_LENGTH": 5,
-        "line_range": np.arange(-10, 11, 10).tolist(),  # in mm
+        "line_range": np.arange(-10, 11, 2).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": [0, 0, 0],  # [x,y,sensor angle]
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
@@ -293,7 +305,7 @@ def next_sensor_placement(ex, meta):
     """ New_orient needs to be in radians. """
 
     if ex.edge_locations is None:
-        new_orient, new_location = find_first_orient()
+        new_orient, new_location = find_first_orient() #TODO
     else:
         if len(ex.edge_locations) == 1:
             # use previous angle
@@ -343,7 +355,7 @@ def main():
             ref_tap = ex.collect_ref_tap(meta)
         else:
             pass
-            # ref_tap = common.load_data( )
+            # ref_tap = common.load_data( <some-path> )
             # todo load a ref tap, using a path specified in meta
 
         collect_more_data = True  # first loop should always collect data
@@ -378,8 +390,8 @@ def main():
             if collect_more_data is True:
                 new_taps = ex.collect_line(new_location, new_orient, meta)
                 edge_location = ex.find_edge_in_line(
-                    new_taps, new_location, new_orient, meta
-                )
+                    new_taps, ref_tap, new_location, new_orient, meta
+                ) #TODO
 
                 # todo: note which to add to location to list (ex.edge_locations)
 
