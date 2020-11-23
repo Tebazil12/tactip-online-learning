@@ -262,4 +262,4 @@ def align_radius(disp, dissim, gp_extrap=False):
 
     # print(corrected_disp)
 
-    return corrected_disp
+    return corrected_disp, disp_offset

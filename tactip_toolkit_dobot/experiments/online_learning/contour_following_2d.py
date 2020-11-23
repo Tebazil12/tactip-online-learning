@@ -85,6 +85,9 @@ class Experiment:
         :param new_orient: needs to be in RADIANS!
         :returns: the best frames from each tap on the line (as n_taps x (2xn_pins) x 1)
         """
+        #see if this fixes first tap being wierd...
+        # self.processed_tap_at([-10,0],0,meta) # it does! why is the camera not working proplerly
+
         new_keypoints = [None] * len(meta["line_range"])
         best_frames = [None] * len(meta["line_range"])
         next_test_location = [None] * len(meta["line_range"])
@@ -139,15 +142,24 @@ class Experiment:
         :return:
         """
 
-        #get dissim profile
-        dissim_profile = dp.calc_dissims(np.array(taps), ref_tap) # taps needs casting as the eulicd distance can be done on all at once (instead of looping list)
+        # get dissim profile
+        dissim_profile = dp.calc_dissims(
+            np.array(taps), ref_tap
+        )  # taps needs casting as the eulicd distance can be done on all at once (instead of looping list)
 
-        #plot dissim profile (NB, pauses experiemnt)
+        # plot dissim profile (NB, pauses experiemnt)
         plt.plot(meta["line_range"], dissim_profile)
         plt.show()
 
-        #find min in profile
+        # find min in profile
+        corrected_disps, offset = dp.align_radius(
+            np.array(meta["line_range"]), dissim_profile
+        )
 
+        print(offset)
+        plt.plot(meta["line_range"], dissim_profile)
+        plt.plot(corrected_disps, dissim_profile)
+        plt.show()
 
         return [0, 0]  # todo implement real code
 
@@ -270,7 +282,7 @@ def make_meta():
         "crop": None,
         "source": 0,
         # ~~~~~~~~~ Processing Settings ~~~~~~~~~#
-        "num_frames": 10,
+        "num_frames": 15,
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": 3,
@@ -305,7 +317,7 @@ def next_sensor_placement(ex, meta):
     """ New_orient needs to be in radians. """
 
     if ex.edge_locations is None:
-        new_orient, new_location = find_first_orient() #TODO
+        new_orient, new_location = find_first_orient()  # TODO
     else:
         if len(ex.edge_locations) == 1:
             # use previous angle
@@ -391,7 +403,7 @@ def main():
                 new_taps = ex.collect_line(new_location, new_orient, meta)
                 edge_location = ex.find_edge_in_line(
                     new_taps, ref_tap, new_location, new_orient, meta
-                ) #TODO
+                )  # TODO
 
                 # todo: note which to add to location to list (ex.edge_locations)
 
