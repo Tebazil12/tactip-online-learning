@@ -291,7 +291,7 @@ def make_meta():
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": 3,
-        "STEP_LENGTH": 5,
+        "STEP_LENGTH": 5, # nb, opposite direction to matlab experiments
         "line_range": np.arange(-10, 11, 2).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": [0, 0, 0],  # [x,y,sensor angle]
@@ -402,7 +402,7 @@ def main():
                     # todo: ### collect_more_data = True
                     # todo: else
                     # todo: ### note which to add location to list
-                    edge_location = [0, -10*current_step]  # todo, add real logic
+                    edge_location = [0, 10*current_step]  # todo, add real logic
 
             if collect_more_data is True:
                 new_taps = ex.collect_line(new_location, new_orient, meta)
