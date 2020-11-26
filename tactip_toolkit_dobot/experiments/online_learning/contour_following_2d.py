@@ -161,7 +161,12 @@ class Experiment:
         plt.plot(corrected_disps, dissim_profile)
         plt.show()
 
-        return [0, 0]  # todo implement real code
+        # use orientation and location to find real location in 2d space
+        edge_location = location + offset * np.array(
+                [np.cos(orient), np.sin(orient)]
+            )
+
+        return edge_location
 
     def processed_tap_at(
         self, new_location, new_orient, meta, neutral_tap=True, selection_criteria="Max"
@@ -397,7 +402,7 @@ def main():
                     # todo: ### collect_more_data = True
                     # todo: else
                     # todo: ### note which to add location to list
-                    edge_location = [0, -10]  # todo, add real logic
+                    edge_location = [0, -10*current_step]  # todo, add real logic
 
             if collect_more_data is True:
                 new_taps = ex.collect_line(new_location, new_orient, meta)
@@ -410,6 +415,7 @@ def main():
             # actually add location to list (so as to not repeat self)
             if ex.edge_locations is None:
                 ex.edge_locations = []
+            print("edge location" + str(edge_location))
             ex.edge_locations.append(edge_location)
 
             # todo: exit clause for returning to first tap location
@@ -421,6 +427,9 @@ def main():
             )
             common.save_data(
                 ex.all_tap_positions, meta, name="all_positions_" + step_n_str + ".json"
+            )
+            common.save_data(
+                ex.edge_locations, meta, name="all_edge_locs_" + step_n_str + ".json"
             )
 
             collect_more_data = False  # last thing in loop, reset for next loop
