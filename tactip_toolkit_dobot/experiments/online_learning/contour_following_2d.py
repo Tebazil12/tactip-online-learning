@@ -150,7 +150,14 @@ class Experiment:
 
         # plot dissim profile (NB, pauses experiemnt)
         plt.plot(meta["line_range"], dissim_profile)
-        plt.show()
+        # plt.show()
+
+        # save image of graph - NB, this gets overwritten with every new line
+        # remove meta.json bit to add new name
+        part_path, _ = os.path.split(meta["meta_file"])
+        full_path = os.path.join(meta["home_dir"], part_path, "dissim_prof.png")
+        plt.savefig(full_path)
+
 
         # find min in profile
         corrected_disps, offset = dp.align_radius(
@@ -160,7 +167,12 @@ class Experiment:
         print(offset)
         plt.plot(meta["line_range"], dissim_profile)
         plt.plot(corrected_disps, dissim_profile)
-        plt.show()
+        # plt.show()
+        # remove meta.json bit to add new name
+        part_path, _ = os.path.split(meta["meta_file"])
+        full_path = os.path.join(meta["home_dir"], part_path, "dissim_prof_corrected.png")
+        plt.savefig(full_path)
+
 
         # use orientation and location to find real location in 2d space
         edge_location = location + offset * np.array(
