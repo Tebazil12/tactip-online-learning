@@ -172,6 +172,7 @@ class Experiment:
         part_path, _ = os.path.split(meta["meta_file"])
         full_path = os.path.join(meta["home_dir"], part_path, "dissim_prof_corrected.png")
         plt.savefig(full_path)
+        plt.close()
 
 
         # use orientation and location to find real location in 2d space
