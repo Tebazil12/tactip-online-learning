@@ -431,7 +431,10 @@ def main():
                 )
 
                 if model is None:
-                    model = gplvm.GPLVM(adjusted_disps, np.array(new_taps))
+                    # set mus to 0 for first line only - elsewhere mu is optimised
+                    x_line = dp.add_line_mu(adjusted_disps, 0)
+
+                    model = gplvm.GPLVM(x_line, np.array(new_taps))
                     print(f"model inited with ls: {str(model.ls)} sigma_f: {str(model.sigma_f)}")
                     print(f"model data shape: x={np.shape(model.x)}, y={np.shape(model.y)}")
                     print(model.__dict__)
@@ -441,6 +444,11 @@ def main():
                         model.__dict__, meta, name="gplvm_" + n_lines_str + ".json"
                     )
                     n_lines_in_model = n_lines_in_model +1
+                else:
+                    pass
+                    # todo, optimise mu of line given old data and hyperpars
+                    # todo, save line to model (taking care with dimensions...)
+
 
                 # todo add new data with adjusted labels to gplvm model
 

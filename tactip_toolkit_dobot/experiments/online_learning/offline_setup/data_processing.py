@@ -3,6 +3,18 @@ import scipy
 import matplotlib.pyplot as plt
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gp as gp
 
+
+def add_line_mu(disps, mu_for_line):
+    """
+
+    :param disps: should be np.array of shape (n_taps_on_line, 1)
+    :param mu_for_line: single number to be added uniformly as mu for the given disps
+    :return: x as a np.array of shape (n_taps_on_line, 2)
+    """
+    mus = np.array([[mu_for_line]] * np.shape(disps)[0])
+    return np.concatenate((disps, mus), axis=1)
+
+
 def add_mus(disps, mu_limits=[-1, 1], line_ordering=None):
     """
     Disps must be a list, with each entry containing a np.array of
@@ -38,6 +50,7 @@ def add_mus(disps, mu_limits=[-1, 1], line_ordering=None):
     # print(x.shape)
     return x
 
+
 def best_frame(all_frames, neutral_tap=None, selection_criteria="Max"):
     """
     For the given tap, select frame with the highest average pin displacement
@@ -50,7 +63,7 @@ def best_frame(all_frames, neutral_tap=None, selection_criteria="Max"):
     if neutral_tap is None:
         all_frames_disp = all_frames - all_frames[0]
     else:
-        #todo safety check lengths of neutral and all frames...
+        # todo safety check lengths of neutral and all frames...
         neutral_tap_2d = neutral_tap.reshape(int(neutral_tap.shape[0] / 2), 2)
         all_frames_disp = all_frames - neutral_tap_2d
 
@@ -62,21 +75,19 @@ def best_frame(all_frames, neutral_tap=None, selection_criteria="Max"):
     # Find euclidean distance per frame
     distances_all_disps = np.linalg.norm(mean_disp_per_frame, axis=1)
 
-    if selection_criteria == "Max": #tap will be pin DISLACEMENTS (relative)
+    if selection_criteria == "Max":  # tap will be pin DISLACEMENTS (relative)
         # Find frame with max euclidean distance
         result = np.where(distances_all_disps == np.amax(distances_all_disps))
         max_frame_i = result[0][0]
 
         tap = all_frames_disp[max_frame_i]
 
-    elif selection_criteria == "Mean": # tap will be pin POSITIONS (absolute)
+    elif selection_criteria == "Mean":  # tap will be pin POSITIONS (absolute)
         # this way does not select a frame, but creates a new frame which is the average
-        tap = np.mean(all_frames,0)
+        tap = np.mean(all_frames, 0)
     else:
         print(selection_criteria)
         raise NameError("Selection criteria for frames is not recognised")
-
-
 
     return tap.reshape(tap.shape[0] * tap.shape[1])
 
