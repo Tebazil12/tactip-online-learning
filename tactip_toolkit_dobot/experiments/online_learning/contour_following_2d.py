@@ -32,6 +32,7 @@ import tactip_toolkit_dobot.experiments.min_example.common as common
 # import tactip_toolkit_dobot.experiments.online_learning.experiment as experiment
 
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
+import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gplvm as gplvm
 
 
 np.set_printoptions(precision=2, suppress=True)
@@ -166,7 +167,9 @@ class Experiment:
                 [np.cos(orient), np.sin(orient)]
             )
 
-        return edge_location
+        corrected_disps = np.reshape(corrected_disps, (np.shape(corrected_disps)[0], 1))
+
+        return edge_location, corrected_disps
 
     def processed_tap_at(
         self, new_location, new_orient, meta, neutral_tap=True, selection_criteria="Max"
@@ -362,6 +365,8 @@ def main():
     meta = make_meta()
     ex = Experiment()
 
+    np.set_printoptions(precision=2, suppress=True)
+
     with common.make_robot() as ex.robot, common.make_sensor(meta) as ex.sensor:
         common.init_robot(ex.robot, meta, do_homing=False)
 
@@ -376,6 +381,8 @@ def main():
             # todo load a ref tap, using a path specified in meta
 
         collect_more_data = True  # first loop should always collect data
+        model = None #init when first line of data collected
+        n_lines_in_model = 0
 
         for current_step in range(0, meta["MAX_STEPS"]):
             print("------------ Main Loop -----------------")
@@ -406,11 +413,23 @@ def main():
 
             if collect_more_data is True:
                 new_taps = ex.collect_line(new_location, new_orient, meta)
-                edge_location = ex.find_edge_in_line(
+                edge_location, adjusted_disps = ex.find_edge_in_line(
                     new_taps, ref_tap, new_location, new_orient, meta
-                )  # TODO
+                )
 
-                # todo: note which to add to location to list (ex.edge_locations)
+                if model is None:
+                    model = gplvm.GPLVM(adjusted_disps, np.array(new_taps))
+                    print(f"model inited with ls: {str(model.ls)} sigma_f: {str(model.sigma_f)}")
+                    print(f"model data shape: x={np.shape(model.x)}, y={np.shape(model.y)}")
+                    print(model.__dict__)
+
+                    n_lines_str = str(n_lines_in_model).rjust(3, "0")
+                    common.save_data(
+                        model.__dict__, meta, name="gplvm_" + n_lines_str + ".json"
+                    )
+                    n_lines_in_model = n_lines_in_model +1
+
+                # todo add new data with adjusted labels to gplvm model
 
             # actually add location to list (so as to not repeat self)
             if ex.edge_locations is None:

@@ -1,7 +1,7 @@
 import scipy.optimize
 import numpy as np
-import gp
-import data_processing as dp
+import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gp as gp
+import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
 
 
 class GPLVM:
@@ -11,6 +11,9 @@ class GPLVM:
         """
         Take in x and y as np.arrays of the correct size and shape to be used
         """
+        if type(x) is not np.ndarray or type(y) is not np.ndarray:
+            raise NameError(f"input to model must be np.array, not x {type(x)} and y {type(y)}")
+
         self.x = x
         self.y = y
 
@@ -85,10 +88,24 @@ class GPLVM:
         return -neg_val  # because trying to find max with a min search
 
     def optim_hyperpars(self, x=None, y=None, start_hyperpars=None, update_data=False):
+        """
+
+
+        :param x:
+        :param y:
+        :param start_hyperpars:
+        :param update_data:
+        :return:
+        """
+
         if x is None:
             x = self.x
+            if x is None:
+                raise NameError("x is None when trying to optimise hyperpars")
         if y is None:
             y = self.y
+            if y is None:
+                raise NameError("y is None when trying to optimise hyperpars")
 
         if start_hyperpars is None:
             start_hyperpars = np.array(
