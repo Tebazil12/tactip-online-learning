@@ -12,7 +12,9 @@ class GPLVM:
         Take in x and y as np.arrays of the correct size and shape to be used
         """
         if type(x) is not np.ndarray or type(y) is not np.ndarray:
-            raise NameError(f"input to model must be np.array, not x {type(x)} and y {type(y)}")
+            raise NameError(
+                f"input to model must be np.array, not x {type(x)} and y {type(y)}"
+            )
 
         self.x = x
         self.y = y
@@ -32,16 +34,14 @@ class GPLVM:
         x, y = set_vals
         return self.max_log_like(sigma_f, l_disp, l_mu, x, y)
 
-
     def max_ll_optim_mu(self, to_optimise, set_vals):
-        mus = to_optimise
+        mu = to_optimise
         disp, y = set_vals
 
-        # make x from disp and optimising mu
-        x = dp.add_mus(
-            [disp],
-            mu_limits=[mus, mus],  # same as only one line being passed
-        )
+        # make x from disp and optimising mu # same as only one line being passed
+        x = dp.add_mus([disp], mu_limits=[mu, mu])
+
+        x = dp.add_line_mu(disp, mu)
 
         # print(y)
         # y = np.array([y])
@@ -49,13 +49,12 @@ class GPLVM:
         x = x.reshape(x.shape[0] * x.shape[1], x.shape[2])
         # y = y.reshape(y.shape[0] * y.shape[1], y.shape[2])
 
-        #todo add in self.x and self.y otherwise your not using the right model!
+        # todo add in self.x and self.y otherwise your not using the right model!
 
         all_xs = np.vstack((self.x, x))
         all_ys = np.vstack((self.y, y))
 
         return self.max_log_like(self.sigma_f, self.ls[0], self.ls[1], all_xs, all_ys)
-
 
     def max_log_like(self, sigma_f, l_disp, l_mu, x, y):
 
@@ -128,15 +127,15 @@ class GPLVM:
         self.ls = [l_disp, l_mu]
         # print(result)
 
-    def optim_mu(self, disps, y):
-        #TODO test that hyperpars have been optimised as can't continue without
+    def optim_many_mu(self, disps, y):
+        # TODO test that hyperpars have been optimised as can't continue without
 
         mus_test = np.empty((len(disps)))
 
         # for loop is used so that only one line is trained at a time, otherwise
         # this isn't representative of online learning
         for i, disp in enumerate(disps):
-            start_mu = 0 # only one value, which is mu for a line
+            start_mu = 0  # only one value, which is mu for a line
             data = [disp, y[i]]
             # minimizer_kwargs = {"args": data}
             result = scipy.optimize.minimize(
@@ -144,11 +143,31 @@ class GPLVM:
                 start_mu,
                 args=data,
                 method="BFGS",
-                options={"gtol": 0.01, "maxiter": 300},  #TODO is this the best number?
+                options={"gtol": 0.01, "maxiter": 300},  # TODO is this the best number?
             )
             # print(result)
 
-            [mus_test[i]] = result.x #TODO figure out return type
-        print(f'The final mus list: {mus_test}')
+            [mus_test[i]] = result.x  # TODO figure out return type
+        print(f"The final mus list: {mus_test}")
 
         return mus_test
+
+    def optim_line_mu(self, disp, y):
+        # TODO test that hyperpars have been optimised as can't continue without
+
+        start_mu = 0  # start mu for line
+        data = [disp, y]
+        # minimizer_kwargs = {"args": data}
+        result = scipy.optimize.minimize(
+            self.max_ll_optim_mu,
+            start_mu,
+            args=data,
+            method="BFGS",
+            options={"gtol": 0.01, "maxiter": 300},  # TODO is this the best number?
+        )
+        # print(result)
+
+        [optim_mu] = result.x  # TODO figure out return type
+        print(f"The final mu is: {optim_mu}")
+
+        return optim_mu

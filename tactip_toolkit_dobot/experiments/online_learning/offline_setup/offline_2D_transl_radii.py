@@ -97,7 +97,7 @@ if __name__ == "__main__":
     # CORRECTLY! Use flag to use gp smoothing)
     disp_test = dp.align_all_xs_via_dissim(disp_real, dissim_test)
 
-    mus_test = model.optim_mu(disp_test, y_test)
+    mus_test = model.optim_many_mu(disp_test, y_test)
 
     print(f"in main, final mus {mus_test}")
     mu_real = np.linspace(mu_range[0], mu_range[1], len(disp_test))

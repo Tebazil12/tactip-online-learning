@@ -42,6 +42,7 @@ def add_mus(disps, mu_limits=[-1, 1], line_ordering=None):
         # print(type(mus))
 
         an_x = np.vstack((disp, mus))
+
         # print(an_x)
 
         x[i] = an_x.T  # todo is this ok, or should np.copy be used for assignment?
