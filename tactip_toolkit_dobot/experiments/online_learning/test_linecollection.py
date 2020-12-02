@@ -46,7 +46,9 @@ def main():
 
         print("Main code...")
 
-        results = ex.collect_line([10, 0], 0, meta)
+        ex.collect_neutral_tap(meta)
+
+        results = ex.collect_line([0, 0], np.deg2rad(30), meta)
 
         print("collected:")
         print(results)

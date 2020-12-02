@@ -201,7 +201,7 @@ class Experiment:
         # frame should still be available
 
         keypoints = common.tap_at(
-            new_location, new_orient, self.robot, self.sensor, meta
+            new_location, np.rad2deg(new_orient), self.robot, self.sensor, meta
         )
 
         self.add_to_alldata(
@@ -378,7 +378,7 @@ def main():
     meta = make_meta()
     ex = Experiment()
 
-    np.set_printoptions(precision=2, suppress=True)
+    # np.set_printoptions(precision=2, suppress=True)
 
     with common.make_robot() as ex.robot, common.make_sensor(meta) as ex.sensor:
         common.init_robot(ex.robot, meta, do_homing=False)
@@ -434,23 +434,29 @@ def main():
                     # set mus to 0 for first line only - elsewhere mu is optimised
                     x_line = dp.add_line_mu(adjusted_disps, 0)
 
+                    # init model (sets hyperpars)
                     model = gplvm.GPLVM(x_line, np.array(new_taps))
-                    print(f"model inited with ls: {str(model.ls)} sigma_f: {str(model.sigma_f)}")
-                    print(f"model data shape: x={np.shape(model.x)}, y={np.shape(model.y)}")
-                    print(model.__dict__)
 
-                    n_lines_str = str(n_lines_in_model).rjust(3, "0")
-                    common.save_data(
-                        model.__dict__, meta, name="gplvm_" + n_lines_str + ".json"
-                    )
-                    n_lines_in_model = n_lines_in_model +1
+
                 else:
                     pass
-                    # todo, optimise mu of line given old data and hyperpars
+                    # optimise mu of line given old data and hyperpars
+                    optm_mu = model.optim_line_mu(adjusted_disps, new_taps)
+
+                    x_line = dp.add_line_mu(adjusted_disps, optm_mu)
+
                     # todo, save line to model (taking care with dimensions...)
 
+                print(f"model inited with ls: {str(model.ls)} sigma_f: {str(model.sigma_f)}")
+                print(f"model data shape: x={np.shape(model.x)}, y={np.shape(model.y)}")
+                print(model.__dict__)
 
-                # todo add new data with adjusted labels to gplvm model
+                n_lines_str = str(n_lines_in_model).rjust(3, "0")
+                common.save_data(
+                    model.__dict__, meta, name="gplvm_" + n_lines_str + ".json"
+                )
+                n_lines_in_model = n_lines_in_model +1
+
 
             # actually add location to list (so as to not repeat self)
             if ex.edge_locations is None:

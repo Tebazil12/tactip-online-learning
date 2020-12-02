@@ -72,7 +72,7 @@ def cal_K_star(x, x_star, sigma_f, L, sigma_n):
 
 def calc_covariance(x, x_prime, sigma_f, L):
     if not np.isscalar(sigma_f):
-        raise NameError("sigma_f must be a scalar, not a matrix")
+        raise NameError(f"sigma_f must be a scalar, not an array: {sigma_f} {type(sigma_f)}")
 
     # todo check shape of x and x_prime
 

@@ -6,6 +6,7 @@ import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_proce
 
 class GPLVM:
     sigma_n_y = 1.14  # TODO this is for the normal tactip, needs setting for others!
+    # sigma_n_y = 100
 
     def __init__(self, x, y, sigma_f=None, ls=None):
         """
@@ -35,24 +36,32 @@ class GPLVM:
         return self.max_log_like(sigma_f, l_disp, l_mu, x, y)
 
     def max_ll_optim_mu(self, to_optimise, set_vals):
-        mu = to_optimise
+        [mu] = to_optimise
         disp, y = set_vals
 
-        # make x from disp and optimising mu # same as only one line being passed
-        x = dp.add_mus([disp], mu_limits=[mu, mu])
+        print(f"mu is now {mu}")
 
+        # make x from disp and optimising mu # same as only one line being passed
+        # x = dp.add_mus([disp], mu_limits=[mu, mu])
+
+        # print(f"just before add_line_mu disps is {disp} and mu is {mu}")
         x = dp.add_line_mu(disp, mu)
+
+        # print(x)
 
         # print(y)
         # y = np.array([y])
         # print(y)
-        x = x.reshape(x.shape[0] * x.shape[1], x.shape[2])
+
+        # x = x.reshape(x.shape[0] * x.shape[1], x.shape[2])
         # y = y.reshape(y.shape[0] * y.shape[1], y.shape[2])
 
         # todo add in self.x and self.y otherwise your not using the right model!
 
         all_xs = np.vstack((self.x, x))
         all_ys = np.vstack((self.y, y))
+
+        # print(f"shape of optmising x {np.shape(all_xs)} and y {np.shape(all_ys)}")
 
         return self.max_log_like(self.sigma_f, self.ls[0], self.ls[1], all_xs, all_ys)
 
@@ -66,7 +75,7 @@ class GPLVM:
         # if not np.isscalar(s_cap):
         #     raise NameError("s_cap is not scalar!")
 
-        ls = np.array([l_disp, l_mu])  # TODO confirm 2 ls works with calc_K
+        ls = np.array([l_disp, l_mu])
 
         k_cap = gp.calc_K(x, sigma_f, ls, self.sigma_n_y)
 
@@ -83,7 +92,7 @@ class GPLVM:
         part_3 = -d_cap * 0.5 * np.trace(np.linalg.inv(k_cap) @ s_cap)
 
         neg_val = part_1 + part_2 + part_3
-        # print(neg_val)
+        print(f"max log like is: {-neg_val}")
         return -neg_val  # because trying to find max with a min search
 
     def optim_hyperpars(self, x=None, y=None, start_hyperpars=None, update_data=False):
@@ -156,6 +165,8 @@ class GPLVM:
         # TODO test that hyperpars have been optimised as can't continue without
 
         start_mu = 0  # start mu for line
+        print(f"start mu: {start_mu}")
+
         data = [disp, y]
         # minimizer_kwargs = {"args": data}
         result = scipy.optimize.minimize(
