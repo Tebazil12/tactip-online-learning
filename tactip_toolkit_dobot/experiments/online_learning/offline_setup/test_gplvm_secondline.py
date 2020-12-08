@@ -16,8 +16,8 @@ data = common.load_data(
 model = gplvm.GPLVM(
     np.array(data["x"]),
     np.array(data["y"]),
-    data["sigma_f"],
-    np.array(data["ls"]),
+    sigma_f=data["sigma_f"],
+    ls=np.array(data["ls"]),
 )
 
 # load new data (as though taking a second line elsewhere)
@@ -36,6 +36,7 @@ disps = np.array([
     [8.0],
     [10.0],
 ])
+# print(f"hyper pars are: {model.sigma_f} and {model.ls}")
 
 y = np.array(data["y"])
 y.sort() # try to get some variation from the same dataset...

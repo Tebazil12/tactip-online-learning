@@ -23,9 +23,12 @@ class GPLVM:
         # print(y.shape)
         # print(x.shape)
         if sigma_f is None or ls is None:
+            print("Optimising model hyperpars")
+
             # optmise
             self.optim_hyperpars()
         else:
+            print(f"Using pre-defined hyperpars sigmaf={sigma_f} ls={ls}")
             # assuming hyperpars already optimised
             self.sigma_f = sigma_f
             self.ls = ls

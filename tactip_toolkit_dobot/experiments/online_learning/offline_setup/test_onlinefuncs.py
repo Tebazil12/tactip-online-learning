@@ -1,72 +1,45 @@
+import scipy.io
+import scipy.spatial
+import scipy.optimize
 import numpy as np
-import scipy
 import matplotlib.pyplot as plt
+
+# import gplvm
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gp as gp
+import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
 
 
-def add_line_mu(disps, mu_for_line):
-    """
+def load_data():
+    n_angles = 19
+    all_data = [None] * n_angles  # all_data[angle][disp][frame][pin][xory]
 
-    :param disps: should be np.array of shape (n_taps_on_line, 1)
-    :param mu_for_line: single number to be added uniformly as mu for the given disps
-    :return: x as a np.array of shape (n_taps_on_line, 2)
-    """
-    mus = np.array([[mu_for_line]] * np.shape(disps)[0])
-    return np.concatenate((disps, mus), axis=1)
+    # folder_path = "C:\\Users\\ea-stone\\Documents\\data\\singleRadius2019-01-16_1651\\"
+    folder_path = (
+        "/home/lizzie/git/tactip_toolkit_dobot/data/singleRadius2019-01-16_1651/"
+    )
 
-
-def add_mus(disps, mu_limits=[-1, 1], line_ordering=None):
-    """
-    Disps must be a list, with each entry containing a np.array of
-    displacement values (i.e. an entry per line)
-    """
-    # print(disps)
-
-    n_disp_lines = len(disps)
-
-    # [np.empty(disps[0].shape)] * len(disps)
-    x = np.empty((n_disp_lines, disps[0].shape[0], 2))
-
-    mu_for_line = np.linspace(mu_limits[0], mu_limits[1], n_disp_lines)
-    # print(mu_for_line)
-
-    for i, disp in enumerate(disps):
-        if line_ordering is not None:
-            if len(line_ordering) != n_disp_lines:
-                raise NameError("line_ordering has different length to disps")
-            # print(line_ordering[i])
-            mus = np.full(disp.shape, mu_for_line[line_ordering[i]])
+    for i in range(0, n_angles):
+        if i < 9:
+            file_name = "c0" + str(i + 1) + "_01.mat"
         else:
-            mus = np.full(disp.shape, mu_for_line[i])
-        # print(mus)
-        # print(type(mus))
+            file_name = "c" + str(i + 1) + "_01.mat"
 
-        an_x = np.vstack((disp, mus))
+        full_load_name = folder_path + file_name
+        mat = scipy.io.loadmat(full_load_name)
+        all_data[i] = mat["data"][0]
+        # all_data[i].round(2)
 
-        # print(an_x)
-
-        x[i] = an_x.T  # todo is this ok, or should np.copy be used for assignment?
-
-    # print(x)
-    # print(x.shape)
-    return x
+    return all_data
 
 
-def best_frame(all_frames, neutral_tap=None, selection_criteria="Max"):
+def best_frame(all_frames):
     """
     For the given tap, select frame with the highest average pin displacement
     from the first frame. Takes in one tap, in form (16ish x 126 ish x 2)
     np.array, returns (1 x 126ish x 2) np.array
-
-    :param neutral_tap: needs to be flattened (will be expanded)
     """
     # make into pin displacement instead of absolute position
-    if neutral_tap is None:
-        all_frames_disp = all_frames - all_frames[0]
-    else:
-        # todo safety check lengths of neutral and all frames...
-        neutral_tap_2d = neutral_tap.reshape(int(neutral_tap.shape[0] / 2), 2)
-        all_frames_disp = all_frames - neutral_tap_2d
+    all_frames_disp = all_frames - all_frames[0]
 
     # Find frame where largest pin displacement takes place (on average)
     # #TODO this method is not the same as in MATLAB!
@@ -76,19 +49,11 @@ def best_frame(all_frames, neutral_tap=None, selection_criteria="Max"):
     # Find euclidean distance per frame
     distances_all_disps = np.linalg.norm(mean_disp_per_frame, axis=1)
 
-    if selection_criteria == "Max":  # tap will be pin DISLACEMENTS (relative)
-        # Find frame with max euclidean distance
-        result = np.where(distances_all_disps == np.amax(distances_all_disps))
-        max_frame_i = result[0][0]
+    # Find frame with max euclidean distance
+    result = np.where(distances_all_disps == np.amax(distances_all_disps))
+    max_frame_i = result[0][0]
 
-        tap = all_frames_disp[max_frame_i]
-
-    elif selection_criteria == "Mean":  # tap will be pin POSITIONS (absolute)
-        # this way does not select a frame, but creates a new frame which is the average
-        tap = np.mean(all_frames, 0)
-    else:
-        print(selection_criteria)
-        raise NameError("Selection criteria for frames is not recognised")
+    tap = all_frames_disp[max_frame_i]
 
     return tap.reshape(tap.shape[0] * tap.shape[1])
 
@@ -230,14 +195,14 @@ def show_dissim_profile(disp, dissim):
     plt.xlabel("disp")
     # plt.ioff()
     # plt.show(block=False)
-    plt.show()
+    # plt.show()
 
 
 def align_all_xs_via_dissim(disp, dissim):
     # todo for loop
     corrected_disps = [None] * len(dissim)
     for i in range(0, len(dissim)):
-        [corrected_disps[i],_] = align_radius(disp[0], dissim[i])
+        corrected_disps[i] = align_radius(disp[0], dissim[i])
 
     return corrected_disps
 
@@ -274,4 +239,41 @@ def align_radius(disp, dissim, gp_extrap=False):
 
     # print(corrected_disp)
 
-    return corrected_disp, disp_offset
+    return corrected_disp
+
+def test_all():
+    all_data = load_data()
+
+
+    ref_tap = dp.best_frame(all_data[10 - 1][11 - 1])
+    ref_tap2 = best_frame(all_data[10 - 1][11 - 1])
+
+    assert (ref_tap == ref_tap2).all()
+
+    i_training_angles = [10 - 1, 15 - 1, 19 - 1, 5 - 1, 1 - 1]
+
+    [y_train, dissim_train] = dp.get_processed_data(
+        all_data, ref_tap, indexes=i_training_angles
+    )
+
+    [y_train2, dissim_train2] = get_processed_data(
+        all_data, ref_tap, indexes=i_training_angles
+    )
+
+    assert type(y_train2) == type(y_train)
+    assert len(y_train2[0]) == len(y_train[0])
+    assert len(y_train2[0][0]) == len(y_train[0][0])
+
+    assert(np.array(y_train) == np.array(y_train2)).all()
+
+    assert (np.array(dissim_train) == np.array(dissim_train2)).all()
+
+
+    disp_real = [-np.arange(-10, 11, dtype=np.float)]
+    disp_train = align_all_xs_via_dissim(disp_real, dissim_train)
+    disp_train2 = dp.align_all_xs_via_dissim(disp_real, dissim_train)
+
+    assert type(disp_train) == type(disp_train2)
+    assert np.shape(disp_train) == np.shape(dissim_train2)
+    # print(np.shape(disp_train))
+    assert (np.array(disp_train2) == np.array(disp_train)).all()

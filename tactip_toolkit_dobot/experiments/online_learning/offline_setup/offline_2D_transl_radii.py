@@ -12,7 +12,8 @@ def load_data():
     n_angles = 19
     all_data = [None] * n_angles  # all_data[angle][disp][frame][pin][xory]
 
-    folder_path = "C:\\Users\\ea-stone\\Documents\\data\\singleRadius2019-01-16_1651\\"
+    # folder_path = "C:\\Users\\ea-stone\\Documents\\data\\singleRadius2019-01-16_1651\\"
+    folder_path = "/home/lizzie/git/tactip_toolkit_dobot/data/singleRadius2019-01-16_1651/"
 
     for i in range(0, n_angles):
         if i < 9:
