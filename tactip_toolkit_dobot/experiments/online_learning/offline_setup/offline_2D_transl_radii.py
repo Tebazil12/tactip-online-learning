@@ -81,8 +81,12 @@ if __name__ == "__main__":
     y_train = np.array(y_train)
     y_train = y_train.reshape(y_train.shape[0] * y_train.shape[1], y_train.shape[2])
 
-    model = gplvm.GPLVM(x_train, y_train)  # init includes hyperpar optm.
+    print("inting model")
+    # model = gplvm.GPLVM(x_train, y_train)  # init includes hyperpar optm.
+    model = gplvm.GPLVM(x_train, y_train, sigma_f=5.57810908398668, ls=[-5.139036963224281, -3.8544548444550086])  # init includes hyperpar optm.
     print(vars(model))  # matrices print rather long
+
+    print(f"done initing, sigma_f = {model.sigma_f}, ls = {model.ls}")
 
     # here matlab attempts to show pattern of taps using GP, to see if
     # predictions are sensible, but that is probably too much effort for
@@ -98,6 +102,7 @@ if __name__ == "__main__":
     # CORRECTLY! Use flag to use gp smoothing)
     disp_test = dp.align_all_xs_via_dissim(disp_real, dissim_test)
 
+    print("testing mus ")
     mus_test = model.optim_many_mu(disp_test, y_test)
 
     print(f"in main, final mus {mus_test}")

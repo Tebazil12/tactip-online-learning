@@ -20,8 +20,9 @@ class GPLVM:
         self.x = x
         self.y = y
 
-        # print(y.shape)
-        # print(x.shape)
+        print(y.shape)
+        print(x.shape)
+
         if sigma_f is None or ls is None:
             print("Optimising model hyperpars")
 
@@ -110,10 +111,12 @@ class GPLVM:
         """
 
         if x is None:
+            # print("x was none")
             x = self.x
             if x is None:
                 raise NameError("x is None when trying to optimise hyperpars")
         if y is None:
+            # print("y is none")
             y = self.y
             if y is None:
                 raise NameError("y is None when trying to optimise hyperpars")
@@ -122,6 +125,12 @@ class GPLVM:
             start_hyperpars = np.array(
                 [1, 300, 5]
             )  # sigma_f , L_disp, L_mu respectively
+
+        # # playing with different vals
+        # if start_hyperpars is None:
+        #     start_hyperpars = np.array(
+        #         [5, 100, 10]
+        #     )  # sigma_f , L_disp, L_mu respectively
 
         data = [x, y]
         # minimizer_kwargs = {"args": data}
@@ -149,6 +158,10 @@ class GPLVM:
         for i, disp in enumerate(disps):
             start_mu = 0  # only one value, which is mu for a line
             data = [disp, y[i]]
+
+            # print(f"disps shape: {np.shape(disp)} and y: {np.shape(y[i])}")
+            # asdfgasg
+
             # minimizer_kwargs = {"args": data}
             result = scipy.optimize.minimize(
                 self.max_ll_optim_mu,
