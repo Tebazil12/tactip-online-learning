@@ -445,7 +445,10 @@ def main():
 
                     x_line = dp.add_line_mu(adjusted_disps, optm_mu)
 
-                    # todo, save line to model (taking care with dimensions...)
+                    # save line to model (taking care with dimensions...)
+                    # todo check dimensions!
+                    model.x = np.vstack((model.x, x_line))
+                    model.y = np.vstack((model.y, new_taps))
 
                 print(f"model inited with ls: {str(model.ls)} sigma_f: {str(model.sigma_f)}")
                 print(f"model data shape: x={np.shape(model.x)}, y={np.shape(model.y)}")
