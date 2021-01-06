@@ -43,7 +43,7 @@ class GPLVM:
         [mu] = to_optimise
         disp, y = set_vals
 
-        print(f"mu is now {mu}")
+        # print(f"mu is now {mu}")
 
         # make x from disp and optimising mu # same as only one line being passed
         # x = dp.add_mus([disp], mu_limits=[mu, mu])
@@ -70,7 +70,8 @@ class GPLVM:
         return self.max_log_like(self.sigma_f, self.ls[0], self.ls[1], all_xs, all_ys)
 
     def max_log_like(self, sigma_f, l_disp, l_mu, x, y):
-
+        np.set_printoptions(suppress=True)
+        # print(f"max log lik x = {np.round(x,1)} and y={np.round(y,1)}")
         # print(y.shape)
         d_cap, n_cap = y.shape
 
@@ -157,7 +158,7 @@ class GPLVM:
         # this isn't representative of online learning
         for i, disp in enumerate(disps):
             start_mu = 0  # only one value, which is mu for a line
-            print(f"this disp is {np.shape(disp)}")
+            # print(f"this disp is {np.shape(disp)}")
             disp = np.array([disp])
             disp = disp.T
             data = [disp, y[i]]
@@ -183,7 +184,7 @@ class GPLVM:
     def optim_line_mu(self, disp, y):
         # TODO test that hyperpars have been optimised as can't continue without
 
-        start_mu = 0  # start mu for line
+        start_mu = 1  # start mu for line
         print(f"start mu: {start_mu}")
 
         data = [disp, y]

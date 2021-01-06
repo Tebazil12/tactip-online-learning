@@ -11,7 +11,7 @@ def add_line_mu(disps, mu_for_line):
     :param mu_for_line: single number to be added uniformly as mu for the given disps
     :return: x as a np.array of shape (n_taps_on_line, 2)
     """
-    print(f"disps for line adding: {disps} of type {type(disps)} and shape {np.shape(disps)}")
+    # print(f"disps for line adding: {disps} of type {type(disps)} and shape {np.shape(disps)}")
 
     mus = np.array([[mu_for_line]] * np.shape(disps)[0])
     return np.concatenate((disps, mus), axis=1)
