@@ -102,6 +102,7 @@ if __name__ == "__main__":
     # CORRECTLY! Use flag to use gp smoothing)
     disp_test = dp.align_all_xs_via_dissim(disp_real, dissim_test)
 
+    print(f"shapedisp = {np.shape(disp_test)}")
     print("testing mus ")
     mus_test = model.optim_many_mu(disp_test, y_test)
 

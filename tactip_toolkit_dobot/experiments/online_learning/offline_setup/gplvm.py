@@ -157,6 +157,9 @@ class GPLVM:
         # this isn't representative of online learning
         for i, disp in enumerate(disps):
             start_mu = 0  # only one value, which is mu for a line
+            print(f"this disp is {np.shape(disp)}")
+            disp = np.array([disp])
+            disp = disp.T
             data = [disp, y[i]]
 
             # print(f"disps shape: {np.shape(disp)} and y: {np.shape(y[i])}")
