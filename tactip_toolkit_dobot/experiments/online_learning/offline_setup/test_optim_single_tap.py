@@ -59,20 +59,10 @@ with np.printoptions(precision=3, suppress=True):
 
     # test optim_line_mu
     # optimise mu of line given old data and hyperpars
-    optm_mu = model.optim_line_mu(disps, y)
+    disp_tap, mu_tap = model.optim_single_mu_and_disp(y[1])
 
     # print(time.time())
     end_time = time.time()
     print(f"time taken: {round(end_time-start_time,2)} sec")
 
-    # print(optm_mu)
-
-    # build x matrix from disps and mu
-    x_line = dp.add_line_mu(disps, optm_mu)
-
-    print(f"final x for line: {x_line}")
-
-    model.x = np.vstack((model.x, x_line))
-    model.y = np.vstack((model.y, y))
-
-    print(f"model has x of shape {np.shape(model.x)} and y shaped {np.shape(model.y)}" )
+    print(f"tap optimised as disp={disp_tap} and mu={mu_tap}")

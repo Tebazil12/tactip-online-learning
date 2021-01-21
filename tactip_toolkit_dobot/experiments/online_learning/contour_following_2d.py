@@ -78,6 +78,9 @@ class Experiment:
         current_pose = self.robot.pose
         return round(current_pose[5], 2)
 
+    def displace_along_line(self, location, displacements, orient):
+        return location + displacements * np.array([np.cos(orient), np.sin(orient)])
+
     def collect_line(self, new_location, new_orient, meta):
         """
         Collect a straight line of taps at 90deg to new_orient, at
@@ -86,7 +89,7 @@ class Experiment:
         :param new_orient: needs to be in RADIANS!
         :returns: the best frames from each tap on the line (as n_taps x (2xn_pins) x 1)
         """
-        #see if this fixes first tap being wierd...
+        # see if this fixes first tap being wierd...
         # self.processed_tap_at([-10,0],0,meta) # it does! why is the camera not working proplerly
 
         new_keypoints = [None] * len(meta["line_range"])
@@ -95,9 +98,12 @@ class Experiment:
 
         for i, displacements in enumerate(meta["line_range"]):
 
-            next_test_location[i] = new_location + displacements * np.array(
-                [np.cos(new_orient), np.sin(new_orient)]
+            next_test_location[i] = self.displace_along_line(
+                new_location, displacements, new_orient
             )
+            # new_location + displacements * np.array(
+            # [np.cos(new_orient), np.sin(new_orient)]
+            # )
 
             best_frames[i], new_keypoints[i] = self.processed_tap_at(
                 next_test_location[i], new_orient, meta
@@ -158,7 +164,6 @@ class Experiment:
         full_path = os.path.join(meta["home_dir"], part_path, "dissim_prof.png")
         plt.savefig(full_path)
 
-
         # find min in profile
         corrected_disps, offset = dp.align_radius(
             np.array(meta["line_range"]), dissim_profile
@@ -170,15 +175,14 @@ class Experiment:
         # plt.show()
         # remove meta.json bit to add new name
         part_path, _ = os.path.split(meta["meta_file"])
-        full_path = os.path.join(meta["home_dir"], part_path, "dissim_prof_corrected.png")
+        full_path = os.path.join(
+            meta["home_dir"], part_path, "dissim_prof_corrected.png"
+        )
         plt.savefig(full_path)
         plt.close()
 
-
         # use orientation and location to find real location in 2d space
-        edge_location = location + offset * np.array(
-                [np.cos(orient), np.sin(orient)]
-            )
+        edge_location = location + offset * np.array([np.cos(orient), np.sin(orient)])
 
         corrected_disps = np.reshape(corrected_disps, (np.shape(corrected_disps)[0], 1))
 
@@ -201,12 +205,12 @@ class Experiment:
         # frame should still be available
 
         keypoints = common.tap_at(
-            new_location, np.rad2deg(new_orient), self.robot, self.sensor, meta
+            new_location, round(np.rad2deg(new_orient)), self.robot, self.sensor, meta
         )
 
         self.add_to_alldata(
             keypoints,
-            [new_location[0], new_location[1], np.rad2deg(new_orient)],
+            [new_location[0], new_location[1], round(np.rad2deg(new_orient))],
         )
 
         if neutral_tap is True:
@@ -229,7 +233,7 @@ class Experiment:
     def collect_neutral_tap(self, meta):
         # collect neutral, non-contact position (as reference for other taps)
         self.neutral_tap, _ = self.processed_tap_at(
-            [-20, -80], 0, meta, selection_criteria="Mean", neutral_tap=None
+            [-20 - 35, -(-80) + 35], 0, meta, selection_criteria="Mean", neutral_tap=None
         )
         # tODO, rework taps so can set z # TODO tap motion is not needed
 
@@ -249,8 +253,20 @@ def make_meta():
         "meta.json",
     )
     data_dir = os.path.dirname(meta_file)
+    # stimuli_name = "flower"
+    stimuli_name ="7m-circle"
 
-    stimuli_height = -190
+    if stimuli_name == "7m-circle":
+        stimuli_height = -190
+        x_y_offset = [35, -35]
+        max_steps = 20
+
+    elif stimuli_name == "flower":
+        stimuli_height = -190 + 2
+        x_y_offset = [35, -35 - 10]
+        max_steps = 30
+    else:
+        raise NameError(f"Stimuli name {stimuli_name} not recognised")
 
     meta = {
         # ~~~~~~~~~ Paths ~~~~~~~~~#
@@ -265,10 +281,11 @@ def make_meta():
         "robot_tcp": [0, 0, 150, 0, 0, 0],  # in mm, will change between sensors
         "base_frame": [0, 0, 0, 0, 0, 0],  # see dobot manual for location
         "home_pose": [170, 0, -150, 0, 0, 0],  # choose a safe "resting" pose
+        "stimuli_name": stimuli_name,
         "stimuli_height": stimuli_height,  # location of stimuli relative to base frame
         "work_frame": [
-            173,
-            -5,
+            173 + x_y_offset[0],
+            -5 + x_y_offset[1],
             stimuli_height + 1,
             0,
             0,
@@ -301,16 +318,17 @@ def make_meta():
         "brightness": 255,
         "contrast": 255,
         "crop": None,
-        "source": 0,
+        "source": 1,
         # ~~~~~~~~~ Processing Settings ~~~~~~~~~#
         "num_frames": 15,
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
-        "MAX_STEPS": 3,
-        "STEP_LENGTH": 5, # nb, opposite direction to matlab experiments
+        "MAX_STEPS": max_steps,
+        "STEP_LENGTH": 5,  # nb, opposite direction to matlab experiments
         "line_range": np.arange(-10, 11, 2).tolist(),  # in mm
         "collect_ref_tap": True,
-        "ref_location": [0, 0, 0],  # [x,y,sensor angle]
+        "ref_location": [0, 0, np.pi / 2],  # [x,y,sensor angle in rads]
+        "tol": 0.9,  # tolerance for second tap (0+_tol)
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
         "comments": "first run with main loop instead of tests",  # so you can identify runs later
     }
@@ -331,7 +349,7 @@ def find_first_orient():
 
     # find best frames
     # set new_location too
-    return 0, [0, 0]  # TODO implement real!
+    return np.pi / 2, [0, 0]  # TODO implement real!
 
 
 def next_sensor_placement(ex, meta):
@@ -342,7 +360,9 @@ def next_sensor_placement(ex, meta):
     else:
         if len(ex.edge_locations) == 1:
             # use previous angle
-            new_orient = ex.current_rotation  # taken from current robot pose
+            new_orient = np.deg2rad(
+                ex.current_rotation
+            )  # taken from current robot pose
         else:
             # interpolate previous two edge locations to find orientation
             step = np.array(ex.edge_locations[-1]) - np.array(ex.edge_locations[-2])
@@ -357,19 +377,43 @@ def next_sensor_placement(ex, meta):
 
 
 def plot_all_movements(ex):
+    # print all tap locations
     all_tap_positions_np = np.array(ex.all_tap_positions)
     pos_xs = all_tap_positions_np[:, 0]
     pos_ys = all_tap_positions_np[:, 1]
+    # pos_ys = pos_ys/0.8
+
     n = range(len(pos_xs))
     plt.plot(pos_xs, pos_ys, "k")
     plt.scatter(pos_xs, pos_ys, color="k")
     ax = plt.gca()
     [ax.annotate(x[0], (x[1], x[2])) for x in np.array([n, pos_xs, pos_ys]).T]
 
+    # print data collection lines
     for line in ex.line_locations:
         line_locations_np = np.array(line)
         plt.plot(line_locations_np[:, 0], line_locations_np[:, 1], "g")
         plt.scatter(line_locations_np[:, 0], line_locations_np[:, 1], color="g")
+
+    # print predicted edge locations
+    all_edge_np = np.array(ex.edge_locations)
+    pos_xs = all_edge_np[:, 0]
+    pos_ys = all_edge_np[:, 1]
+    # pos_ys = pos_ys/0.8
+    n = range(len(pos_xs))
+    plt.plot(pos_xs, pos_ys, "r")
+
+    # print small circle location
+    radius = 35
+    x_offset = 35 - 35
+    y_offset = 0 + 35
+    # --- https://uk.mathworks.com/matlabcentral/answers/3058-plotting-circles
+    ang = np.linspace(0, 2 * np.pi, 100)
+    x = x_offset + radius * np.cos(ang)
+    y = y_offset + radius * np.sin(ang)
+    y=y*.8
+    plt.plot(x, y)
+    plt.gca().set_aspect("equal")
 
     plt.show()
 
@@ -381,7 +425,7 @@ def main():
     # np.set_printoptions(precision=2, suppress=True)
 
     with common.make_robot() as ex.robot, common.make_sensor(meta) as ex.sensor:
-        common.init_robot(ex.robot, meta, do_homing=False)
+        common.init_robot(ex.robot, meta, do_homing=True)
 
         ex.collect_neutral_tap(meta)
 
@@ -394,11 +438,11 @@ def main():
             # todo load a ref tap, using a path specified in meta
 
         collect_more_data = True  # first loop should always collect data
-        model = None #init when first line of data collected
+        model = None  # init when first line of data collected
         n_lines_in_model = 0
 
         for current_step in range(0, meta["MAX_STEPS"]):
-            print("------------ Main Loop -----------------")
+            print(f"------------ Main Loop {current_step}-----------------")
 
             new_orient, new_location = next_sensor_placement(
                 ex, meta
@@ -408,58 +452,78 @@ def main():
                 # do single tap
                 tap_1, _ = ex.processed_tap_at(new_location, new_orient, meta)
 
-                # todo: predict distance to edge
+                # predict distance to edge
+                disp_tap_1, mu_tap_1 = model.optim_single_mu_and_disp(tap_1)
+                print(f"tap 1 optimised as disp={disp_tap_1} and mu={mu_tap_1}")
 
-                # todo: if exceed sensible limit
-                # todo: ### collect_more_data = True
+                # if exceed sensible limit #TODO find vals from matlab
+                if -15 > disp_tap_1 or disp_tap_1 > 15:  # todo move to meta!!!
+                    print(
+                        f"distance to move from tap_1 prediction (={disp_tap_1} is outside safe range"
+                    )
+                    collect_more_data = True
 
                 if collect_more_data is False:
 
-                    # todo: move distance
-                    # todo: predict again
+                    # move predicted distance
+                    tap_2_location = ex.displace_along_line(
+                        new_location, -disp_tap_1, new_orient
+                    )
 
-                    # todo: if bad
-                    # todo: ### collect_more_data = True
-                    # todo: else
-                    # todo: ### note which to add location to list
-                    edge_location = [0, 10*current_step]  # todo, add real logic
+                    tap_2, _ = ex.processed_tap_at(tap_2_location, new_orient, meta)
+
+                    # predict again
+                    disp_tap_2, mu_tap_2 = model.optim_single_mu_and_disp(tap_2)
+                    print(f"tap 2 optimised as disp={disp_tap_2} and mu={mu_tap_2}")
+
+                    # was model good? was it within 0+-tol?
+                    tol = meta["tol"]
+                    if -tol > disp_tap_2 or disp_tap_2 > tol:
+                        print(f"tap 2 pred ({disp_tap_2}) outside of tol")
+                        collect_more_data = True
+                    else:
+                        # note which to add location to list
+                        print(f"tap 2 within of tol")
+                        edge_location = tap_2_location
 
             if collect_more_data is True:
+                print("Collecting data line")
                 new_taps = ex.collect_line(new_location, new_orient, meta)
                 edge_location, adjusted_disps = ex.find_edge_in_line(
                     new_taps, ref_tap, new_location, new_orient, meta
                 )
 
                 if model is None:
-                    # set mus to 0 for first line only - elsewhere mu is optimised
-                    x_line = dp.add_line_mu(adjusted_disps, 0)
+                    print("Model is None, mu will be 1")
+                    # set mus to 1 for first line only - elsewhere mu is optimised
+                    x_line = dp.add_line_mu(adjusted_disps, 1)
 
                     # init model (sets hyperpars)
                     model = gplvm.GPLVM(x_line, np.array(new_taps))
 
-
                 else:
-                    pass
+                    # pass
                     # optimise mu of line given old data and hyperpars
                     optm_mu = model.optim_line_mu(adjusted_disps, new_taps)
 
                     x_line = dp.add_line_mu(adjusted_disps, optm_mu)
+                    print(f"line x to add to model = {x_line}")
 
                     # save line to model (taking care with dimensions...)
-                    # todo check dimensions!
                     model.x = np.vstack((model.x, x_line))
                     model.y = np.vstack((model.y, new_taps))
 
-                print(f"model inited with ls: {str(model.ls)} sigma_f: {str(model.sigma_f)}")
+                print(
+                    f"model inited with ls: {str(model.ls)} sigma_f: {str(model.sigma_f)}"
+                )
                 print(f"model data shape: x={np.shape(model.x)}, y={np.shape(model.y)}")
-                print(model.__dict__)
+                # print(model.__dict__)
 
                 n_lines_str = str(n_lines_in_model).rjust(3, "0")
                 common.save_data(
                     model.__dict__, meta, name="gplvm_" + n_lines_str + ".json"
                 )
-                n_lines_in_model = n_lines_in_model +1
-
+                n_lines_in_model = n_lines_in_model + 1
 
             # actually add location to list (so as to not repeat self)
             if ex.edge_locations is None:
@@ -491,6 +555,7 @@ def main():
 
     # plot results
     plot_all_movements(ex)
+    # todo plot edge locations too
 
     print("Done, exiting")
 

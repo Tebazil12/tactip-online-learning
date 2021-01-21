@@ -5,8 +5,9 @@ import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_proce
 
 
 class GPLVM:
-    sigma_n_y = 1.14  # TODO this is for the normal tactip, needs setting for others!
+    # sigma_n_y = 1.14  # TODO this is for the normal tactip, needs setting for others!
     # sigma_n_y = 100
+    sigma_n_y = 0.379#2061569338708 #Tacfoot #TODO this should really be passed from meta
 
     def __init__(self, x, y, sigma_f=None, ls=None):
         """
@@ -69,6 +70,38 @@ class GPLVM:
 
         return self.max_log_like(self.sigma_f, self.ls[0], self.ls[1], all_xs, all_ys)
 
+
+    def max_ll_optim_mu_and_disp(self, to_optimise, set_vals):
+        disp, mu = to_optimise
+        y_new = set_vals
+
+        # print(f"mu is now {mu}")
+
+        # make x from disp and optimising mu # same as only one line being passed
+        # x = dp.add_mus([disp], mu_limits=[mu, mu])
+
+        # print(f"just before add_line_mu disps is {disp} and mu is {mu}")
+        x = dp.add_line_mu([[disp]], mu) #disp here is a value, but elsewhere is 2d list/array
+
+        # print(x)
+
+        # print(y)
+        # y = np.array([y])
+        # print(y)
+
+        # x = x.reshape(x.shape[0] * x.shape[1], x.shape[2])
+        # y = y.reshape(y.shape[0] * y.shape[1], y.shape[2])
+
+        # add in self.x and self.y otherwise your not using the right model!
+        all_xs = np.vstack((self.x, x))
+        all_ys = np.vstack((self.y, y_new))
+
+        # print(f"shape of optmising x {np.shape(all_xs)} and y {np.shape(all_ys)}")
+
+        return self.max_log_like(self.sigma_f, self.ls[0], self.ls[1], all_xs, all_ys)
+
+
+
     def max_log_like(self, sigma_f, l_disp, l_mu, x, y):
         np.set_printoptions(suppress=True)
         # print(f"max log lik x = {np.round(x,1)} and y={np.round(y,1)}")
@@ -97,7 +130,8 @@ class GPLVM:
         part_3 = -d_cap * 0.5 * np.trace(np.linalg.inv(k_cap) @ s_cap)
 
         neg_val = part_1 + part_2 + part_3
-        print(f"max log like is: {-neg_val}")
+        # print(f"max log like is: {-neg_val}")
+        print(".",end='')
         return -neg_val  # because trying to find max with a min search
 
     def optim_hyperpars(self, x=None, y=None, start_hyperpars=None, update_data=False):
@@ -143,6 +177,7 @@ class GPLVM:
             options={"gtol": 0.01, "maxiter": 300},  # is this the best number?
         )
         # print(result)
+        print("optimise done")
 
         [sigma_f, l_disp, l_mu] = result.x
         self.sigma_f = sigma_f
@@ -175,6 +210,7 @@ class GPLVM:
                 options={"gtol": 0.01, "maxiter": 300},  # TODO is this the best number?
             )
             # print(result)
+            print("optimise done")
 
             [mus_test[i]] = result.x  # TODO figure out return type
         print(f"The final mus list: {mus_test}")
@@ -184,7 +220,7 @@ class GPLVM:
     def optim_line_mu(self, disp, y):
         # TODO test that hyperpars have been optimised as can't continue without
 
-        start_mu = 1  # start mu for line
+        start_mu = 0  # start mu for line
         print(f"start mu: {start_mu}")
 
         data = [disp, y]
@@ -197,8 +233,37 @@ class GPLVM:
             options={"gtol": 0.01, "maxiter": 300},  # TODO is this the best number?
         )
         # print(result)
+        print("optimise done")
 
         [optim_mu] = result.x  # TODO figure out return type
         print(f"The final mu is: {optim_mu}")
 
         return optim_mu
+
+
+    def optim_single_mu_and_disp(self, y):
+
+        if y is None:
+            raise NameError("y is None when trying to optimise mu and disps")
+
+        #todo, should probably check dimensions of y here!
+
+
+        start_vals = np.array([0,0]) #disp, mu #TODO check 0 is ok for starting
+
+
+        data = [y]
+        # minimizer_kwargs = {"args": data}
+        result = scipy.optimize.minimize(
+            self.max_ll_optim_mu_and_disp,
+            start_vals,
+            args=data,
+            method="BFGS",
+            options={"gtol": 0.01, "maxiter": 300},  # is this the best number?
+        )
+        # print(result)
+        print("optimise done")
+
+        [disp, mu] = result.x
+
+        return disp, mu
