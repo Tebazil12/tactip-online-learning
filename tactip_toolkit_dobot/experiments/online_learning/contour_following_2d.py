@@ -464,7 +464,7 @@ def plot_all_movements(ex, meta):
     readable_name = parse_exp_name(exp_name[1])
 
     plt.gcf().text(0.01,1.01, meta["stimuli_name"],transform=ax.transAxes, fontsize=4,alpha=0.2)
-    plt.gcf().text(0.6,1.01, readable_name,transform=ax.transAxes, fontsize=4,alpha=0.2)
+    plt.gcf().text(1,1.01, readable_name,transform=ax.transAxes, fontsize=4,alpha=0.2,ha='right')
     #     # Don't allow the axis to be on top of your data
     # ax.set_axisbelow(True)
     #
