@@ -139,7 +139,7 @@ class Experiment:
 
         if self.all_tap_positions is None:
             self.all_tap_positions = []
-        position_rounded = [round(num, 1) for num in position]
+        position_rounded = [round(num, 2) for num in position]
         self.all_tap_positions.append(position_rounded)
 
     def find_edge_in_line(self, taps, ref_tap, location, orient, meta):
@@ -206,14 +206,13 @@ class Experiment:
         """
         # TODO neutral tap should be the default, though the None option for best
         # frame should still be available
-
         keypoints = common.tap_at(
-            new_location, round(np.rad2deg(new_orient)), self.robot, self.sensor, meta
+            new_location, round(np.rad2deg(new_orient),2), self.robot, self.sensor, meta
         )
 
         self.add_to_alldata(
             keypoints,
-            [new_location[0], new_location[1], round(np.rad2deg(new_orient))],
+            [new_location[0], new_location[1], round(np.rad2deg(new_orient),2)],
         )
 
         if neutral_tap is True:
@@ -261,17 +260,23 @@ class Experiment:
             plot_all_movements(self, state.meta)
 
 
-def make_meta():
+def make_meta(file_name=None):
     """
     Make dictionary of all meta data about the current experiment, and
     save to json file.
     """
-
-    meta_file = os.path.join(
-        "online_learning",
-        os.path.basename(__file__)[:-3] + "_" + time.strftime("%mm-%dd_%Hh%Mm%Ss"),
-        "meta.json",
-    )
+    if file_name is None:
+        meta_file = os.path.join(
+            "online_learning",
+            os.path.basename(__file__)[:-3] + "_" + time.strftime("%Yy-%mm-%dd_%Hh%Mm%Ss"),
+            "meta.json",
+        )
+    else:
+        meta_file = os.path.join(
+            "online_learning",
+            os.path.basename(file_name)[:-3] + "_" + time.strftime("%yy-%mm-%dd_%Hh%Mm%Ss"),
+            "meta.json",
+        )
     data_dir = os.path.dirname(meta_file)
     # stimuli_name = "flower"
     stimuli_name ="7mm-circle"
@@ -288,7 +293,7 @@ def make_meta():
         max_steps = 30
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
-
+    # max_steps = 3 # for testing
     meta = {
         # ~~~~~~~~~ Paths ~~~~~~~~~#
         "home_dir": os.path.join(
@@ -346,10 +351,10 @@ def make_meta():
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
         "STEP_LENGTH": 5,  # nb, opposite direction to matlab experiments
-        "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
+        "line_range": np.arange(-10, 11, 2).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": [0, 0, np.pi / 2],  # [x,y,sensor angle in rads]
-        "tol": 2,  # tolerance for second tap (0+_tol)
+        "tol": 1,  # tolerance for second tap (0+_tol)
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
         "comments": "first run with main loop instead of tests",  # so you can identify runs later
     }
@@ -393,7 +398,6 @@ def next_sensor_placement(ex, meta):
             [np.sin(-new_orient), np.cos(-new_orient)]
         )
         new_location = ex.edge_locations[-1] + step_vector
-
     return new_orient, new_location
 
 
@@ -407,12 +411,12 @@ def plot_all_movements(ex, meta):
         x_offset = 35 - 35
         y_offset = 0 + 35
         # --- https://uk.mathworks.com/matlabcentral/answers/3058-plotting-circles
-        ang = np.linspace(0, 2 * np.pi, 100)
-        x = x_offset + radius * np.cos(ang)
+        ang = np.linspace(np.pi/2, -np.pi/2, 100)
+        x = x_offset + radius * -np.cos(ang)
         y = y_offset + radius * np.sin(ang)
         plt.plot(x, y,'tab:brown',linewidth=line_width)
-        y=y*.8
-        plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
+        # y=y*.8
+        # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
 
 
 
@@ -505,8 +509,9 @@ def parse_exp_name(name):
     split_name[3] = split_name[3].replace('-', '/')
     split_name[3] = split_name[3].replace('m', '')
     split_name[3] = split_name[3].replace('d', '')
+    split_name[3] = split_name[3].replace('y', '')
 
-    return split_name[2].upper() + " "+ split_name[0].capitalize() +" "+split_name[1].capitalize() + " on 2021/" + split_name[3] + " at " + split_name[4]
+    return split_name[2].upper() + " "+ split_name[0].capitalize() +" "+split_name[1].capitalize() + " on " + split_name[3] + " at " + split_name[4]
 
 
 def save_final_status():
@@ -553,7 +558,6 @@ def main(ex, model, meta):
             new_orient, new_location = next_sensor_placement(
                 ex, meta
             )  # todo: make sure implemented
-
             if collect_more_data is False:  # should only skip on first loop
                 # do single tap
                 tap_1, _ = ex.processed_tap_at(new_location, new_orient, meta)
@@ -656,7 +660,7 @@ def main(ex, model, meta):
 
         common.go_home(ex.robot, meta)
 
-    success = True
+    state.success = True
     # save the final set of data
     common.save_data(ex.all_raw_data, meta, name="all_data_final.json")
     common.save_data(ex.all_tap_positions, meta, name="all_positions_final.json")
@@ -670,11 +674,14 @@ def main(ex, model, meta):
     print("Done, exiting")
 
 class State:
-    def __init__(self):
-        self.model = None # init when first line of data collected
-        self.success = False
+    def __init__(self,model=None,success=False,meta=None):
+        self.model = model # init when first line of data collected
+        self.success = success
         self.ex = Experiment()
-        self.meta = make_meta()
+        if meta is None:
+            self.meta = make_meta()
+        else:
+            self.meta = meta
 
 
 

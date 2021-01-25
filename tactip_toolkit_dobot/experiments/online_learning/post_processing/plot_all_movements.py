@@ -25,7 +25,7 @@ def main(ex,meta):
     ex.all_tap_positions = common.load_data(data_home + current_experiment + "all_positions_final.json")
     ex.all_tap_positions = np.array(ex.all_tap_positions)
 
-    ex.line_locations = common.load_data(data_home + current_experiment + "location_line_002.json")
+    ex.line_locations = common.load_data(data_home + current_experiment + "location_line_001.json")
     ex.line_locations = np.array([ex.line_locations])
 
     print(ex.line_locations)
@@ -38,15 +38,16 @@ def main(ex,meta):
     plot_all_movements(ex,meta)
 
 if __name__ == "__main__":
-    state = State()
+
     data_home = (
         "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
     )
     # current_experiment = "contour_following_2d_01m-19d_10h47m37s/"
     # current_experiment = "contour_following_2d_01m-18d_17h41m48s/"
-    current_experiment = "contour_following_2d_01m-22d_14h58m05s/"
+    # current_experiment = "contour_following_2d_01m-22d_14h58m05s/"
+    current_experiment = "contour_following_2d_2021y-01m-25d_17h37m24s/"
 
-    state.meta = common.load_data(data_home + current_experiment + "meta.json")
+    state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
     print(state.meta["stimuli_name"])
 
