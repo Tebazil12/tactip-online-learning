@@ -27,6 +27,7 @@ import time
 import json
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from matplotlib.patches import Wedge
 
 import atexit
 
@@ -234,12 +235,12 @@ class Experiment:
 
     def collect_neutral_tap(self, meta):
         # collect neutral, non-contact position (as reference for other taps)
-        # self.neutral_tap, _ = self.processed_tap_at(
-        #     [-20 - 35, -(-80) + 35], 0, meta, selection_criteria="Mean", neutral_tap=None
-        # )
         self.neutral_tap, _ = self.processed_tap_at(
-            [-20 , -(-80)], 0, meta, selection_criteria="Mean", neutral_tap=None
+            [-20 - 35, -(-80) + 35], 0, meta, selection_criteria="Mean", neutral_tap=None
         )
+        # self.neutral_tap, _ = self.processed_tap_at(
+        #     [-20 , -(-80)], 0, meta, selection_criteria="Mean", neutral_tap=None
+        # )
         # tODO, rework taps so can set z # TODO tap motion is not needed
 
         common.save_data(self.neutral_tap, meta, name="neutral_tap.json")
@@ -278,8 +279,8 @@ def make_meta(file_name=None):
             "meta.json",
         )
     data_dir = os.path.dirname(meta_file)
-    # stimuli_name = "flower"
-    stimuli_name ="7mm-circle"
+    stimuli_name = "flower"
+    # stimuli_name ="7mm-circle"
 
     if stimuli_name == "7mm-circle":
         stimuli_height = -190
@@ -289,7 +290,7 @@ def make_meta(file_name=None):
 
     elif stimuli_name == "flower":
         stimuli_height = -190 + 2
-        x_y_offset = [35, -35 - 10]
+        x_y_offset = [35, -35 - 10 -10]
         max_steps = 30
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
@@ -404,7 +405,7 @@ def next_sensor_placement(ex, meta):
 def plot_all_movements(ex, meta):
     line_width = 0.5
     marker_size = 1
-
+    ax = plt.gca()
     if meta["stimuli_name"] == "7mm-circle":
         # print small circle location
         radius = 35
@@ -418,7 +419,15 @@ def plot_all_movements(ex, meta):
         # y=y*.8
         # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
 
-
+        # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
+        w2 = Wedge((x_offset,y_offset), radius, 90, -90, fc='tab:brown',alpha=0.5)
+        ax.add_artist(w2)
+    elif meta["stimuli_name"] == "flower":
+        img = plt.imread("/home/lizzie/Pictures/stimulus-flower.png")
+        img_cropped = img[:, 0:int(img.shape[0]/2), :]
+        f_size = 126
+        f_y_offset = -5.2
+        ax.imshow(img_cropped, extent=[-f_size/2,0, 0+f_y_offset, f_size+f_y_offset], alpha=0.5)
 
     # print all tap locations
     all_tap_positions_np = np.array(ex.all_tap_positions)
@@ -428,7 +437,7 @@ def plot_all_movements(ex, meta):
     n = range(len(pos_xs))
     plt.plot(pos_xs, pos_ys, "k",marker='o',markersize=marker_size,linewidth=line_width)
     # plt.scatter(pos_xs, pos_ys, color="k", s=marker_size)
-    ax = plt.gca()
+
     [ax.annotate(int(x[0]), (x[1], x[2]),fontsize=1, ha="center", va="center",color="grey") for x in np.array([n, pos_xs, pos_ys]).T]
 
     # print data collection lines
@@ -461,6 +470,10 @@ def plot_all_movements(ex, meta):
     # set axis font size
     plt.tick_params(labelsize=5)
 
+    # axis labels
+    plt.xlabel('x displacement (mm)',fontsize=5, va='top')
+    plt.ylabel('y displacement (mm)',fontsize=5, va='top')
+
     # add identifier labels
     part_path, _ = os.path.split(meta["meta_file"])
 
@@ -470,7 +483,13 @@ def plot_all_movements(ex, meta):
     plt.gcf().text(0.01,1.01, meta["stimuli_name"],transform=ax.transAxes, fontsize=4,alpha=0.2)
     plt.gcf().text(1,1.01, readable_name,transform=ax.transAxes, fontsize=4,alpha=0.2,ha='right')
     #     # Don't allow the axis to be on top of your data
-    # ax.set_axisbelow(True)
+    ax.set_axisbelow(True)
+
+    # ax.set(auto=True)
+    xmin, xmax, ymin, ymax = plt.axis()
+    print(xmax)
+    plt.axis([xmin, xmax+2, ymin, ymax])
+
     #
     # # Turn on the minor TICKS, which are required for the minor GRID
     # ax.minorticks_on()
