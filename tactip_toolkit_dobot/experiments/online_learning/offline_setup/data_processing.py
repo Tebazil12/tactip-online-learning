@@ -1,5 +1,6 @@
 import numpy as np
-import scipy
+# import scipy
+import scipy.optimize
 import matplotlib.pyplot as plt
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gp as gp
 
@@ -246,12 +247,13 @@ def align_all_xs_via_dissim(disp, dissim):
 
 def align_radius(disp, dissim, gp_extrap=False):
     if gp_extrap:
-        sigma_n_diss = 5
-        start_params = [15.0, 15.0]  # sigma_f and L respectively
+        sigma_n_diss = 0.1 # this should really be calculated from sigma_n_y/same data
+        start_params = [100, 9]  # sigma_f and L respectively
         data = [disp, dissim, sigma_n_diss]
         # minimizer_kwargs = {"args": data}
         result = scipy.optimize.minimize(
-            gp.max_log_like, start_params, args=data, method="BFGS"
+            gp.max_log_like, start_params, args=data, method="BFGS",
+            options={"gtol": 0.01, "maxiter": 300},
         )
         # print(result)
 
@@ -261,7 +263,12 @@ def align_radius(disp, dissim, gp_extrap=False):
             disp, dissim, sigma_f, L, sigma_n_diss
         )
 
-        show_dissim_profile([disp_stars], [dissim_stars])
+        show_dissim_profile([disp_stars, disp], [dissim_stars, dissim])
+        # show_dissim_profile(np.vstack(([disp_stars],disp)), np.vstack(([dissim_stars],dissim)))
+
+        result = np.where(dissim_stars == np.amin(dissim_stars))
+        # print(result[0][0])
+        disp_offset = disp_stars[result[0][0]]
 
         # return shift
     else:

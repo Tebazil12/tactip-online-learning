@@ -158,7 +158,7 @@ class GPLVM:
 
         if start_hyperpars is None:
             start_hyperpars = np.array(
-                [1, 300, 5]
+                [1, 10, 5]
             )  # sigma_f , L_disp, L_mu respectively
 
         # # playing with different vals
