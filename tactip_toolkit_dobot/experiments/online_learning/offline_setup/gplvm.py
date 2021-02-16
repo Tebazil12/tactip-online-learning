@@ -35,6 +35,7 @@ class GPLVM:
             self.sigma_f = sigma_f
             self.ls = ls
 
+
     def max_ll_optim_hyperpars(self, to_optimise, set_vals):
         sigma_f, l_disp, l_mu = to_optimise
         x, y = set_vals
@@ -155,6 +156,11 @@ class GPLVM:
             y = self.y
             if y is None:
                 raise NameError("y is None when trying to optimise hyperpars")
+
+        if type(x) is not np.ndarray or type(y) is not np.ndarray:
+            raise NameError(
+                f"input to model must be np.array, not x {type(x)} and y {type(y)}"
+            )
 
         if start_hyperpars is None:
             start_hyperpars = np.array(

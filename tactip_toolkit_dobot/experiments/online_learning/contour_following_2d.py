@@ -273,6 +273,11 @@ class Experiment:
             # plot results
             plot_all_movements(self, state.meta)
 
+    def make_gplvm_graph_final(self):
+        if state.model is not None:  # crude way of telling if things are inited
+            # plot results
+            plot_gplvm(state.model, state.meta)
+
 
 def make_meta(file_name=None):
     """
@@ -311,7 +316,7 @@ def make_meta(file_name=None):
         max_steps = 30
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
-    # max_steps = 3 # for testing
+    max_steps = 3 # for testing
     meta = {
         # ~~~~~~~~~ Paths ~~~~~~~~~#
         "home_dir": os.path.join(
@@ -362,7 +367,7 @@ def make_meta(file_name=None):
         "brightness": 255,
         "contrast": 255,
         "crop": None,
-        "source": 1,
+        "source": 0,
         # ~~~~~~~~~ Processing Settings ~~~~~~~~~#
         "num_frames": 15,
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
@@ -567,6 +572,7 @@ def plot_all_movements(ex, meta):
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
     plt.show()
+    plt.clf()
 
 
 def plot_gplvm(model, meta):
@@ -580,6 +586,16 @@ def plot_gplvm(model, meta):
     ref_tap = common.load_data(full_path_png)
     ref_tap = np.array(ref_tap)
     # calc dissims for all ys in model
+
+    if type(model.y) is list:
+        print(f"wtf, model.y is a list: {model.y}")
+        model.y = np.array(model.y)
+    elif type(model.y) is np.ndarray:
+        print(f"model.y is an array, should be fine")
+    else:
+        print(f"wellp, model.y is {model.y} of type {type(model.y)}")
+
+
     dissims = dp.calc_dissims(model.y, ref_tap)
 
     len_line = len(meta["line_range"])
@@ -636,6 +652,7 @@ def plot_gplvm(model, meta):
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
     plt.show()
+    plt.clf()
 
 
 def parse_exp_name(name):
@@ -838,9 +855,9 @@ class State:
 if __name__ == "__main__":
 
     state = State()
-
-    atexit.register(state.ex.save_final_data)
-    atexit.register(save_final_status)
+    atexit.register(state.ex.make_gplvm_graph_final)
     atexit.register(state.ex.make_graphs_final)
+    atexit.register(save_final_status)
+    atexit.register(state.ex.save_final_data)
 
     main(state.ex, state.model, state.meta)
