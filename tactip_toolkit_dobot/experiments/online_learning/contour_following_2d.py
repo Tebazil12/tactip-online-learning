@@ -86,7 +86,7 @@ class Experiment:
     def displace_along_line(self, location, displacements, orient):
         return location + displacements * np.array([np.cos(orient), np.sin(orient)])
 
-    def collect_line(self, new_location, new_orient, meta):
+    def collect_line(self, new_location, new_orient, meta, height=0):
         """
         Collect a straight line of taps at 90deg to new_orient, at
         displacements specified in meta.
@@ -111,7 +111,7 @@ class Experiment:
             # )
 
             best_frames[i], new_keypoints[i] = self.processed_tap_at(
-                next_test_location[i], new_orient, meta
+                next_test_location[i], new_orient, meta, height=height
             )
 
         # save line of data
@@ -194,7 +194,7 @@ class Experiment:
         return edge_location, corrected_disps
 
     def processed_tap_at(
-        self, new_location, new_orient, meta, neutral_tap=True, selection_criteria="Max"
+        self, new_location, new_orient, meta, neutral_tap=True, selection_criteria="Max", height=0
     ):
         """
 
@@ -214,6 +214,7 @@ class Experiment:
             self.robot,
             self.sensor,
             meta,
+            height=height
         )
 
         self.add_to_alldata(
@@ -240,8 +241,10 @@ class Experiment:
 
     def collect_neutral_tap(self, meta):
         # collect neutral, non-contact position (as reference for other taps)
+        offset = meta["work_frame_offset"]
+
         self.neutral_tap, _ = self.processed_tap_at(
-            [-20 - 35, -(-80) + 35],
+            [-20 - offset[0], -(-80) + offset[1]],
             0,
             meta,
             selection_criteria="Mean",
@@ -279,7 +282,7 @@ class Experiment:
             plot_gplvm(state.model, state.meta)
 
 
-def make_meta(file_name=None):
+def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
     """
     Make dictionary of all meta data about the current experiment, and
     save to json file.
@@ -301,22 +304,30 @@ def make_meta(file_name=None):
             "meta.json",
         )
     data_dir = os.path.dirname(meta_file)
-    stimuli_name = "flower"
-    # stimuli_name ="7mm-circle"
 
-    if stimuli_name == "7mm-circle":
+    if stimuli_name is None: # so can be overwritten in test files
+        stimuli_name = "flower"
+        # stimuli_name ="70mm-circle"
+
+    if stimuli_name == "70mm-circle":
         stimuli_height = -190
         x_y_offset = [35, -35]
         # x_y_offset = [0, 0]
         max_steps = 20
 
+    elif stimuli_name == "105mm-circle":
+        stimuli_height = -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-17.5, 0]
+        max_steps = 25
+
     elif stimuli_name == "flower":
         stimuli_height = -190 + 2
         x_y_offset = [35, -35 - 10 - 10]
-        max_steps = 30
+        max_steps = 15#30
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
-    max_steps = 3 # for testing
+    # max_steps = 3 # for testing
     meta = {
         # ~~~~~~~~~ Paths ~~~~~~~~~#
         "home_dir": os.path.join(
@@ -340,6 +351,7 @@ def make_meta(file_name=None):
             0,
             0,
         ],  # experiment specific start point
+        "work_frame_offset": x_y_offset,
         "linear_speed": 100,
         "angular_speed": 100,
         "tap_move": [[0, 0, -3, 0, 0, 0], [0, 0, 0, 0, 0, 0]],
@@ -373,14 +385,17 @@ def make_meta(file_name=None):
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
-        "STEP_LENGTH": 5,  # nb, opposite direction to matlab experiments
-        "line_range": np.arange(-10, 11, 2).tolist(),  # in mm
+        "STEP_LENGTH": 10,#5,  # nb, opposite direction to matlab experiments
+        "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": [0, 0, np.pi / 2],  # [x,y,sensor angle in rads]
-        "tol": 1,  # tolerance for second tap (0+_tol)
+        "tol": 2,  # tolerance for second tap (0+_tol)
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
         "comments": "first run with main loop instead of tests",  # so you can identify runs later
     }
+
+    if extra_dict is not None:
+        meta.update(extra_dict)
 
     os.makedirs(os.path.join(meta["home_dir"], os.path.dirname(meta["meta_file"])))
     with open(os.path.join(meta["home_dir"], meta["meta_file"]), "w") as f:
@@ -429,7 +444,7 @@ def plot_all_movements(ex, meta):
     line_width = 0.5
     marker_size = 1
     ax = plt.gca()
-    if meta["stimuli_name"] == "7mm-circle":
+    if meta["stimuli_name"] == "70mm-circle":
         # print small circle location
         radius = 35
         x_offset = 35 - 35
@@ -487,20 +502,21 @@ def plot_all_movements(ex, meta):
         )
         # plt.scatter(line_locations_np[:, 0], line_locations_np[:, 1], color="g",s=marker_size)
 
-    # print predicted edge locations
-    all_edge_np = np.array(ex.edge_locations)
-    pos_xs = all_edge_np[:, 0]
-    pos_ys = all_edge_np[:, 1]
-    # pos_ys = pos_ys/0.8
-    n = range(len(pos_xs))
-    plt.plot(
-        pos_xs,
-        pos_ys,
-        color="#15b01a",
-        marker="+",
-        markersize=marker_size + 1,
-        linewidth=line_width,
-    )
+    if ex.edge_locations is not None:
+        # print predicted edge locations
+        all_edge_np = np.array(ex.edge_locations)
+        pos_xs = all_edge_np[:, 0]
+        pos_ys = all_edge_np[:, 1]
+        # pos_ys = pos_ys/0.8
+        n = range(len(pos_xs))
+        plt.plot(
+            pos_xs,
+            pos_ys,
+            color="#15b01a",
+            marker="+",
+            markersize=marker_size + 1,
+            linewidth=line_width,
+        )
     # plt.scatter(pos_xs, pos_ys, color="r",marker='+',s=marker_size)
     plt.gca().set_aspect("equal")
 
