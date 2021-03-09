@@ -250,7 +250,7 @@ def align_all_xs_via_dissim(disp, dissim):
     return corrected_disps
 
 
-def align_radius(disp, dissim, gp_extrap=False):
+def align_radius(disp, dissim, gp_extrap=False, show_graph=False):
     if gp_extrap:
         sigma_n_diss = 0.1 # this should really be calculated from sigma_n_y/same data
         start_params = [100, 9]  # sigma_f and L respectively
@@ -267,8 +267,8 @@ def align_radius(disp, dissim, gp_extrap=False):
         disp_stars, dissim_stars = gp.interpolate(
             disp, dissim, sigma_f, L, sigma_n_diss
         )
-
-        show_dissim_profile([disp_stars, disp], [dissim_stars, dissim])
+        if show_graph is True:
+            show_dissim_profile([disp_stars, disp], [dissim_stars, dissim])
         # show_dissim_profile(np.vstack(([disp_stars],disp)), np.vstack(([dissim_stars],dissim)))
 
         result = np.where(dissim_stars == np.amin(dissim_stars))
