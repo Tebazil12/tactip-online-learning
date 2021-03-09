@@ -41,13 +41,23 @@ def save_final_data(ex):
     common.save_data(ex.all_tap_positions, state.meta, name="all_positions_final.json")
 
 
-def plot_profiles(results, meta, ref_tap):
+def plot_profiles_flat(results, meta, ref_tap):
     # get dissim profile
-    dissim_profile = dp.calc_dissims(
-        np.array(results), ref_tap
-    )  # taps needs casting as the eulicd distance can be done on all at once (instead of looping list)
-    plt.plot(meta["line_range"], dissim_profile)
+    for line in results:
+
+        dissim_profile = dp.calc_dissims(
+            np.array(line), ref_tap
+        )  # taps needs casting as the eulicd distance can be done on all at once (instead of looping list)
+        plt.plot(meta["line_range"], dissim_profile)
+
+    part_path, _ = os.path.split(meta["meta_file"])
+    full_path_png = os.path.join(meta["home_dir"], part_path, "dissim_profiles.png")
+    full_path_svg = os.path.join(meta["home_dir"], part_path, "dissim_profiles.svg")
+    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+
     plt.show()
+    plt.clf()
 
 np.set_printoptions(precision=2, suppress=True)
 
@@ -68,14 +78,16 @@ def main(ex, model, meta):
         if meta["collect_ref_tap"] is True:
             ref_tap = ex.collect_ref_tap(meta)
 
+        results =[]
+
         # for height in range(-1, 2, 1):
         for height in meta["height_range"]:
             # for angle in range(-45, 46, 5):
             for angle in meta["angle_range"]:
 
-                results = ex.collect_line(
+                results.append(ex.collect_line(
                     [0, 0], np.deg2rad(angle), meta, height=height
-                )
+                ))
 
                 # print("collected:")
                 # print(results)
@@ -87,7 +99,7 @@ def main(ex, model, meta):
     # save data
     save_final_data(ex)
     plot_all_movements(ex, meta)
-    plot_profiles(results, meta, ref_tap)
+    plot_profiles_flat(results, meta, ref_tap)
 
     print("Done, exiting")
 
@@ -99,9 +111,10 @@ def main(ex, model, meta):
 if __name__ == "__main__":
     extra_dict = {
         # range(-1, 2, 1)
-        "height_range": np.array(range(0, 1, 1)).tolist(),
+        "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),
         # range(-45, 46, 5)
-        "angle_range": np.array(range(0, 1, 45)).tolist(),
+        "angle_range": np.array(range(-45, 46, 5)).tolist(),
+        "line_range": np.arange(-10, 11, 1).tolist(),
         "ref_location": [0, 0, 0]
     }
 

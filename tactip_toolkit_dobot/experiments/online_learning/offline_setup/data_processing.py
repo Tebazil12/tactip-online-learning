@@ -143,6 +143,11 @@ def extract_ytrain(radii_data):
 
 def calc_dissims(y_train, ref_tap):
     # print("calc_dissim")
+    if type(y_train) is not np.ndarray:
+        raise NameError(f"y_train is not a np.array: {type(y_train)}")
+
+    if type(ref_tap) is not np.ndarray:
+        raise NameError(f"ref tap is not a np.array: {type(ref_tap)}")
 
     diffs = -y_train + ref_tap
     # print(diffs.shape)

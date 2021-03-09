@@ -219,7 +219,7 @@ class Experiment:
 
         self.add_to_alldata(
             keypoints,
-            [new_location[0], new_location[1], round(np.rad2deg(new_orient), 2)],
+            [new_location[0], new_location[1], round(np.rad2deg(new_orient), 2), height],
         )
 
         if neutral_tap is True:
@@ -379,7 +379,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "brightness": 255,
         "contrast": 255,
         "crop": None,
-        "source": 0,
+        "source": 1,
         # ~~~~~~~~~ Processing Settings ~~~~~~~~~#
         "num_frames": 15,
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
