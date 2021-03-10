@@ -238,6 +238,7 @@ def plot_minimas(dissims, meta):
 
     font_size = 5
     offsets = []
+    corrected_disps = []
 
     for line_num, dissim in enumerate(dissims):
         angle = (line_num % num_angles) * 5 - 45  # todo, extract from meta
@@ -266,9 +267,10 @@ def plot_minimas(dissims, meta):
         else:
             subplot_num = int(np.ceil((line_num + 1) / num_angles))
 
-        _, offset = dp.align_radius(np.array(real_disp), dissim, gp_extrap=True)
+        corrected_disp, offset = dp.align_radius(np.array(real_disp), dissim, gp_extrap=True)
 
         offsets.append(offset)
+        corrected_disps.append(corrected_disp)
 
         ax = the_figure.add_subplot(1, 5, subplot_num)
         # f.set_figheight(3)
@@ -355,7 +357,9 @@ def plot_minimas(dissims, meta):
     )
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
-    common.save_data(offsets, meta, name="predicted_offsets.json")
+    common.save_data(offsets, meta, name="post_processing/predicted_offsets.json")
+    common.save_data(corrected_disps, meta, name="post_processing/corrected_disps.json")
+
 
     plt.show()
     plt.clf()
@@ -395,6 +399,10 @@ def main(ex, meta):
 
         # calc dissims for each line
         dissims.append(dp.calc_dissims(lines[line_num - 1], ref_tap))
+
+    common.save_data(locations, meta, name="post_processing/all_locations.json")
+    common.save_data(lines, meta, name="post_processing/all_lines.json")
+    common.save_data(dissims, meta, name="post_processing/dissims.json")
 
     # plot_flat(dissims,meta)
     # plot_seperate_heights(dissims, meta)

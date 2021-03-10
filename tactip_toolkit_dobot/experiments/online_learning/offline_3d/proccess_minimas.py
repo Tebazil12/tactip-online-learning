@@ -17,7 +17,7 @@ from tactip_toolkit_dobot.experiments.online_learning.contour_following_2d impor
 )
 
 def main(ex, meta):
-    data = common.load_data(data_home + current_experiment+ "predicted_offsets.json")
+    data = common.load_data(data_home + current_experiment+ "post_processing/predicted_offsets.json")
 
     data_np = np.array(data)
 
