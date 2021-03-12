@@ -9,7 +9,7 @@ class GPLVM:
     # sigma_n_y = 100
     sigma_n_y = 0.379#2061569338708 #Tacfoot #TODO this should really be passed from meta
 
-    def __init__(self, x, y, sigma_f=None, ls=None):
+    def __init__(self, x, y, sigma_f=None, ls=None, start_hyperpars=None):
         """
         Take in x and y as np.arrays of the correct size and shape to be used
         """
@@ -28,7 +28,7 @@ class GPLVM:
             print("Optimising model hyperpars")
 
             # optmise
-            self.optim_hyperpars()
+            self.optim_hyperpars(start_hyperpars)
         else:
             print(f"Using pre-defined hyperpars sigmaf={sigma_f} ls={ls}")
             # assuming hyperpars already optimised
@@ -37,9 +37,10 @@ class GPLVM:
 
 
     def max_ll_optim_hyperpars(self, to_optimise, set_vals):
-        sigma_f, l_disp, l_mu = to_optimise
+        # to_optimise = [sigma_f, l_disp, l_mu, l_zed]
+
         x, y = set_vals
-        return self.max_log_like(sigma_f, l_disp, l_mu, x, y)
+        return self.max_log_like(to_optimise[0], to_optimise[1:], x, y)
 
     def max_ll_optim_mu(self, to_optimise, set_vals):
         [mu] = to_optimise
@@ -69,7 +70,7 @@ class GPLVM:
 
         # print(f"shape of optmising x {np.shape(all_xs)} and y {np.shape(all_ys)}")
 
-        return self.max_log_like(self.sigma_f, self.ls[0], self.ls[1], all_xs, all_ys)
+        return self.max_log_like(self.sigma_f, self.ls, all_xs, all_ys)
 
 
     def max_ll_optim_mu_and_disp(self, to_optimise, set_vals):
@@ -99,11 +100,11 @@ class GPLVM:
 
         # print(f"shape of optmising x {np.shape(all_xs)} and y {np.shape(all_ys)}")
 
-        return self.max_log_like(self.sigma_f, self.ls[0], self.ls[1], all_xs, all_ys)
+        return self.max_log_like(self.sigma_f, self.ls, all_xs, all_ys)
 
 
 
-    def max_log_like(self, sigma_f, l_disp, l_mu, x, y):
+    def max_log_like(self, sigma_f, ls, x, y):
         np.set_printoptions(suppress=True)
         # print(f"max log lik x = {np.round(x,1)} and y={np.round(y,1)}")
         # print(y.shape)
@@ -114,7 +115,7 @@ class GPLVM:
         # if not np.isscalar(s_cap):
         #     raise NameError("s_cap is not scalar!")
 
-        ls = np.array([l_disp, l_mu])
+        # ls = np.array([l_disp, l_mu])
 
         k_cap = gp.calc_K(x, sigma_f, ls, self.sigma_n_y)
 
@@ -185,9 +186,10 @@ class GPLVM:
         # print(result)
         print("optimise done")
 
-        [sigma_f, l_disp, l_mu] = result.x
-        self.sigma_f = sigma_f
-        self.ls = [l_disp, l_mu]
+        self.sigma_f = result.x[0]
+        self.ls = result.x[1:]
+
+
         # print(result)
 
     def optim_many_mu(self, disps, y):
