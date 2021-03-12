@@ -226,7 +226,7 @@ def plot_seperate_heights(dissims, meta):
     plt.clf()
 
 
-def plot_minimas(dissims, meta):
+def plot_minimas(dissims, meta, gp_extrap=True):
 
     num_heights = len(meta["height_range"])
     heights = meta["height_range"]
@@ -267,7 +267,7 @@ def plot_minimas(dissims, meta):
         else:
             subplot_num = int(np.ceil((line_num + 1) / num_angles))
 
-        corrected_disp, offset = dp.align_radius(np.array(real_disp), dissim, gp_extrap=True)
+        corrected_disp, offset = dp.align_radius(np.array(real_disp), dissim, gp_extrap=gp_extrap)
 
         offsets.append(offset)
         corrected_disps.append(corrected_disp)
@@ -349,16 +349,28 @@ def plot_minimas(dissims, meta):
         if line_num <= 19:
             plt.legend(fontsize=font_size)
 
-    full_path_png = os.path.join(
-        data_home, current_experiment, "dissim_profiles_minimas.png"
-    )
-    full_path_svg = os.path.join(
-        data_home, current_experiment, "dissim_profiles_minimas.svg"
-    )
-    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
-    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
-    common.save_data(offsets, meta, name="post_processing/predicted_offsets.json")
-    common.save_data(corrected_disps, meta, name="post_processing/corrected_disps.json")
+    if gp_extrap:
+        full_path_png = os.path.join(
+            data_home, current_experiment, "dissim_profiles_minimas_gp.png"
+        )
+        full_path_svg = os.path.join(
+            data_home, current_experiment, "dissim_profiles_minimas_gp.svg"
+        )
+        plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+        plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+        common.save_data(offsets, meta, name="post_processing/predicted_offsets_gp.json")
+        common.save_data(corrected_disps, meta, name="post_processing/corrected_disps_gp.json")
+    else:
+        full_path_png = os.path.join(
+            data_home, current_experiment, "dissim_profiles_minimas_basic.png"
+        )
+        full_path_svg = os.path.join(
+            data_home, current_experiment, "dissim_profiles_minimas_basic.svg"
+        )
+        plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+        plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+        common.save_data(offsets, meta, name="post_processing/predicted_offsets_basic.json")
+        common.save_data(corrected_disps, meta, name="post_processing/corrected_disps_basic.json")
 
 
     plt.show()
@@ -406,7 +418,7 @@ def main(ex, meta):
 
     # plot_flat(dissims,meta)
     # plot_seperate_heights(dissims, meta)
-    plot_minimas(dissims, meta)
+    plot_minimas(dissims, meta, gp_extrap=False)
 
     # best_frames = dp.best_frame()
 
