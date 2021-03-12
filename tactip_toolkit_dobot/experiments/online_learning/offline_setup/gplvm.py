@@ -117,7 +117,7 @@ class GPLVM:
 
         # ls = np.array([l_disp, l_mu])
 
-        k_cap = gp.calc_K(x, sigma_f, ls, self.sigma_n_y)
+        k_cap = gp.calc_K(x, sigma_f, np.array(ls), self.sigma_n_y)
 
         r_cap = np.linalg.cholesky(k_cap)
         sign, logdet_K = np.linalg.slogdet(r_cap)
