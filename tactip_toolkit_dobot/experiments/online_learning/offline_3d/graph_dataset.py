@@ -376,6 +376,333 @@ def plot_minimas(dissims, meta, gp_extrap=True):
     plt.show()
     plt.clf()
 
+def plot_height_flat(dissims, meta):
+    num_heights = len(meta["height_range"])
+    num_angles = len(meta["angle_range"])
+
+    real_disp = meta["line_range"]
+    real_heights = meta["height_range"]
+
+    the_figure = plt.figure(figsize=(10, 10))
+    ax = plt.gca()
+
+    print(f"dissims is shape {np.shape(dissims[1])}")
+
+    n_lines = len(dissims)
+
+    for tap_num, _ in enumerate(dissims[1]):
+        # if line_num < 19:
+        #     angle = (line_num % num_angles) * 5 - 45  # todo, extract from meta
+        #
+        #     label = str(angle) + "°"
+        # else:
+        #     label = ""
+
+        # if line_num % num_angles:
+        #     line_colour = ((line_num) % num_angles) / num_angles
+        # else:
+        #     line_colour = 0
+
+
+        # line_colour = ((tap_num) % num_angles) / num_angles
+
+        dissims = np.array(dissims)
+
+        for i in range(num_angles):
+            print(i)
+            line_colour = i / num_angles
+
+            plt.plot(
+                real_heights,
+                # np.tile(real_heights, int(n_lines/(num_heights))),
+                dissims[int(n_lines/(num_angles))*i:int(n_lines/(num_angles))*(i+1),tap_num],
+                # dissims[:,tap_num],
+                color=(line_colour, 0, 1 - line_colour),
+                # label=label,
+            )
+    plt.legend()
+
+    font_size = 10
+
+    # Show the major grid lines with dark grey lines
+    plt.grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+
+    # Show the minor grid lines with very faint and almost transparent grey lines
+    plt.minorticks_on()
+    plt.grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
+    ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+    ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+
+    # set axis font size
+    plt.tick_params(labelsize=font_size)
+
+    # axis labels
+    plt.xlabel("Height (mm)", fontsize=font_size, va="top")
+    plt.ylabel("Dissimilarity", fontsize=font_size, va="top")
+
+    # add identifier labels
+    part_path, _ = os.path.split(meta["meta_file"])
+
+    exp_name = part_path.split("/")
+    readable_name = parse_exp_name(exp_name[1])
+
+    # plt.gcf().text(
+    #     0.01, 1.01, meta["stimuli_name"], transform=ax.transAxes, fontsize=4, alpha=0.2
+    # )
+    plt.gcf().text(
+        1,
+        1.01,
+        readable_name,
+        transform=ax.transAxes,
+        fontsize=font_size,
+        alpha=0.2,
+        ha="right",
+    )
+    #     # Don't allow the axis to be on top of your data
+    ax.set_axisbelow(True)
+
+    full_path_png = os.path.join(
+        data_home, current_experiment, "dissim_height_profiles_keyed.png"
+    )
+    full_path_svg = os.path.join(
+        data_home, current_experiment, "dissim_height_profiles_keyed.svg"
+    )
+    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+
+    plt.show()
+    plt.clf()
+
+def plot_height_minimas(dissims, meta):
+    num_heights = len(meta["height_range"])
+    num_angles = len(meta["angle_range"])
+
+    real_disp = meta["line_range"]
+    num_disps = len(meta["line_range"])
+    real_heights = np.array(meta["height_range"])
+
+    the_figure = plt.figure(figsize=(10, 10))
+    ax = plt.gca()
+
+    print(f"dissims is shape {np.shape(dissims[1])}")
+
+    n_lines = len(dissims)
+    # print(f"shape of dissims= {np.shape(dissims)} where dissim={dissims}")
+    
+
+    line_number = -1
+
+    for tap_num, _ in enumerate(dissims[1]):
+
+
+        # if line_num < 19:
+        #     angle = (line_num % num_angles) * 5 - 45  # todo, extract from meta
+        #
+        #     label = str(angle) + "°"
+        # else:
+        #     label = ""
+
+        # if line_num % num_angles:
+        #     line_colour = ((line_num) % num_angles) / num_angles
+        # else:
+        #     line_colour = 0
+
+
+        # line_colour = ((tap_num) % num_angles) / num_angles
+
+        dissims = np.array(dissims)
+
+        for i in range(num_angles):
+            line_number = tap_num + (num_angles * i) #TODO how to get to 0:95??!!
+            print(f"line num: {line_number}")
+
+            # print(i)
+            line_colour = i / num_angles
+
+            height_dissim_profile = dissims[int(n_lines/(num_angles))*i:int(n_lines/(num_angles))*(i+1),tap_num]
+
+            corrected_height, offset_height = dp.align_radius(real_heights,height_dissim_profile)
+
+            plt.scatter(offset_height,line_number, marker="+")
+
+            # plt.plot(
+            #     real_heights,
+            #     # np.tile(real_heights, int(n_lines/(num_heights))),
+            #     dissims[int(n_lines/(num_angles))*i:int(n_lines/(num_angles))*(i+1),tap_num],
+            #     # dissims[:,tap_num],
+            #     color=(line_colour, 0, 1 - line_colour),
+            #     # label=label,
+            # )
+    plt.legend()
+
+    font_size = 10
+
+    # Show the major grid lines with dark grey lines
+    plt.grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+
+    # Show the minor grid lines with very faint and almost transparent grey lines
+    plt.minorticks_on()
+    plt.grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
+    ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+    ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+
+    # set axis font size
+    plt.tick_params(labelsize=font_size)
+
+    # axis labels
+    plt.xlabel("Height (mm)", fontsize=font_size, va="top")
+    plt.ylabel("Dissimilarity", fontsize=font_size, va="top")
+
+    # add identifier labels
+    part_path, _ = os.path.split(meta["meta_file"])
+
+    exp_name = part_path.split("/")
+    readable_name = parse_exp_name(exp_name[1])
+
+    # plt.gcf().text(
+    #     0.01, 1.01, meta["stimuli_name"], transform=ax.transAxes, fontsize=4, alpha=0.2
+    # )
+    plt.gcf().text(
+        1,
+        1.01,
+        readable_name,
+        transform=ax.transAxes,
+        fontsize=font_size,
+        alpha=0.2,
+        ha="right",
+    )
+    #     # Don't allow the axis to be on top of your data
+    ax.set_axisbelow(True)
+
+    full_path_png = os.path.join(
+        data_home, current_experiment, "dissim_height_minimas.png"
+    )
+    full_path_svg = os.path.join(
+        data_home, current_experiment, "dissim_height_minimas.svg"
+    )
+    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+
+    plt.show()
+    plt.clf()
+
+def plot_seperate_angles(dissims, meta):
+    num_heights = len(meta["height_range"])
+    heights = meta["height_range"]
+    num_angles = len(meta["angle_range"])
+
+    real_disp = meta["line_range"]
+
+    the_figure = plt.figure(figsize=(20, 5))
+
+    for line_num, dissim in enumerate(dissims):
+        if line_num < 19:
+            angle = (line_num % num_angles) * 5 - 45  # todo, extract from meta
+
+            label = str(angle) + "°"
+
+        else:
+            label = ""
+
+        # print(label)
+        # if Y Z=X/Y else Z=0
+        # z= ( x / y ) if y != 0 else 0
+        print(line_num)
+        if line_num % num_angles:
+            line_colour = ((line_num) % num_angles) / num_angles
+        else:
+            line_colour = 0
+
+        # line_colour = ((line_num-1  % num_angles) / num_angles) if (line_num-1  % num_angles) != 0 else 0
+
+        print(line_colour)
+        if (line_num + 1) is 0:
+            subplot_num = 1
+        else:
+            subplot_num = int(np.ceil((line_num + 1) / num_angles))
+
+        ax = the_figure.add_subplot(1, 5, subplot_num)
+        # f.set_figheight(3)
+        # f.set_figwidth(3)
+        # plt.subplots(1,5,figsize=(15,15))
+        # plt.subplots(figsize=(5, 5))
+
+        # line_colour = (line_num  % num_angles) / num_angles
+        plt.plot(
+            real_disp, dissim, color=(line_colour, 0, 1 - line_colour), label=label
+        )
+        plt.axis([-11, 11, 8, 63])
+
+        font_size = 5
+        if line_num % 19 == 1:
+
+            # Show the major grid lines with dark grey lines
+            plt.grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
+            ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
+            ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+
+            # Show the minor grid lines with very faint and almost transparent grey lines
+            plt.minorticks_on()
+            plt.grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
+            ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+            ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+
+            # set axis font size
+            plt.tick_params(labelsize=font_size)
+
+            # axis labels
+            plt.xlabel("Displacement (mm)", fontsize=font_size, va="top")
+            plt.ylabel("Dissimilarity", fontsize=font_size, va="top")
+
+            # height = (subplot_num*0.5)-1.5
+            # print(subplot_num)
+            # print(1)
+            # print(subplot_num-1)
+            height = heights[subplot_num - 1]
+            plt.title(
+                f"Profiles at tap depth {height} mm from reference",
+                fontsize=(font_size + 1),
+            )
+
+            # add identifier labels
+            part_path, _ = os.path.split(meta["meta_file"])
+
+            exp_name = part_path.split("/")
+            readable_name = parse_exp_name(exp_name[1])
+
+            # plt.gcf().text(
+            #     0.01, 1.01, meta["stimuli_name"], transform=ax.transAxes, fontsize=4, alpha=0.2
+            # )
+            plt.gcf().text(
+                1,
+                1.01,
+                readable_name,
+                transform=ax.transAxes,
+                fontsize=font_size,
+                alpha=0.2,
+                ha="right",
+            )
+            #     # Don't allow the axis to be on top of your data
+            ax.set_axisbelow(True)
+
+        if line_num <= 19:
+            plt.legend(fontsize=font_size)
+
+    full_path_png = os.path.join(
+        data_home, current_experiment, "dissim_profiles_heights.png"
+    )
+    full_path_svg = os.path.join(
+        data_home, current_experiment, "dissim_profiles_heights.svg"
+    )
+    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+
+    plt.show()
+    plt.clf()
 
 def main(ex, meta):
 
@@ -418,7 +745,10 @@ def main(ex, meta):
 
     # plot_flat(dissims,meta)
     # plot_seperate_heights(dissims, meta)
-    plot_minimas(dissims, meta, gp_extrap=False)
+    # plot_minimas(dissims, meta, gp_extrap=False)
+    # plot_height_flat(dissims, meta)
+    # plot_seperate_angles(dissims, meta)
+    plot_height_minimas(dissims, meta)
 
     # best_frames = dp.best_frame()
 

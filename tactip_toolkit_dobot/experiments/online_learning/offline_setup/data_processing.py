@@ -251,6 +251,9 @@ def align_all_xs_via_dissim(disp, dissim):
 
 
 def align_radius(disp, dissim, gp_extrap=False, show_graph=False):
+    if type(disp) is not np.ndarray:
+        raise NameError(f"disp should be np.array not {type(disp)}")
+
     if gp_extrap:
         sigma_n_diss = 0.1 # this should really be calculated from sigma_n_y/same data
         start_params = [100, 9]  # sigma_f and L respectively
