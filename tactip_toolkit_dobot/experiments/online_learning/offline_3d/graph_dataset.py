@@ -732,20 +732,20 @@ def dissims_height(dissims, meta):
     print(np.shape(reshaped_dissims))
 
     # noinspection PyTypeChecker
-    assert all(dissims[0] == reshaped_dissims[0,0])
-
-    assert all(dissims[4] == reshaped_dissims[0,4])
-
-    assert all(dissims[num_angles-1] == reshaped_dissims[0,num_angles-1])
-
-    assert all(dissims[num_angles] == reshaped_dissims[1,0])
-
-
-    assert all(dissims[2*num_angles] == reshaped_dissims[2,0])
-
-    assert all(dissims[(2*num_angles)+1] == reshaped_dissims[2,1])
-
-    assert all(dissims[(num_heights*num_angles)-1] == reshaped_dissims[4,6])
+    # assert all(dissims[0] == reshaped_dissims[0,0])
+    #
+    # assert all(dissims[4] == reshaped_dissims[0,4])
+    #
+    # assert all(dissims[num_angles-1] == reshaped_dissims[0,num_angles-1])
+    #
+    # assert all(dissims[num_angles] == reshaped_dissims[1,0])
+    #
+    #
+    # assert all(dissims[2*num_angles] == reshaped_dissims[2,0])
+    #
+    # assert all(dissims[(2*num_angles)+1] == reshaped_dissims[2,1])
+    #
+    # assert all(dissims[(num_heights*num_angles)-1] == reshaped_dissims[4,6])
 
     # flatten_again_dissim = np.reshape(reshaped_dissims, (num_heights, num_angles*num_disps)).T
     # # flatten_again_dissim = np.reshape(reshaped_dissims, (num_angles*num_disps,num_heights))
@@ -758,7 +758,7 @@ def dissims_height(dissims, meta):
 
     return reshaped_dissims
 
-def plot_seperate_angles(dissims, meta, data_home=None, current_experiment=None):
+def plot_seperate_angles(dissims, meta, data_home=None, current_experiment=None,show_fig=True ):
     num_heights = len(meta["height_range"])
     heights = meta["height_range"]
     num_angles = len(meta["angle_range"])
@@ -775,105 +775,107 @@ def plot_seperate_angles(dissims, meta, data_home=None, current_experiment=None)
     max_dissim = np.max(reshaped_dissims)
     min_dissim = np.min(reshaped_dissims)
 
-    for line_num, dissim in enumerate(reshaped_dissims):
+    # for line_num, dissim in enumerate(reshaped_dissims):
+    for disp_index in range(num_disps):
+        for angle_index in range(num_angles):
 
-        angle = angles[(line_num % num_angles)]
-        # if -15 <= angle <= 15: # filter to show just this range
-        print(angle)
-        if line_num < num_angles:
+            angle = angles[angle_index]
+            # if -15 <= angle <= 15: # filter to show just this range
+            print(angle)
+            if disp_index == 0: # line_num < num_angles:
 
-            label = str(angle) + "°"
+                label = str(angle) + "°"
 
-        else:
-            label = ""
+            else:
+                label = ""
 
-        # print(label)
-        # if Y Z=X/Y else Z=0
-        # z= ( x / y ) if y != 0 else 0
-        print(line_num)
-        if line_num % num_angles:
-            line_colour = ((line_num) % num_angles) / num_angles
-        else:
-            line_colour = 0
+            # print(label)
+            # if Y Z=X/Y else Z=0
+            # z= ( x / y ) if y != 0 else 0
+            # print(line_num)
+            # if line_num % num_angles:
+            line_colour = angle_index / num_angles
+            # else:
+            #     line_colour = 0
 
-        # line_colour = ((line_num-1  % num_angles) / num_angles) if (line_num-1  % num_angles) != 0 else 0
+            # line_colour = ((line_num-1  % num_angles) / num_angles) if (line_num-1  % num_angles) != 0 else 0
 
-        print(line_colour)
-        if (line_num + 1) is 0:
-            subplot_num = 1
-        else:
-            subplot_num = int(np.ceil((line_num + 1) / num_angles))
+            # print(line_colour)
+            # if (line_num + 1) is 0:
+            #     subplot_num = 1
+            # else:
+            #     subplot_num = int(np.ceil((line_num + 1) / num_angles))
+            subplot_num = disp_index + 1
+            ax = the_figure.add_subplot(3, 10, subplot_num)
+            # f.set_figheight(3)
+            # f.set_figwidth(3)
+            # plt.subplots(1,5,figsize=(15,15))
+            # plt.subplots(figsize=(5, 5))
 
-        ax = the_figure.add_subplot(3, 10, subplot_num)
-        # f.set_figheight(3)
-        # f.set_figwidth(3)
-        # plt.subplots(1,5,figsize=(15,15))
-        # plt.subplots(figsize=(5, 5))
-
-        # line_colour = (line_num  % num_angles) / num_angles
-        plt.plot(
-            heights, dissim, color=(line_colour, 0, 1 - line_colour), label=label
-        )
-        plt.axis([-1.1, 1.1, min_dissim-5, max_dissim+5])
-
-        font_size = 5
-        if line_num % num_angles == 1:
-
-            # Show the major grid lines with dark grey lines
-            plt.grid(
-                b=True, which="major", color="#666666", linestyle="-", alpha=0.5
+            # line_colour = (line_num  % num_angles) / num_angles
+            plt.plot(
+                heights,reshaped_dissims[:,angle_index,disp_index] , color=(line_colour, 0, 1 - line_colour), label=label
             )
-            ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
-            ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+            plt.axis([-1.1, 1.1, min_dissim-5, max_dissim+5])
 
-            # Show the minor grid lines with very faint and almost transparent grey lines
-            plt.minorticks_on()
-            plt.grid(
-                b=True, which="minor", color="#999999", linestyle="-", alpha=0.2
-            )
-            ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
-            ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+            font_size = 5
+            if angle_index == 1:
 
-            # set axis font size
-            plt.tick_params(labelsize=font_size)
+                # Show the major grid lines with dark grey lines
+                plt.grid(
+                    b=True, which="major", color="#666666", linestyle="-", alpha=0.5
+                )
+                ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
+                ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
 
-            # axis labels
-            plt.xlabel("Height (mm)", fontsize=font_size, va="top")
-            plt.ylabel("Dissimilarity", fontsize=font_size, va="top")
+                # Show the minor grid lines with very faint and almost transparent grey lines
+                plt.minorticks_on()
+                plt.grid(
+                    b=True, which="minor", color="#999999", linestyle="-", alpha=0.2
+                )
+                ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+                ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
-            # height = (subplot_num*0.5)-1.5
-            # print(subplot_num)
-            # print(1)
-            # print(subplot_num-1)
-            disp = real_disp[subplot_num - 1]
-            plt.title(
-                f"disp.={disp} mm from reference",
-                fontsize=(font_size + 1),
-            )
+                # set axis font size
+                plt.tick_params(labelsize=font_size)
 
-            # add identifier labels
-            part_path, _ = os.path.split(meta["meta_file"])
+                # axis labels
+                plt.xlabel("Height (mm)", fontsize=font_size, va="top")
+                plt.ylabel("Dissimilarity", fontsize=font_size, va="top")
 
-            exp_name = part_path.split("/")
-            readable_name = parse_exp_name(exp_name[1])
+                # height = (subplot_num*0.5)-1.5
+                # print(subplot_num)
+                # print(1)
+                # print(subplot_num-1)
+                disp = real_disp[subplot_num - 1]
+                plt.title(
+                    f"disp.={disp} mm from reference",
+                    fontsize=(font_size + 1),
+                )
 
-            # plt.gcf().text(
-            #     0.01, 1.01, meta["stimuli_name"], transform=ax.transAxes, fontsize=4, alpha=0.2
-            # )
-            plt.gcf().text(
-                1,
-                1.01,
-                readable_name,
-                transform=ax.transAxes,
-                fontsize=font_size,
-                alpha=0.2,
-                ha="right",
-            )
-            #     # Don't allow the axis to be on top of your data
-            ax.set_axisbelow(True)
+                # add identifier labels
+                part_path, _ = os.path.split(meta["meta_file"])
 
-        if line_num <= 19:
-            plt.legend(fontsize=font_size)
+                exp_name = part_path.split("/")
+                readable_name = parse_exp_name(exp_name[1])
+
+                # plt.gcf().text(
+                #     0.01, 1.01, meta["stimuli_name"], transform=ax.transAxes, fontsize=4, alpha=0.2
+                # )
+                plt.gcf().text(
+                    1,
+                    1.01,
+                    readable_name,
+                    transform=ax.transAxes,
+                    fontsize=font_size,
+                    alpha=0.2,
+                    ha="right",
+                )
+                #     # Don't allow the axis to be on top of your data
+                ax.set_axisbelow(True)
+
+            if disp_index == 0:
+                plt.legend(fontsize=font_size)
 
     full_path_png = os.path.join(
         data_home, current_experiment, "dissim_profiles_angles.png"
@@ -884,7 +886,8 @@ def plot_seperate_angles(dissims, meta, data_home=None, current_experiment=None)
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
-    plt.show()
+    if show_fig:
+        plt.show()
     plt.clf()
 
 
@@ -952,7 +955,8 @@ def main(ex, meta, data_home=None, current_experiment=None, show_figs=True):
             dissims,
             meta,
             data_home=data_home,
-            current_experiment=current_experiment
+            current_experiment=current_experiment,
+            show_fig=show_figs
         )
         # plot_height_minimas(
         #     dissims, meta, data_home=data_home, current_experiment=current_experiment
