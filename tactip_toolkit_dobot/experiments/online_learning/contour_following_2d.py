@@ -368,20 +368,20 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "max_area": 400,
         "filter_by_circularity": True,
         "min_circularity": 0.3,
-        "filter_by_inertia": True,
-        "min_inertia_ratio": 0.22,
+        "filter_by_inertia": False,
+        "min_inertia_ratio": 0.5,#0.22,
         "filter_by_convexity": True,
         "min_convexity": 0.61,
-        "nntracker_threshold": 20,
+        "nntracker_threshold": 40,
         "kpview_colour": (0, 255, 0),
         # ~~~~~~~~~ Camera Settings ~~~~~~~~~#
         "exposure": None,  # tacFoot camera doesn't support exposure
         "brightness": 255,
         "contrast": 255,
         "crop": None,
-        "source": 1,
+        "source": 0,
         # ~~~~~~~~~ Processing Settings ~~~~~~~~~#
-        "num_frames": 15,
+        "num_frames": 1,
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
@@ -400,6 +400,10 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
     os.makedirs(os.path.join(meta["home_dir"], os.path.dirname(meta["meta_file"])))
     with open(os.path.join(meta["home_dir"], meta["meta_file"]), "w") as f:
         json.dump(meta, f)
+
+    part_path, _ = os.path.split(meta["meta_file"])
+    full_path = os.path.join(meta["home_dir"], part_path, "post_processing/")
+    os.makedirs(full_path)
 
     return meta
 

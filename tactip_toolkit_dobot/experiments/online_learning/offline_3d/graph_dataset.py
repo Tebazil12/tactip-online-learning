@@ -499,7 +499,7 @@ def plot_height_flat(
     plt.close()
 
 
-def plot_height_minimas(dissims, meta, data_home=None, current_experiment=None):
+def plot_height_minimas(dissims, meta, data_home=None, current_experiment=None,gp_extrap=False):
     num_heights = len(meta["height_range"])
     num_angles = len(meta["angle_range"])
 
@@ -517,7 +517,9 @@ def plot_height_minimas(dissims, meta, data_home=None, current_experiment=None):
 
     line_number = -1
 
-    for tap_num, _ in enumerate(dissims[1]):
+    reshaped_dissims = dissims_height(dissims, meta)
+
+    # for tap_num, _ in enumerate(dissims[1]):
 
         # if line_num < 19:
         #     angle = (line_num % num_angles) * 5 - 45  # todo, extract from meta
@@ -533,25 +535,31 @@ def plot_height_minimas(dissims, meta, data_home=None, current_experiment=None):
 
         # line_colour = ((tap_num) % num_angles) / num_angles
 
-        dissims = np.array(dissims)
+        # dissims = np.array(dissims)
+    all_offsets = []
 
-        for i in range(num_angles):
-            line_number = tap_num + (num_angles * i)  # TODO how to get to 0:95??!!
+    for disp_index in range(num_disps):
+        for angle_index in range(num_angles):
+            line_number = (disp_index *num_angles) + angle_index
             print(f"line num: {line_number}")
 
             # print(i)
-            line_colour = i / num_angles
+            line_colour = angle_index / num_angles
+            # line_colour = disp_index / num_disps
 
-            height_dissim_profile = dissims[
-                int(n_lines / (num_angles)) * i : int(n_lines / (num_angles)) * (i + 1),
-                tap_num,
-            ]
+            # height_dissim_profile = dissims[
+            #     int(n_lines / (num_angles)) * angle : int(n_lines / (num_angles)) * (angle + 1),
+            #     tap_num,
+            # ]
+            height_dissim_profile = reshaped_dissims[:,angle_index,disp_index]
 
             corrected_height, offset_height = dp.align_radius(
-                real_heights, height_dissim_profile
+                real_heights, height_dissim_profile, gp_extrap=gp_extrap, start_hypers=[0.01, 100,20], show_graph=False
             )
 
-            plt.scatter(offset_height, line_number, marker="+")
+            all_offsets.append(offset_height)
+
+            plt.scatter(offset_height, line_number, marker="+", c=[line_colour, 0,1-line_colour ])
 
             # plt.plot(
             #     real_heights,
@@ -563,17 +571,30 @@ def plot_height_minimas(dissims, meta, data_home=None, current_experiment=None):
             # )
     plt.legend()
 
+    plt.axis([-1.05, 1.05, 0, (num_disps*num_angles)+1 ])
+
+    # plot seperating section (by disp)
+    for i in range(num_disps):
+        height = (i*num_angles)
+        plt.plot([-1,1],[height-.5,height-.5],'k')
+        plt.text(
+            0.8, height + (num_angles/2), f"disp = {real_disp[i]}mm"
+        )
+
+
+
+
     font_size = 10
 
     # Show the major grid lines with dark grey lines
     plt.grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(.5))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
 
     # Show the minor grid lines with very faint and almost transparent grey lines
     plt.minorticks_on()
     plt.grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
-    ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+    ax.xaxis.set_minor_locator(ticker.MultipleLocator(0.1))
     ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
     # set axis font size
@@ -581,7 +602,7 @@ def plot_height_minimas(dissims, meta, data_home=None, current_experiment=None):
 
     # axis labels
     plt.xlabel("Height (mm)", fontsize=font_size, va="top")
-    plt.ylabel("Dissimilarity", fontsize=font_size, va="top")
+    plt.ylabel("Tap number", fontsize=font_size, va="top")
 
     # add identifier labels
     part_path, _ = os.path.split(meta["meta_file"])
@@ -603,19 +624,43 @@ def plot_height_minimas(dissims, meta, data_home=None, current_experiment=None):
     )
     #     # Don't allow the axis to be on top of your data
     ax.set_axisbelow(True)
-
-    full_path_png = os.path.join(
-        data_home, current_experiment, "dissim_height_minimas.png"
-    )
-    full_path_svg = os.path.join(
-        data_home, current_experiment, "dissim_height_minimas.svg"
-    )
+    if gp_extrap:
+        full_path_png = os.path.join(
+            data_home, current_experiment, "dissim_height_minimas_gp.png"
+        )
+        full_path_svg = os.path.join(
+            data_home, current_experiment, "dissim_height_minimas_gp.svg"
+        )
+    else:
+        full_path_png = os.path.join(
+            data_home, current_experiment, "dissim_height_minimas_simple.png"
+        )
+        full_path_svg = os.path.join(
+            data_home, current_experiment, "dissim_height_minimas_simple.svg"
+        )
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
-    plt.show()
+    # plt.show()
     plt.clf()
 
+    distributions = {"mean":np.mean(all_offsets),
+                     "abs_mean": np.mean(np.abs(all_offsets)),
+                     "perc_90":np.percentile(np.abs(all_offsets),90),
+                     "perc_75":np.percentile(np.abs(all_offsets),75),
+                     "perc_25":np.percentile(np.abs(all_offsets),25),
+                     }
+
+    if gp_extrap:
+        common.save_data(distributions, meta, name="post_processing/distributions_gp.json")
+    else:
+        common.save_data(distributions, meta, name="post_processing/distributions_simple.json")
+    print(all_offsets)
+    print(f"mean = {np.mean(all_offsets)}")
+    print(f"abs mean = {np.mean(np.abs(all_offsets))}")
+    print(f"percentile 90  = {np.percentile(np.abs(all_offsets),90)}")
+    print(f"percentile 75  = {np.percentile(np.abs(all_offsets),75)}")
+    print(f"percentile 25  = {np.percentile(np.abs(all_offsets),25)}")
 
 def get_height_minimas(dissims, meta, data_home=None, current_experiment=None):
     num_heights = len(meta["height_range"])
@@ -951,16 +996,16 @@ def main(ex, meta, data_home=None, current_experiment=None, show_figs=True):
         #     current_experiment=current_experiment,
         #     show_fig=show_figs,
         # )
-        plot_seperate_angles(
-            dissims,
-            meta,
-            data_home=data_home,
-            current_experiment=current_experiment,
-            show_fig=show_figs
-        )
-        # plot_height_minimas(
-        #     dissims, meta, data_home=data_home, current_experiment=current_experiment
+        # plot_seperate_angles(
+        #     dissims,
+        #     meta,
+        #     data_home=data_home,
+        #     current_experiment=current_experiment,
+        #     show_fig=show_figs
         # )
+        plot_height_minimas(
+            dissims, meta, data_home=data_home, current_experiment=current_experiment, gp_extrap=False
+        )
         # get_height_minimas(dissims, meta)
 
         # best_frames = dp.best_frame()

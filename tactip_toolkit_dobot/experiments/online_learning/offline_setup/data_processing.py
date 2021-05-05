@@ -222,6 +222,7 @@ def calc_dissims(y_train, ref_tap):
 def show_dissim_profile(disp, dissim):
     """ dissim needs to be a list, with each entry a line of taps corresponding with disp"""
     # print(dissim)
+    fig = plt.figure()
     for i in range(0, len(dissim)):
         # print(len(disp))
         if len(disp) == 1:
@@ -250,22 +251,34 @@ def align_all_xs_via_dissim(disp, dissim):
     return corrected_disps
 
 
-def align_radius(disp, dissim, gp_extrap=False, show_graph=False):
+def align_radius(disp, dissim, gp_extrap=False, show_graph=False, start_hypers=None):
+
+    # print(show_graph)
     if type(disp) is not np.ndarray:
         raise NameError(f"disp should be np.array not {type(disp)}")
 
+    if type(dissim) is not np.ndarray:
+        raise NameError(f"disp should be np.array not {type(dissim)}")
+
     if gp_extrap:
-        sigma_n_diss = 0.1 # this should really be calculated from sigma_n_y/same data
-        start_params = [100, 9]  # sigma_f and L respectively
+        if  start_hypers is None:
+            sigma_n_diss = 0.1 # this should really be calculated from sigma_n_y/same data
+            # start_params = [100, 9]  # sigma_f and L respectively
+            start_params = [10, .1]  # sigma_f and L respectively
+        else:
+            sigma_n_diss = start_hypers[0]
+            start_params = start_hypers[1:] # sigma_f and L respectively
+
         data = [disp, dissim, sigma_n_diss]
         # minimizer_kwargs = {"args": data}
         result = scipy.optimize.minimize(
-            gp.max_log_like, start_params, args=data, method="BFGS",
-            options={"gtol": 0.01, "maxiter": 300},
+            gp.max_log_like, start_params, args=data, method="BFGS",tol=0.000001,
+            options={"gtol": 0.00001, "maxiter": 300000},
         )
         # print(result)
 
         [sigma_f, L] = result.x
+        print(f"sigmaf={sigma_f} L={L}")
 
         disp_stars, dissim_stars = gp.interpolate(
             disp, dissim, sigma_f, L, sigma_n_diss

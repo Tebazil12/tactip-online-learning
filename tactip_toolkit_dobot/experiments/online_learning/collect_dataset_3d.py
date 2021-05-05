@@ -40,6 +40,20 @@ def save_final_data(ex):
     common.save_data(ex.all_raw_data, state.meta, name="all_data_final.json")
     common.save_data(ex.all_tap_positions, state.meta, name="all_positions_final.json")
 
+def save_final_status():
+    name, _ = os.path.split(state.meta["meta_file"])
+    data = {
+        "success": state.success,
+        "useful": None,
+        "name": name,
+        "stimuli": state.meta["stimuli_name"],
+        "comment": "",
+    }
+
+    with open(os.path.join(state.meta["home_dir"], "experiment_logs"), "a") as myfile:
+        json.dump(data, myfile)
+        myfile.write("\n")
+
 
 def plot_profiles_flat(results, meta, ref_tap):
     # get dissim profile
@@ -95,11 +109,14 @@ def main(ex, model, meta):
                 # print("raw data")
                 # print(ex.all_raw_data)
 
+                time.sleep(1) # to give tip time to return to neutral
+
         common.go_home(ex.robot, meta)
     # save data
     save_final_data(ex)
     plot_all_movements(ex, meta)
     plot_profiles_flat(results, meta, ref_tap)
+    save_final_status()
 
     print("Done, exiting")
 
@@ -113,9 +130,10 @@ if __name__ == "__main__":
         # range(-1, 2, 1)
         "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),
         # range(-45, 46, 5)
-        "angle_range": np.array(range(-45, 46, 5)).tolist(),
-        "line_range": np.arange(-10, 11, 1).tolist(),
-        "ref_location": [0, 0, 0]
+        "angle_range": np.array(range(-15, 16, 5)).tolist(),
+        "line_range": np.arange(-10, 11, 2).tolist(),
+        "ref_location": [0, 0, 0],
+        "comments": "bug should be fixed now"
     }
 
     state = State(
