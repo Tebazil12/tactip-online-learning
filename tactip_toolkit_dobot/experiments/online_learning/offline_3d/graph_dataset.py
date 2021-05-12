@@ -988,7 +988,7 @@ def main(ex, meta, data_home=None, current_experiment=None, show_figs=True):
         # plot_seperate_heights(
         #     dissims, meta, data_home=data_home, current_experiment=current_experiment
         # )
-        # plot_minimas(dissims, meta, gp_extrap=False)
+        plot_minimas(dissims, meta, gp_extrap=True, data_home=data_home, current_experiment=current_experiment)
         # plot_height_flat(
         #     dissims,
         #     meta,
@@ -1003,9 +1003,9 @@ def main(ex, meta, data_home=None, current_experiment=None, show_figs=True):
         #     current_experiment=current_experiment,
         #     show_fig=show_figs
         # )
-        plot_height_minimas(
-            dissims, meta, data_home=data_home, current_experiment=current_experiment, gp_extrap=False
-        )
+        # plot_height_minimas(
+        #     dissims, meta, data_home=data_home, current_experiment=current_experiment, gp_extrap=False
+        # )
         # get_height_minimas(dissims, meta)
 
         # best_frames = dp.best_frame()
@@ -1072,8 +1072,8 @@ if __name__ == "__main__":
     # current_experiment = "collect_dataset_3d_21y-03m-30d_12h06m43s/"
     # current_experiment = "collect_dataset_3d_21y-04m-13d_14h57m22s/"
     # current_experiment = "collect_dataset_3d_21y-04m-19d_11h18m10s/"
-    # current_experiment = "collect_dataset_3d_21y-04m-20d_13h47m03s/"
-    current_experiment = "collect_dataset_3d_21y-04m-20d_14h43m12s/"
+    current_experiment = "collect_dataset_3d_21y-04m-20d_13h47m03s/"
+    # current_experiment = "collect_dataset_3d_21y-04m-20d_14h43m12s/"
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
