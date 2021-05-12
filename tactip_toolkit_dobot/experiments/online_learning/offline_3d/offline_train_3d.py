@@ -272,14 +272,20 @@ def main(ex, meta):
 
     print(f"calibrated plane is: {ready_plane.__dict__}")
 
-    # if state.model is None:
-    #     print("Model is None, mu will be 1")
-    #     # set mus to 1 for first line only - elsewhere mu is optimised
-    #     x_line = dp.add_line_mu(adjusted_disps, 1)
-    #
-    #     # init model (sets hyperpars)
-    #     state.model = gplvm.GPLVM(x_line, np.array(new_taps))
-    #     model = state.model
+    if state.model is None:
+        print("Model is None, mu will be 1")
+        # set mus to 1 for first line only - elsewhere mu is optimised
+        ready_plane.make_all_phis(1)
+        ready_plane.make_x()
+
+        print(ready_plane.__dict__)
+
+
+        # init model (sets hyperpars)
+        state.model = gplvm.GPLVM(ready_plane.x, ready_plane.y, start_hyperpars=[1, 10, 5,5])
+        model = state.model
+
+        print(model.__dict__)
 
     # best_frames = dp.best_frame()
 
