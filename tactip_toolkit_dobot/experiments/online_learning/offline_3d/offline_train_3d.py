@@ -28,6 +28,9 @@ class Plane:
 
     dissims = None
 
+    real_height = None # baseline height in case of a plane # for use offline only
+    real_angle = None # for use offline only
+
     def __init__(self):
         pass
 
@@ -85,6 +88,8 @@ def extract_line_at(local, data, meta):
     the_line.make_all_phis(local[1])
     the_line.make_all_heights(local[0])
     the_line.make_x()
+    the_line.real_height = local[0]
+    the_line.real_angle = local[1]
 
     return the_line
 
@@ -258,7 +263,7 @@ def main(ex, meta):
     num_disps = len(real_disp)
 
     # Find location of disp minima
-    training_local_1 = [0, 0]
+    training_local_1 = [0, 0] # [height(in mm), angle(in deg)]
     # new_taps = extract_line_at(training_local_1, lines, meta).y
 
     ready_plane = get_calibrated_plane(
