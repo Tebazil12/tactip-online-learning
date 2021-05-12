@@ -41,7 +41,7 @@ class Plane:
             ),
             axis=1,
         )
-        print(f"x is shape: {np.shape(self.x)}")
+        # print(f"x is shape: {np.shape(self.x)}")
 
     def make_all_heights(self, height):
         # make heights the same length as disp and set to given height
@@ -71,13 +71,13 @@ def extract_line_at(local, data, meta):
     num_disps = len(real_disp)
 
     height_index = np.where(heights == local[0])[0][0]
-    print(f"height index {height_index}")
+    # print(f"height index {height_index}")
     angle_index = np.where(angles == local[1])[0][0]
-    print(f"angle index {angle_index}")
+    # print(f"angle index {angle_index}")
 
     index = angle_index + ((height_index) * num_angles)
 
-    print(f"getting index {index}")
+    # print(f"getting index {index}")
 
     the_line = Plane()
     the_line.y = data[index]
@@ -115,15 +115,15 @@ def at_plane_extract(
         other_ys = np.array(other_ys)
 
         index_to_take = cross_disp
-         # cross disp is index shift atm, not mm shift
+        # cross disp is index shift atm, not mm shift
         # rounds down in case of even num of taps (which really shouldn't be the case)
 
-        print(f"index: {index_to_take}")
+        # print(f"index: {index_to_take}")
 
-        print(
-            f"other ys shape: {np.shape(other_ys)} slice: {np.shape(other_ys[:,index_to_take])}"
-        )
-        print(f"shape of base_line.y {np.shape(base_line.y)}")
+        # print(
+        #     f"other ys shape: {np.shape(other_ys)} slice: {np.shape(other_ys[:,index_to_take])}"
+        # )
+        # print(f"shape of base_line.y {np.shape(base_line.y)}")
 
         for line in other_lines:
             # print("---")
@@ -145,12 +145,92 @@ def at_plane_extract(
         base_line.make_all_phis(0)  # could use None to show its not optimised?
         base_line.make_x()
 
-        print(f"baseline = {base_line}, has vars {base_line.__dict__}")
-        print(
-            f"baseline y is shape {np.shape(base_line.y)}, disp is {np.shape(base_line.disps)}"
-        )
+        # print(f"baseline = {base_line}, has vars {base_line.__dict__}")
+        # print(
+        #     f"baseline y is shape {np.shape(base_line.y)}, disp is {np.shape(base_line.disps)}"
+        # )
 
         return base_line
+
+
+def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
+    adjusted_disps = extract_line_at(local, optm_disps, meta).y
+    [[offset_index_disp]] = np.where(adjusted_disps == 0)
+    # offset_index_disp = 4
+
+    center_index = int(np.floor((num_disps - 1) / 2))
+    if offset_index_disp != center_index:
+
+        print(
+            f"WARNING - disp offset index is {offset_index_disp}, should be {center_index}"
+        )
+
+    # print(f"lengths are {len(new_taps)} and {len(adjusted_disps)}")
+
+    # Collect height data at disp minima (in offline, also line data)
+    new_taps_plane = at_plane_extract(
+        local,
+        lines,
+        meta,
+        method="cross",
+        cross_length=2,
+        cross_disp=offset_index_disp,
+    )
+
+    # print(new_taps_plane.__dict__)
+
+    # Adjust displacement of plane to edge loc #horrible hack for offline
+    disp_mm_offset = new_taps_plane.disps[-1]  # should be found online in a better way!
+    new_taps_plane.disps = new_taps_plane.disps - disp_mm_offset
+    new_taps_plane.make_x()
+
+    # print(new_taps_plane.__dict__)
+
+    # Find height minima
+    indexs = np.where(new_taps_plane.disps == 0)
+    # print(indexs)
+    # print(np.shape(new_taps_plane.y))
+    height_x = new_taps_plane.x[indexs[0], :]
+    height_y = new_taps_plane.y[indexs[0], :]
+
+    # print(height_y)
+    # print(height_x)
+
+    # Adjust heights based on minima
+    # calc dissims for plane
+    new_taps_plane.dissims = dp.calc_dissims(new_taps_plane.y, ref_tap)
+    # print(new_taps_plane.dissims)
+
+    # seperate out just the height profile
+    height_dissims = new_taps_plane.dissims[indexs[0]]
+    # print(height_dissims)
+
+    # reorder as wasn't build in correct order for profile
+    height_height = height_x[:, 1]
+    # print(f"height {height_height}")
+
+    zipped = zip(height_height, height_dissims)
+    # print(zipped)
+
+    sorted_stuff = sorted(zipped)
+    # print(sorted_stuff)
+    sorted_stuff = np.array(sorted_stuff)
+
+    height_dissims_sorted = sorted_stuff[:, 1]
+    height_height_sorted = sorted_stuff[:, 0]
+
+    corrected_heights, height_offset = dp.align_radius(
+        height_height_sorted, height_dissims_sorted
+    )
+
+    # print(f"results={corrected_heights} offset = {height_offset}")
+
+    # add offset to all x heights
+    new_taps_plane.heights = new_taps_plane.heights - height_offset
+    # print(new_taps_plane.heights)
+    new_taps_plane.make_x()
+
+    return new_taps_plane
 
 
 def main(ex, meta):
@@ -180,83 +260,12 @@ def main(ex, meta):
     # Find location of disp minima
     training_local_1 = [0, 0]
     # new_taps = extract_line_at(training_local_1, lines, meta).y
-    adjusted_disps = extract_line_at(training_local_1, optm_disps, meta).y
-    [[offset_index_disp]] = np.where(adjusted_disps == 0)
-    # offset_index_disp = 4
 
-    center_index = int(np.floor((num_disps - 1) / 2))
-    if offset_index_disp != center_index:
-
-        print(
-            f"WARNING - disp offset index is {offset_index_disp}, should be {center_index}"
-        )
-
-    # print(f"lengths are {len(new_taps)} and {len(adjusted_disps)}")
-
-    # Collect height data at disp minima (in offline, also line data)
-    new_taps_plane = at_plane_extract(
-        training_local_1,
-        lines,
-        meta,
-        method="cross",
-        cross_length=2,
-        cross_disp=offset_index_disp,
+    ready_plane = get_calibrated_plane(
+        training_local_1, meta, lines, optm_disps, ref_tap, num_disps
     )
 
-    print(new_taps_plane.__dict__)
-
-    # Adjust displacement of plane to edge loc #horrible hack for offline
-    disp_mm_offset = new_taps_plane.disps[-1] # should be found online in a better way!
-    new_taps_plane.disps =  new_taps_plane.disps - disp_mm_offset
-    new_taps_plane.make_x()
-
-    print(new_taps_plane.__dict__)
-
-    # Find height minima
-    indexs = np.where(new_taps_plane.disps == 0)
-    print(indexs)
-    print(np.shape(new_taps_plane.y))
-    height_x = new_taps_plane.x[indexs[0],:]
-    height_y = new_taps_plane.y[indexs[0],:]
-
-    print(height_y)
-    print(height_x)
-
-    # Adjust heights based on minima
-    # calc dissims for plane
-    new_taps_plane.dissims = dp.calc_dissims(new_taps_plane.y, ref_tap)
-    print(new_taps_plane.dissims)
-
-    # seperate out just the height profile
-    height_dissims = new_taps_plane.dissims[indexs[0]]
-    print(height_dissims)
-
-    # reorder as wasn't build in correct order for profile
-    height_height = height_x[:,1]
-    print(f"height {height_height}")
-
-    zipped = zip(height_height, height_dissims)
-    print(zipped)
-    # order = np.argsort(height_x, axis=0)[:,1]
-    # print(order)
-
-    sorted_stuff = sorted(zipped)
-    print(sorted_stuff)
-    sorted_stuff=np.array(sorted_stuff)
-
-    height_dissims_sorted = sorted_stuff[:,1]
-    height_height_sorted = sorted_stuff[:,0]
-
-    corrected_heights, height_offset = dp.align_radius(height_height_sorted,height_dissims_sorted)
-
-    print(f"results={corrected_heights} offset = {height_offset}")
-
-    # add offset to all x heights
-    new_taps_plane.heights = new_taps_plane.heights - height_offset
-    print(new_taps_plane.heights)
-    new_taps_plane.make_x()
-
-
+    print(f"calibrated plane is: {ready_plane.__dict__}")
 
     # if state.model is None:
     #     print("Model is None, mu will be 1")
