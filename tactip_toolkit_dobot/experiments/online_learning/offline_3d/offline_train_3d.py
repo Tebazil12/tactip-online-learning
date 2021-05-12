@@ -238,7 +238,7 @@ def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
     return new_taps_plane
 
 
-def main(ex, meta):
+def main(ex, meta, train_or_test="train"):
 
     # load data
     path = data_home + current_experiment
@@ -262,31 +262,65 @@ def main(ex, meta):
     real_disp.reverse()  # to match previous works (-ve on obj, +ve free)
     num_disps = len(real_disp)
 
-    # Find location of disp minima
-    training_local_1 = [0, 0] # [height(in mm), angle(in deg)]
-    # new_taps = extract_line_at(training_local_1, lines, meta).y
+    if train_or_test == "train":
+        # Find location of disp minima
+        training_local_1 = [0, 0] # [height(in mm), angle(in deg)]
+        # new_taps = extract_line_at(training_local_1, lines, meta).y
 
-    ready_plane = get_calibrated_plane(
-        training_local_1, meta, lines, optm_disps, ref_tap, num_disps
-    )
+        ready_plane = get_calibrated_plane(
+            training_local_1, meta, lines, optm_disps, ref_tap, num_disps
+        )
 
-    print(f"calibrated plane is: {ready_plane.__dict__}")
+        print(f"calibrated plane is: {ready_plane.__dict__}")
 
-    if state.model is None:
-        print("Model is None, mu will be 1")
-        # set mus to 1 for first line only - elsewhere mu is optimised
-        ready_plane.make_all_phis(1)
-        ready_plane.make_x()
+        if state.model is None:
+            print("Model is None, mu will be 1")
+            # set mus to 1 for first line only - elsewhere mu is optimised
+            ready_plane.make_all_phis(1)
+            ready_plane.make_x()
 
-        print(ready_plane.__dict__)
+            print(ready_plane.__dict__)
 
 
-        # init model (sets hyperpars)
-        state.model = gplvm.GPLVM(ready_plane.x, ready_plane.y, start_hyperpars=[1, 10, 5,5])
+            # init model (sets hyperpars)
+            state.model = gplvm.GPLVM(ready_plane.x, ready_plane.y, start_hyperpars=[1, 10, 5,5])
+            model = state.model
+
+            print(model.__dict__)
+            common.save_data(model.__dict__,meta, "post_processing/gplvm_model.json")
+
+    else: # must be testing, so load pre-trained model
+
+        model_dict = common.load_data(path + "post_processing/gplvm_model.json")
+
+        state.model = gplvm.GPLVM(
+            np.array(model_dict["x"]),
+            np.array(model_dict["y"]),
+            sigma_f=model_dict["sigma_f"],
+            ls=model_dict["ls"],
+        )
         model = state.model
 
-        print(model.__dict__)
+        print(state.model.__dict__)
+        print(type(state.model))
 
+        if train_or_test == "test_line_angles":
+            disp_test = []
+            y_test = []
+            for height in heights:
+                for angle in angles:
+                    ready_plane = get_calibrated_plane(
+                        [height,angle], meta, lines, optm_disps, ref_tap, num_disps
+                    )
+                    disp_test.append(ready_plane.x)
+
+
+            mus_test = model.optim_many_mu(disp_test, y_test)
+
+
+
+        elif train_or_test == "test_single_taps":
+            pass
     # best_frames = dp.best_frame()
 
     # print(model["ls"])
@@ -314,4 +348,4 @@ if __name__ == "__main__":
     print(f"Dataset: {current_experiment} using {state.meta['stimuli_name']}")
 
     state.ex = Experiment()
-    main(state.ex, state.meta)
+    main(state.ex, state.meta,train_or_test="test_line_angles")
