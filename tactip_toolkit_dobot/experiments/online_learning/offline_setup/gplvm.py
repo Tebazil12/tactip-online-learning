@@ -28,7 +28,7 @@ class GPLVM:
             print("Optimising model hyperpars")
 
             # optmise
-            self.optim_hyperpars(start_hyperpars)
+            self.optim_hyperpars(start_hyperpars=start_hyperpars)
         else:
             print(f"Using pre-defined hyperpars sigmaf={sigma_f} ls={ls}")
             # assuming hyperpars already optimised
