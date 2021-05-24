@@ -62,6 +62,26 @@ class Plane:
 
         self.phis = [phi] * len(self.disps)
 
+def extract_point_at(local, data, meta):
+    # return the data at given height, angle, displacment
+    # local=[height(mm), angle(deg),disp(mm)]
+    real_disp = np.array(meta["line_range"])
+
+    line = extract_line_at(local,data,meta)
+    disp_index = np.where(real_disp == local[2])[0][0]
+
+    the_point = Plane()
+    the_point.y = line.y[disp_index]
+    the_point.disps = [local[2]]
+    the_point.make_all_phis(local[1])
+    the_point.make_all_heights(local[0])
+    the_point.make_x()
+    the_point.real_height = local[0]
+    the_point.real_angle = local[1]
+
+    # print(f"the point = {the_point.__dict__}")
+
+    return the_point
 
 def extract_line_at(local, data, meta):
     # return the data at given height and angle, local=[height, angle(in deg)]
@@ -360,7 +380,27 @@ def main(ex, meta, train_or_test="train"):
 
 
         elif train_or_test == "test_single_taps":
-            pass
+            results = {
+                "real":[],
+                "optm":[]
+            }
+            for height in heights:
+                for angle in angles:
+                    for disp in real_disp:
+                        point = extract_point_at([height,angle,disp], lines, meta)
+                        disp_optm, mu_optm, height_optm = model.optim_single_mu_disp_height(point.y)
+                        results["real"].append([height,angle,disp])
+                        results["optm"].append([height_optm,mu_optm,disp_optm])
+            print(results)
+            common.save_data(results,meta, "post_processing/single_tap_results.json")
+
+            results["real"] = np.array(results["real"])
+            results["optm"] = np.array(results["optm"])
+
+            errors = results["optm"] - results["real"]
+            print(errors)
+
+
     # best_frames = dp.best_frame()
 
     # print(model["ls"])
@@ -393,5 +433,6 @@ if __name__ == "__main__":
 
     state.ex = Experiment()
 
-    main(state.ex, state.meta,train_or_test="train")
-    main(state.ex, state.meta,train_or_test="test_line_angles")
+    # main(state.ex, state.meta,train_or_test="train")
+    # main(state.ex, state.meta,train_or_test="test_line_angles")
+    main(state.ex, state.meta,train_or_test="test_single_taps")

@@ -104,6 +104,35 @@ class GPLVM:
 
         return self.max_log_like(self.sigma_f, self.ls, all_xs, all_ys)
 
+    def max_ll_optim_mu_disp_height(self, to_optimise, set_vals):
+        disp, mu, height = to_optimise
+        y_new = set_vals
+
+        # print(f"mu is now {mu}")
+
+        # make x from disp and optimising mu # same as only one line being passed
+        # x = dp.add_mus([disp], mu_limits=[mu, mu])
+
+        # print(f"just before add_line_mu disps is {disp} and mu is {mu}")
+        # x = dp.add_line_mu([[disp]], mu) #disp here is a value, but elsewhere is 2d list/array
+        x = np.array([disp, height, mu])
+
+        # print(x)
+
+        # print(y)
+        # y = np.array([y])
+        # print(y)
+
+        # x = x.reshape(x.shape[0] * x.shape[1], x.shape[2])
+        # y = y.reshape(y.shape[0] * y.shape[1], y.shape[2])
+
+        # add in self.x and self.y otherwise your not using the right model!
+        all_xs = np.vstack((self.x, x))
+        all_ys = np.vstack((self.y, y_new))
+
+        # print(f"shape of optmising x {np.shape(all_xs)} and y {np.shape(all_ys)}")
+
+        return self.max_log_like(self.sigma_f, self.ls, all_xs, all_ys)
 
 
     def max_log_like(self, sigma_f, ls, x, y):
@@ -277,3 +306,29 @@ class GPLVM:
         [disp, mu] = result.x
 
         return disp, mu
+
+    def optim_single_mu_disp_height(self, y):
+        if y is None:
+            raise NameError("y is None when trying to optimise mu and disps")
+
+        #todo, should probably check dimensions of y here!
+
+
+        start_vals = np.array([0,0,0]) #disp, mu #TODO check 0 is ok for starting
+
+
+        data = [y]
+        # minimizer_kwargs = {"args": data}
+        result = scipy.optimize.minimize(
+            self.max_ll_optim_mu_disp_height,
+            start_vals,
+            args=data,
+            method="BFGS",
+            options={"gtol": 0.01, "maxiter": 300},  # is this the best number?
+        )
+        # print(result)
+        print("optimise done")
+
+        [disp, mu, height] = result.x
+
+        return disp, mu, height
