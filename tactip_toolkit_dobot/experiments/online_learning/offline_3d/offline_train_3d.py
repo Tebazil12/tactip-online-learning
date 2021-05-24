@@ -39,8 +39,8 @@ class Plane:
         self.x = np.concatenate(
             (
                 np.array([self.disps]).T,
-                np.array([self.phis]).T,
                 np.array([self.heights]).T,
+                np.array([self.phis]).T,
             ),
             axis=1,
         )
@@ -211,7 +211,7 @@ def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
     # print(height_dissims)
 
     # reorder as wasn't build in correct order for profile
-    height_height = height_x[:, 2]
+    height_height = height_x[:, 1]
     # print(f"height {height_height}")
 
     zipped = zip(height_height, height_dissims)
