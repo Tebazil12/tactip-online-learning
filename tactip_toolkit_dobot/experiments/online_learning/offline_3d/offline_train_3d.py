@@ -147,7 +147,7 @@ def at_plane_extract(
             )
             # todo same for disp etc
 
-        base_line.make_all_phis(0)  # could use None to show its not optimised?
+        base_line.make_all_phis(None)  # could use None to show its not optimised?
         base_line.make_x()
 
         # print(f"baseline = {base_line}, has vars {base_line.__dict__}")
@@ -258,36 +258,49 @@ def main(ex, meta, train_or_test="train"):
     num_heights = len(heights)
     angles = meta["angle_range"]
     num_angles = len(angles)
-    real_disp = meta["line_range"]  # nb, not copied so that reverse is persistent
-    real_disp.reverse()  # to match previous works (-ve on obj, +ve free)
+    real_disp = meta["line_range"]
     num_disps = len(real_disp)
 
     if train_or_test == "train":
         # Find location of disp minima
         training_local_1 = [0, 0] # [height(in mm), angle(in deg)]
-        # new_taps = extract_line_at(training_local_1, lines, meta).y
 
-        ready_plane = get_calibrated_plane(
-            training_local_1, meta, lines, optm_disps, ref_tap, num_disps
-        )
+        for local in [training_local_1]:#, [0,45]]:
+            # new_taps = extract_line_at(training_local_1, lines, meta).y
 
-        print(f"calibrated plane is: {ready_plane.__dict__}")
+            ready_plane = get_calibrated_plane(
+                local, meta, lines, optm_disps, ref_tap, num_disps
+            )
 
-        if state.model is None:
-            print("Model is None, mu will be 1")
-            # set mus to 1 for first line only - elsewhere mu is optimised
-            ready_plane.make_all_phis(1)
-            ready_plane.make_x()
+            print(f"calibrated plane is: {ready_plane.__dict__}")
 
-            print(ready_plane.__dict__)
+            if state.model is None:
+                print("Model is None, mu will be 1")
+                # set mus to 1 for first line only - elsewhere mu is optimised
+                ready_plane.make_all_phis(1)
+                ready_plane.make_x()
+
+                print(ready_plane.__dict__)
 
 
-            # init model (sets hyperpars)
-            state.model = gplvm.GPLVM(ready_plane.x, ready_plane.y, start_hyperpars=[1, 10, 5,5])
-            model = state.model
+                # init model (sets hyperpars)
+                state.model = gplvm.GPLVM(ready_plane.x, ready_plane.y, start_hyperpars=[1, 10, 5,5])
+                model = state.model
+            else:
+                optm_mu = model.optim_line_mu(ready_plane.x, ready_plane.y)
 
-            print(model.__dict__)
-            common.save_data(model.__dict__,meta, "post_processing/gplvm_model.json")
+                x_line = dp.add_line_mu(ready_plane.x, optm_mu)
+                print(f"line x to add to model = {x_line}")
+
+                # save line to model (taking care with dimensions...)
+                model.x = np.vstack((model.x, x_line))
+                model.y = np.vstack((model.y, ready_plane.y))
+
+
+
+        print(model.__dict__)
+        common.save_data(model.__dict__,meta, "post_processing/gplvm_model.json")
+
 
     else: # must be testing, so load pre-trained model
 
@@ -304,18 +317,45 @@ def main(ex, meta, train_or_test="train"):
         print(state.model.__dict__)
         print(type(state.model))
 
+        print("~~~ Model Loaded, Starting Testing ~~~")
+
         if train_or_test == "test_line_angles":
             disp_test = []
             y_test = []
-            for height in heights:
+            mus_optm = []
+            angles_of_planes = []
+            for height in [0]:#heights:
                 for angle in angles:
                     ready_plane = get_calibrated_plane(
                         [height,angle], meta, lines, optm_disps, ref_tap, num_disps
                     )
-                    disp_test.append(ready_plane.x)
+                    ready_plane.make_all_phis(None) # ensure phis are none
+                    ready_plane.make_x()
+                    # print(f"plane={ready_plane}")
+                    # print(ready_plane.__dict__)
+                    # disp_test.append(ready_plane.x)
+                    mu = model.optim_line_mu(ready_plane.x, ready_plane.y)
+                    mus_optm.append(mu)
+                    angles_of_planes.append(ready_plane.real_angle)
 
+            print(mus_optm)
+            common.save_data(mus_optm,meta, "post_processing/optm_plane_mus.json")
+            print(angles_of_planes)
+            # mus_test = model.optim_many_mu(disp_test, y_test)
 
-            mus_test = model.optim_many_mu(disp_test, y_test)
+            # visulaise predictions
+            plt.plot(angles_of_planes, mus_optm)
+            plt.plot([-45,0,45],[0,1,2],'k:') #plot ideal relation # TODO extract from data
+            plt.xlabel("real angle (degrees)")
+            plt.ylabel("predicted phi")
+
+            # save graphs automatically
+            part_path, _ = os.path.split(meta["meta_file"])
+            full_path_png = os.path.join(meta["home_dir"], part_path, "post_processing/phi_predictions.png")
+            full_path_svg = os.path.join(meta["home_dir"], part_path, "post_processing/phi_predictions.svg")
+            plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+            plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+            plt.show()
 
 
 
@@ -347,5 +387,11 @@ if __name__ == "__main__":
 
     print(f"Dataset: {current_experiment} using {state.meta['stimuli_name']}")
 
+    # reverse real displacements so when main is run twice, the change is not reverted
+    real_disp = state.meta["line_range"]  # nb, not copied so that reverse is persistent
+    real_disp.reverse()  # to match previous works (-ve on obj, +ve free)
+
     state.ex = Experiment()
+
+    main(state.ex, state.meta,train_or_test="train")
     main(state.ex, state.meta,train_or_test="test_line_angles")

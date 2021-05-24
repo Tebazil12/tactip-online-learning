@@ -63,7 +63,9 @@ class GPLVM:
         # x = x.reshape(x.shape[0] * x.shape[1], x.shape[2])
         # y = y.reshape(y.shape[0] * y.shape[1], y.shape[2])
 
-        # todo add in self.x and self.y otherwise your not using the right model!
+        # add self.x and self.y otherwise you're not using the right model
+        if np.shape(x)[1] != np.shape(self.x)[1]:
+            raise NameError(f"Self.x has {np.shape(self.x)[1]} columns but x has {np.shape(x)[1]}")
 
         all_xs = np.vstack((self.x, x))
         all_ys = np.vstack((self.y, y))
@@ -229,7 +231,7 @@ class GPLVM:
         # TODO test that hyperpars have been optimised as can't continue without
 
         start_mu = 0  # start mu for line
-        print(f"start mu: {start_mu}")
+        # print(f"start mu: {start_mu}")
 
         data = [disp, y]
         # minimizer_kwargs = {"args": data}

@@ -14,8 +14,16 @@ def add_line_mu(disps, mu_for_line):
     """
     # print(f"disps for line adding: {disps} of type {type(disps)} and shape {np.shape(disps)}")
 
-    mus = np.array([[mu_for_line]] * np.shape(disps)[0])
-    return np.concatenate((disps, mus), axis=1)
+
+
+    if np.shape(disps)[1]>1: # in case of 3d using planes, need to replace phi
+        disps[:,-1] = mu_for_line
+        result = disps
+    else:
+        mus = np.array([[mu_for_line]] * np.shape(disps)[0])
+        result = np.concatenate((disps, mus), axis=1)
+
+    return result
 
 
 def add_mus(disps, mu_limits=[-1, 1], line_ordering=None):
