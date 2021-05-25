@@ -258,7 +258,7 @@ def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
     return new_taps_plane
 
 
-def main(ex, meta, train_or_test="train"):
+def main(ex, meta, train_or_test="train", train_folder=""):
 
     # load data
     path = data_home + current_experiment
@@ -285,7 +285,7 @@ def main(ex, meta, train_or_test="train"):
         # Find location of disp minima
         training_local_1 = [0, 0] # [height(in mm), angle(in deg)]
 
-        for local in [training_local_1]:#, [0,45]]:
+        for local in [training_local_1, [0,45]]:
             # new_taps = extract_line_at(training_local_1, lines, meta).y
 
             ready_plane = get_calibrated_plane(
@@ -319,12 +319,12 @@ def main(ex, meta, train_or_test="train"):
 
 
         print(model.__dict__)
-        common.save_data(model.__dict__,meta, "post_processing/gplvm_model.json")
+        common.save_data(model.__dict__,meta, "post_processing/"+train_folder+"gplvm_model.json")
 
 
     else: # must be testing, so load pre-trained model
 
-        model_dict = common.load_data(path + "post_processing/gplvm_model.json")
+        model_dict = common.load_data(path + "post_processing/"+train_folder+"gplvm_model.json")
 
         state.model = gplvm.GPLVM(
             np.array(model_dict["x"]),
@@ -359,7 +359,7 @@ def main(ex, meta, train_or_test="train"):
                     angles_of_planes.append(ready_plane.real_angle)
 
             print(mus_optm)
-            common.save_data(mus_optm,meta, "post_processing/optm_plane_mus.json")
+            common.save_data(mus_optm,meta, "post_processing/"+train_folder+"optm_plane_mus.json")
             print(angles_of_planes)
             # mus_test = model.optim_many_mu(disp_test, y_test)
 
@@ -371,8 +371,8 @@ def main(ex, meta, train_or_test="train"):
 
             # save graphs automatically
             part_path, _ = os.path.split(meta["meta_file"])
-            full_path_png = os.path.join(meta["home_dir"], part_path, "post_processing/phi_predictions.png")
-            full_path_svg = os.path.join(meta["home_dir"], part_path, "post_processing/phi_predictions.svg")
+            full_path_png = os.path.join(meta["home_dir"], part_path, "post_processing/"+train_folder+"phi_predictions.png")
+            full_path_svg = os.path.join(meta["home_dir"], part_path, "post_processing/"+train_folder+"phi_predictions.svg")
             plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
             plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
             plt.show()
@@ -392,7 +392,7 @@ def main(ex, meta, train_or_test="train"):
                         results["real"].append([height,angle,disp])
                         results["optm"].append([height_optm,mu_optm,disp_optm])
             print(results)
-            common.save_data(results,meta, "post_processing/single_tap_results.json")
+            common.save_data(results,meta, "post_processing/"+train_folder+"single_tap_results.json")
 
             results["real"] = np.array(results["real"])
             results["optm"] = np.array(results["optm"])
@@ -433,6 +433,6 @@ if __name__ == "__main__":
 
     state.ex = Experiment()
 
-    # main(state.ex, state.meta,train_or_test="train")
-    # main(state.ex, state.meta,train_or_test="test_line_angles")
-    main(state.ex, state.meta,train_or_test="test_single_taps")
+    # main(state.ex, state.meta,train_or_test="train", train_folder="model_twoline/")
+    # main(state.ex, state.meta,train_or_test="test_line_angles",train_folder="model_twoline/")
+    main(state.ex, state.meta,train_or_test="test_single_taps", train_folder="model_twoline/")
