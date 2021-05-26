@@ -433,6 +433,6 @@ if __name__ == "__main__":
 
     state.ex = Experiment()
 
-    # main(state.ex, state.meta,train_or_test="train", train_folder="model_twoline/")
-    # main(state.ex, state.meta,train_or_test="test_line_angles",train_folder="model_twoline/")
-    main(state.ex, state.meta,train_or_test="test_single_taps", train_folder="model_twoline/")
+    # main(state.ex, state.meta,train_or_test="train", train_folder="model_two_cross/")
+    # main(state.ex, state.meta,train_or_test="test_line_angles",train_folder="model_two_cross/")
+    main(state.ex, state.meta,train_or_test="test_single_taps", train_folder="model_two_cross/")
