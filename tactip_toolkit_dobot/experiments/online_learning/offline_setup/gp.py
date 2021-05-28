@@ -33,13 +33,16 @@ def max_log_like(hyper_pars, data):
 
 
 def calc_K(x, sigma_f, L, sigma_n):
+
     n_xs = len(x)
 
     k_cap = np.empty([n_xs, n_xs])
 
-    for i in range(0, n_xs):
-        for j in range(0, n_xs):
-            k_cap[i, j] = calc_covariance(x[i], x[j], sigma_f, L)
+    for i in range(0,n_xs):
+        # matrix is symmetric, so less is calculated as time goes on
+        val = calc_covariance(x[i], x[i:], sigma_f, L)
+        k_cap[i,i:] = val
+        k_cap[i:,i] = val
 
     # print(k_cap)
     # print(k_cap.shape)
@@ -70,10 +73,8 @@ def cal_K_star(x, x_star, sigma_f, L, sigma_n):
     return k_cap_star
 
 
-def calc_covariance(x, x_prime, sigma_f, L):
-    if not np.isscalar(sigma_f):
-        raise NameError(f"sigma_f must be a scalar, not an array: {sigma_f} {type(sigma_f)}")
-
+def calc_covariance(x, x_primes, sigma_f, L):
+    # print("in calc_covariance")
 
     if np.isscalar(x):
         if not np.isscalar(L):
@@ -91,14 +92,16 @@ def calc_covariance(x, x_prime, sigma_f, L):
     # print("start of cal cov")
     # print(x,x_prime,sigma_f,L)
 
-    x_diff = x - x_prime
+    x_diff = -x_primes + x
     # print(x_diff)
     x_diff_sqr = np.asarray(x_diff ** 2)  # asarray as can be both scalar or array
 
     x_sqr_l_sqr = np.asarray(np.nan_to_num(x_diff_sqr / (2 * (L ** 2))))
     x_sqr_l_sqr[x_sqr_l_sqr == np.inf] = 0  # remove infs
 
-    sum_of_sqrs = np.sum(x_sqr_l_sqr)
+
+    sum_of_sqrs = np.sum(x_sqr_l_sqr,axis=1) # TODO this might break if things are 1d?
+
 
     exp_sum_sqr = np.exp(-sum_of_sqrs)
 
