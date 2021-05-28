@@ -102,8 +102,13 @@ def calc_covariance(x, x_primes, sigma_f, L):
 
     x_sqr_l_sqr[x_sqr_l_sqr == np.inf] = 0  # remove infs
 
-    sum_of_sqrs = np.sum(x_sqr_l_sqr,axis=1) # TODO this might break if things are 1d?
+    if np.shape(np.shape(x_sqr_l_sqr))[0] == 2:
+        sum_of_sqrs = np.sum(x_sqr_l_sqr,axis=1)
+    else:
+        sum_of_sqrs = np.sum(x_sqr_l_sqr)
 
+    # print(f"sumofsqrs is type {type(sum_of_sqrs)}{type(sum_of_sqrs[0])}, shape {np.shape(sum_of_sqrs)} = {sum_of_sqrs}")
+    # print(np)
     exp_sum_sqr = np.exp(-sum_of_sqrs)
 
     k = exp_sum_sqr * (sigma_f ** 2)
