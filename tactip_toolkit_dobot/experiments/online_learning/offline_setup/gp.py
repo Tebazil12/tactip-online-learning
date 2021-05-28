@@ -76,43 +76,49 @@ def cal_K_star(x, x_star, sigma_f, L, sigma_n):
 def calc_covariance(x, x_primes, sigma_f, L):
     # print("in calc_covariance")
 
-    if np.isscalar(x):
-        if not np.isscalar(L):
-            raise NameError(f"x is scalar ({type(x)}) but L is {type(L)}")
+    # # Check everything is same sizes # this slows optimisation so uncomment if
+    # # there are errors to help diagnose bugs
+    # if not np.isscalar(sigma_f):
+    #     raise NameError(f"sigma_f must be a scalar, not an array: {sigma_f} {type(sigma_f)}")
+    #
+    # if np.isscalar(x):
+    #     if not np.isscalar(L):
+    #         raise NameError(f"x is scalar ({type(x)}) but L is {type(L)}")
+    #
+    # # todo check shape of x and x_prime
+    # else:
+    #     if np.isscalar(L):
+    #         raise NameError(f"x is non-scalar ({type(x)}) but L is scalar ({type(L)})")
+    #     if len(x) != len(L):
+    #         raise NameError(f"Dimensions of x do not match number of Ls")
 
-    # if type(L) is not np.ndarray:
-    #     raise NameError(f"L must be np.array but is: {type(L)}")
-    # todo check shape of x and x_prime
-    else:
-        if np.isscalar(L):
-            raise NameError(f"x is non-scalar ({type(x)}) but L is scalar ({type(L)})")
-        if len(x) != len(L):
-            raise NameError(f"Dimensions of x do not match number of Ls")
 
-    # print("start of cal cov")
-    # print(x,x_prime,sigma_f,L)
 
     x_diff = -x_primes + x
     # print(x_diff)
     x_diff_sqr = np.asarray(x_diff ** 2)  # asarray as can be both scalar or array
 
     x_sqr_l_sqr = np.asarray(np.nan_to_num(x_diff_sqr / (2 * (L ** 2))))
+
     x_sqr_l_sqr[x_sqr_l_sqr == np.inf] = 0  # remove infs
 
-
     sum_of_sqrs = np.sum(x_sqr_l_sqr,axis=1) # TODO this might break if things are 1d?
-
 
     exp_sum_sqr = np.exp(-sum_of_sqrs)
 
     k = exp_sum_sqr * (sigma_f ** 2)
 
-    if np.isnan(k) or np.isinf(k):
-        raise NameError("k contains not a number (has nan or inf)")
 
-    if np.isscalar(k) == False:
-        raise NameError("k is not scalar - must be a scalar")
+    # # make sure returned stuff is correct types etc # again, uncomment to use
+    # if np.isnan(k) or np.isinf(k):
+    #     raise NameError("k contains not a number (has nan or inf)")
+    #
+    # if np.isscalar(k) == False:
+    #     raise NameError("k is not scalar - must be a scalar")
+
+    # print("end calc_covaraince")
     # print(k)
+
     return k
 
 
