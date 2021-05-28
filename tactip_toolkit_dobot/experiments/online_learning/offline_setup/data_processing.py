@@ -23,7 +23,7 @@ def add_line_mu(disps, mu_for_line):
         mus = np.array([[mu_for_line]] * np.shape(disps)[0])
         result = np.concatenate((disps, mus), axis=1)
 
-    return result
+    return np.array(result, dtype=np.float64) # normal int etc can't be mathed
 
 
 def add_mus(disps, mu_limits=[-1, 1], line_ordering=None):
