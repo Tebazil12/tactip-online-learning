@@ -3,7 +3,9 @@ import os
 import time
 import json
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import matplotlib.ticker as ticker
+
 
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gplvm as gplvm
@@ -148,6 +150,27 @@ def main(ex, meta, train_folder=""):
 
         elif i == 2:
             print("### disp ###")
+            # axs[i].add_patch(
+            #     patches.Rectangle(
+            #     (2.5, -2),
+            #     8,
+            #     4,
+            #     edgecolor = 'grey',
+            #     facecolor = 'grey',
+            #     fill=False,
+            #     alpha=0.9
+            #     ) )
+            # axs[i].add_patch(
+            #     patches.Rectangle(
+            #     (-10.5, -2),
+            #     8,
+            #     4,
+            #     edgecolor = 'grey',
+            #     facecolor = 'grey',
+            #     fill=False,
+            #     alpha=0.9
+            #     ) )
+
             axs[i].set_title("Disp.")
             axs[i].plot([-10,0,10],[-10,0,10],'k:') #plot ideal relation # TODO extract from data
             axs[i].set_xlabel("real disp (mm)")
@@ -164,6 +187,8 @@ def main(ex, meta, train_folder=""):
             axs[i].grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
             axs[i].xaxis.set_minor_locator(ticker.MultipleLocator(1))
             axs[i].yaxis.set_minor_locator(ticker.MultipleLocator(1))
+
+
 
         this_error = errors[:,i]
 
@@ -207,5 +232,6 @@ if __name__ == "__main__":
 
     state.ex = Experiment()
 
-    main(state.ex, state.meta, train_folder="model_one_cross/")
-    main(state.ex, state.meta, train_folder="model_two_cross/")
+    # main(state.ex, state.meta, train_folder="model_one_cross/")
+    # main(state.ex, state.meta, train_folder="model_two_cross/")
+    main(state.ex, state.meta, train_folder="model_two_grid/")

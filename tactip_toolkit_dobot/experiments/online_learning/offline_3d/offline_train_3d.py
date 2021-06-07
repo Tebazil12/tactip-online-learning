@@ -176,6 +176,83 @@ def at_plane_extract(
         # )
 
         return base_line
+    elif method == "grid":
+        # take the points cross_length up and cross_length down (in height)
+        # from center of line, and 4 extreme corners
+
+        other_lines = []
+        other_ys = []
+        height_step = 0.5  # todo, extract from meta
+
+        for i in np.arange(
+            height_step, (cross_length * height_step) + 0.000001, height_step
+        ):  # todo, map to .5mm prooperly
+            other_lines.append(extract_line_at(local + np.array([i, 0]), data, meta))
+            other_ys.append(other_lines[-1].y)
+            other_lines.append(extract_line_at(local + np.array([-i, 0]), data, meta))
+            other_ys.append(other_lines[-1].y)
+
+        other_ys = np.array(other_ys)
+
+        index_to_take = cross_disp
+        # cross disp is index shift atm, not mm shift
+        # rounds down in case of even num of taps (which really shouldn't be the case)
+
+        # print(f"index: {index_to_take}")
+
+        # print(
+        #     f"other ys shape: {np.shape(other_ys)} slice: {np.shape(other_ys[:,index_to_take])}"
+        # )
+        # print(f"shape of base_line.y {np.shape(base_line.y)}")
+
+        # extremes of grid
+        for line in other_lines[-2:]:
+            base_line.y = np.concatenate(
+                (base_line.y, np.array([line.y[0]])), axis=0
+            )
+            base_line.disps = np.concatenate(
+                (base_line.disps, np.array([line.disps[0]])), axis=0
+            )
+            base_line.heights = np.concatenate(
+                (base_line.heights, np.array([line.heights[0]])), axis=0
+            )
+
+            base_line.y = np.concatenate(
+                (base_line.y, np.array([line.y[-1]])), axis=0
+            )
+            base_line.disps = np.concatenate(
+                (base_line.disps, np.array([line.disps[-1]])), axis=0
+            )
+            base_line.heights = np.concatenate(
+                (base_line.heights, np.array([line.heights[-1]])), axis=0
+            )
+
+        for line in other_lines:
+            # print("---")
+            # print(f"line.y is shape {np.shape(line.y)}")
+            # new_point = np.array([line.y[index_to_take]])
+            # print(f"new point {np.shape(new_point)}")
+
+            base_line.y = np.concatenate(
+                (base_line.y, np.array([line.y[index_to_take]])), axis=0
+            )
+            base_line.disps = np.concatenate(
+                (base_line.disps, np.array([line.disps[index_to_take]])), axis=0
+            )
+            base_line.heights = np.concatenate(
+                (base_line.heights, np.array([line.heights[index_to_take]])), axis=0
+            )
+            # todo same for disp etc
+
+        base_line.make_all_phis(None)  # could use None to show its not optimised?
+        base_line.make_x()
+
+        # print(f"baseline = {base_line}, has vars {base_line.__dict__}")
+        # print(
+        #     f"baseline y is shape {np.shape(base_line.y)}, disp is {np.shape(base_line.disps)}"
+        # )
+
+        return base_line
 
 
 def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
@@ -197,7 +274,7 @@ def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
         local,
         lines,
         meta,
-        method="cross",
+        method="grid",
         cross_length=2,
         cross_disp=offset_index_disp,
     )
@@ -435,4 +512,12 @@ if __name__ == "__main__":
 
     # main(state.ex, state.meta,train_or_test="train", train_folder="model_two_cross/")
     # main(state.ex, state.meta,train_or_test="test_line_angles",train_folder="model_two_cross/")
-    main(state.ex, state.meta,train_or_test="test_single_taps", train_folder="model_two_cross/")
+    # main(state.ex, state.meta,train_or_test="test_single_taps", train_folder="model_two_cross/")
+
+    # main(state.ex, state.meta,train_or_test="train", train_folder="model_one_grid/")
+    # main(state.ex, state.meta,train_or_test="test_line_angles",train_folder="model_one_grid/")
+    # main(state.ex, state.meta,train_or_test="test_single_taps", train_folder="model_one_grid/")
+
+    # main(state.ex, state.meta,train_or_test="train", train_folder="model_two_grid/")
+    # main(state.ex, state.meta,train_or_test="test_line_angles",train_folder="model_two_grid/")
+    main(state.ex, state.meta,train_or_test="test_single_taps", train_folder="model_two_grid/")
