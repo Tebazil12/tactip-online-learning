@@ -194,7 +194,13 @@ class Experiment:
         return edge_location, corrected_disps
 
     def processed_tap_at(
-        self, new_location, new_orient, meta, neutral_tap=True, selection_criteria="Max", height=0
+        self,
+        new_location,
+        new_orient,
+        meta,
+        neutral_tap=True,
+        selection_criteria="Max",
+        height=0,
     ):
         """
 
@@ -214,12 +220,17 @@ class Experiment:
             self.robot,
             self.sensor,
             meta,
-            height=height
+            height=height,
         )
 
         self.add_to_alldata(
             keypoints,
-            [new_location[0], new_location[1], round(np.rad2deg(new_orient), 2), height],
+            [
+                new_location[0],
+                new_location[1],
+                round(np.rad2deg(new_orient), 2),
+                height,
+            ],
         )
 
         if neutral_tap is True:
@@ -305,7 +316,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         )
     data_dir = os.path.dirname(meta_file)
 
-    if stimuli_name is None: # so can be overwritten in test files
+    if stimuli_name is None:  # so can be overwritten in test files
         stimuli_name = "flower"
         # stimuli_name ="70mm-circle"
 
@@ -324,7 +335,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
     elif stimuli_name == "flower":
         stimuli_height = -190 + 2
         x_y_offset = [35, -35 - 10 - 10]
-        max_steps = 15#30
+        max_steps = 15  # 30
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
     # max_steps = 3 # for testing
@@ -369,7 +380,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "filter_by_circularity": True,
         "min_circularity": 0.3,
         "filter_by_inertia": False,
-        "min_inertia_ratio": 0.5,#0.22,
+        "min_inertia_ratio": 0.5,  # 0.22,
         "filter_by_convexity": True,
         "min_convexity": 0.61,
         "nntracker_threshold": 40,
@@ -385,7 +396,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
-        "STEP_LENGTH": 10,#5,  # nb, opposite direction to matlab experiments
+        "STEP_LENGTH": 10,  # 5,  # nb, opposite direction to matlab experiments
         "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": [0, 0, np.pi / 2],  # [x,y,sensor angle in rads]
@@ -615,7 +626,6 @@ def plot_gplvm(model, meta):
     else:
         print(f"wellp, model.y is {model.y} of type {type(model.y)}")
 
-
     dissims = dp.calc_dissims(model.y, ref_tap)
 
     len_line = len(meta["line_range"])
@@ -642,12 +652,12 @@ def plot_gplvm(model, meta):
         )
 
     # axis labels
-    ax.set_xlabel('Estimated Displacement (mm)', fontsize=5, va="top")
-    ax.set_ylabel('Dissimilarity', fontsize=5, va="top")
-    ax.set_zlabel(r'Optimised $\phi$', fontsize=5, va="top")
+    ax.set_xlabel("Estimated Displacement (mm)", fontsize=5, va="top")
+    ax.set_ylabel("Dissimilarity", fontsize=5, va="top")
+    ax.set_zlabel(r"Optimised $\phi$", fontsize=5, va="top")
 
     # Show the major grid lines with dark grey lines
-    ax.grid(b=True, which="major", linestyle=":",color='black')
+    ax.grid(b=True, which="major", linestyle=":", color="black")
     ax.xaxis.set_major_locator(ticker.MultipleLocator(2))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
     ax.zaxis.set_major_locator(ticker.MultipleLocator(5))
@@ -659,10 +669,8 @@ def plot_gplvm(model, meta):
     # ax.yaxis.set_minor_locator(ticker.MultipleLocator(0.1))
     # ax.zaxis.set_minor_locator(ticker.MultipleLocator(1))
 
-
     # set axis font size
     plt.tick_params(labelsize=5)
-
 
     # save graphs automatically
     # part_path, _ = os.path.split(meta["meta_file"])
@@ -778,11 +786,19 @@ def main(ex, model, meta):
                         new_location, -disp_tap_1, new_orient, new_height
                     )
 
-                    tap_2, _ = ex.processed_tap_at(tap_2_location, new_orient, meta, height=tap_2_height)
+                    tap_2, _ = ex.processed_tap_at(
+                        tap_2_location, new_orient, meta, height=tap_2_height
+                    )
 
                     # predict again
-                    disp_tap_2, mu_tap_2, height_tap_2 = model.optim_single_mu_disp_height(tap_2)
-                    print(f"tap 2 optimised as disp={disp_tap_2} and mu={mu_tap_2} and height={height_tap_2}")
+                    (
+                        disp_tap_2,
+                        mu_tap_2,
+                        height_tap_2,
+                    ) = model.optim_single_mu_disp_height(tap_2)
+                    print(
+                        f"tap 2 optimised as disp={disp_tap_2} and mu={mu_tap_2} and height={height_tap_2}"
+                    )
 
                     # was model good? was it within 0+-tol?
                     tol = meta["tol"]
