@@ -742,36 +742,47 @@ def main(ex, model, meta):
         for current_step in range(0, meta["MAX_STEPS"]):
             print(f"------------ Main Loop {current_step}-----------------")
 
-            new_orient, new_location = next_sensor_placement(
+            new_orient, new_location, new_height = next_sensor_placement(
                 ex, meta
             )  # todo: make sure implemented
             if collect_more_data is False:  # should only skip on first loop
                 # do single tap
-                tap_1, _ = ex.processed_tap_at(new_location, new_orient, meta)
+                tap_1, _ = ex.processed_tap_at(
+                    new_location, new_orient, meta, height=new_height
+                )
 
                 # predict distance to edge
-                disp_tap_1, mu_tap_1 = model.optim_single_mu_and_disp(tap_1)
-                print(f"tap 1 optimised as disp={disp_tap_1} and mu={mu_tap_1}")
+                disp_tap_1, mu_tap_1, height_tap_1 = model.optim_single_mu_disp_height(
+                    tap_1
+                )
+                print(
+                    f"tap 1 optimised as disp={disp_tap_1} and mu={mu_tap_1} and height={height_tap_1}"
+                )
 
                 # if exceed sensible limit #TODO find vals from matlab
-                if -15 > disp_tap_1 or disp_tap_1 > 15:  # todo move to meta!!!
+                if (
+                    -15 > disp_tap_1
+                    or disp_tap_1 > 15
+                    or height_tap_1 > 2
+                    or height_tap_1 < -2
+                ):  # todo move to meta!!!
                     print(
-                        f"distance to move from tap_1 prediction (={disp_tap_1} is outside safe range"
+                        f"distance to move from tap_1 prediction (={disp_tap_1}) or height (={height_tap_1}) is outside safe range"
                     )
                     collect_more_data = True
 
                 if collect_more_data is False:
 
                     # move predicted distance
-                    tap_2_location = ex.displace_along_line(
-                        new_location, -disp_tap_1, new_orient
+                    tap_2_location, tap_2_height = ex.displace_along_line(
+                        new_location, -disp_tap_1, new_orient, new_height
                     )
 
-                    tap_2, _ = ex.processed_tap_at(tap_2_location, new_orient, meta)
+                    tap_2, _ = ex.processed_tap_at(tap_2_location, new_orient, meta, height=tap_2_height)
 
                     # predict again
-                    disp_tap_2, mu_tap_2 = model.optim_single_mu_and_disp(tap_2)
-                    print(f"tap 2 optimised as disp={disp_tap_2} and mu={mu_tap_2}")
+                    disp_tap_2, mu_tap_2, height_tap_2 = model.optim_single_mu_disp_height(tap_2)
+                    print(f"tap 2 optimised as disp={disp_tap_2} and mu={mu_tap_2} and height={height_tap_2}")
 
                     # was model good? was it within 0+-tol?
                     tol = meta["tol"]
