@@ -49,6 +49,7 @@ class Experiment:
 
     # actual global location in 2d (x,y) , only known with arm (so far)
     edge_locations = None
+    edge_height = None  # should be same length as edge locations
 
     line_locations = []
 
@@ -83,8 +84,14 @@ class Experiment:
         current_pose = self.robot.pose
         return round(current_pose[5], 2)
 
-    def displace_along_line(self, location, displacements, orient):
-        return location + displacements * np.array([np.cos(orient), np.sin(orient)])
+    def displace_along_line(self, location, distance, orient):
+        # location: start point in x,y
+        # distance: a (scalar, xy) length to go from location
+        # orient: (xy) orientation at which the displacement is applied
+        # returns:
+        #   new_location: the location at distance and orient from location
+
+        return location + distance * np.array([np.cos(orient), np.sin(orient)])
 
     def collect_line(self, new_location, new_orient, meta, height=0):
         """
@@ -279,6 +286,9 @@ class Experiment:
             common.save_data(
                 self.edge_locations, state.meta, name="all_edge_locs_final.json"
             )
+            common.save_data(
+                self.edge_height, state.meta, name="all_edge_heights_final.json"
+            )
 
             common.save_data(state.model.__dict__, state.meta, name="gplvm_final.json")
 
@@ -398,11 +408,13 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "MAX_STEPS": max_steps,
         "STEP_LENGTH": 10,  # 5,  # nb, opposite direction to matlab experiments
         "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
+        "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": [0, 0, np.pi / 2],  # [x,y,sensor angle in rads]
-        "tol": 2,  # tolerance for second tap (0+_tol)
+        "tol": 2,  # tolerance for displacement of second tap (0+_tol)
+        "tol_height": 1,  # tolerance for height of second tap (0+_tol)
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
-        "comments": "first run with main loop instead of tests",  # so you can identify runs later
+        "comments": "3d trials",  # so you can identify runs later
     }
 
     if extra_dict is not None:
@@ -428,7 +440,7 @@ def find_first_orient():
 
     # find best frames
     # set new_location too
-    return np.pi / 2, [0, 0]  # TODO implement real!
+    return np.pi / 2, [0, 0], 0  # TODO implement real!
     # return 0, [0, 0]  # TODO implement real!
 
 
@@ -436,23 +448,32 @@ def next_sensor_placement(ex, meta):
     """ New_orient needs to be in radians. """
 
     if ex.edge_locations is None:
-        new_orient, new_location = find_first_orient()  # TODO
+        new_orient, new_location, new_height = find_first_orient()  # TODO
     else:
         if len(ex.edge_locations) == 1:
             # use previous angle
             new_orient = np.deg2rad(
                 ex.current_rotation
             )  # taken from current robot pose
+
+            # use previous height
+            new_height = ex.edge_height[0]
+
         else:
             # interpolate previous two edge locations to find orientation
             step = np.array(ex.edge_locations[-1]) - np.array(ex.edge_locations[-2])
             new_orient = -np.arctan2(step[0], step[1])
 
+            # interpolate height
+            height_step = ex.edge_height[-1] - ex.edge_height[-2]
+            new_height = ex.edge_height[-1] + height_step
+
         step_vector = meta["STEP_LENGTH"] * np.array(
             [np.sin(-new_orient), np.cos(-new_orient)]
         )
         new_location = ex.edge_locations[-1] + step_vector
-    return new_orient, new_location
+
+    return new_orient, new_location, new_height
 
 
 def plot_all_movements(ex, meta):
@@ -750,9 +771,7 @@ def main(ex, model, meta):
         for current_step in range(0, meta["MAX_STEPS"]):
             print(f"------------ Main Loop {current_step}-----------------")
 
-            new_orient, new_location, new_height = next_sensor_placement(
-                ex, meta
-            )  # todo: make sure implemented
+            new_orient, new_location, new_height = next_sensor_placement(ex, meta)
             if collect_more_data is False:  # should only skip on first loop
                 # do single tap
                 tap_1, _ = ex.processed_tap_at(
@@ -782,9 +801,11 @@ def main(ex, model, meta):
                 if collect_more_data is False:
 
                     # move predicted distance
-                    tap_2_location, tap_2_height = ex.displace_along_line(
-                        new_location, -disp_tap_1, new_orient, new_height
+                    tap_2_location = ex.displace_along_line(
+                        new_location, -disp_tap_1, new_orient
                     )
+
+                    tap_2_height = (-height_tap_1)  # todo 3d double check this logic when awake
 
                     tap_2, _ = ex.processed_tap_at(
                         tap_2_location, new_orient, meta, height=tap_2_height
@@ -801,21 +822,50 @@ def main(ex, model, meta):
                     )
 
                     # was model good? was it within 0+-tol?
-                    tol = meta["tol"]
-                    if -tol > disp_tap_2 or disp_tap_2 > tol:
-                        print(f"tap 2 pred ({disp_tap_2}) outside of tol")
+                    tol_d = meta["tol"]
+                    tol_h = meta["tol_height"]
+
+                    if (
+                        -tol_d > disp_tap_2
+                        or disp_tap_2 > tol_d
+                        or height_tap_2 > tol_h
+                        or height_tap_2 < -tol_h
+                    ):
+                        print(
+                            f"tap 2 pred (disp={disp_tap_2}, height={height_tap_2}) outside of tol"
+                        )
                         collect_more_data = True
                     else:
                         # note which to add location to list
                         print(f"tap 2 within of tol")
                         edge_location = tap_2_location
+                        edge_height = height_tap_2
 
             if collect_more_data is True:
                 print("Collecting data line")
-                new_taps = ex.collect_line(new_location, new_orient, meta)
+
+                # collect displacement line only
+                new_taps = ex.collect_line(
+                    new_location, new_orient, meta, height=new_height
+                )
                 edge_location, adjusted_disps = ex.find_edge_in_line(
                     new_taps, ref_tap, new_location, new_orient, meta
                 )
+
+                # todo (maybe) use plane class to track data better?
+
+                # todo 3d collect height profile (doing cross method)
+                new_taps_height = ex.collect_height_line(
+                    edge_location, new_orient, meta
+                )
+                # todo 3d find minima in height profile
+                edge_height, adjusted_heights = ex.find_edge_in_line_height(
+                    new_taps_height, ref_tap, meta
+                )
+
+                # todo 3d add taps together to make x
+
+                # todo correct height offset for all
 
                 if model is None:
                     print("Model is None, mu will be 1")
@@ -823,13 +873,17 @@ def main(ex, model, meta):
                     x_line = dp.add_line_mu(adjusted_disps, 1)
 
                     # init model (sets hyperpars)
-                    state.model = gplvm.GPLVM(x_line, np.array(new_taps))
+                    state.model = gplvm.GPLVM(
+                        x_line, np.array(new_taps), start_hyperpars=[1, 10, 5, 5]
+                    )
                     model = state.model
 
                 else:
                     # pass
                     # optimise mu of line given old data and hyperpars
-                    optm_mu = model.optim_line_mu(adjusted_disps, new_taps)
+                    optm_mu = model.optim_line_mu(
+                        adjusted_disps, new_taps
+                    )  # todo 3d not just adjusted disps here
 
                     x_line = dp.add_line_mu(adjusted_disps, optm_mu)
                     print(f"line x to add to model = {x_line}")
@@ -856,6 +910,11 @@ def main(ex, model, meta):
             print("edge location" + str(edge_location))
             ex.edge_locations.append(edge_location)
 
+            if ex.edge_height is None:
+                ex.edge_height = []
+            print(f"edge height {edge_height}")
+            ex.edge_height.append(edge_height)
+
             # todo: exit clause for returning to first tap location
 
             # save data every loop just to make sure data isn't lost
@@ -869,6 +928,9 @@ def main(ex, model, meta):
             common.save_data(
                 ex.edge_locations, meta, name="all_edge_locs_" + step_n_str + ".json"
             )
+            common.save_data(
+                ex.edge_height, meta, name="all_edge_heights_" + step_n_str + ".json"
+            )
 
             collect_more_data = False  # last thing in loop, reset for next loop
 
@@ -879,6 +941,7 @@ def main(ex, model, meta):
     common.save_data(ex.all_raw_data, meta, name="all_data_final.json")
     common.save_data(ex.all_tap_positions, meta, name="all_positions_final.json")
     common.save_data(ex.edge_locations, meta, name="all_edge_locs_final.json")
+    common.save_data(ex.edge_height, meta, name="all_edge_heights_final.json")
     common.save_data(model.__dict__, meta, name="gplvm_final.json")
 
     # plot results
