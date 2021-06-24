@@ -959,7 +959,7 @@ def main(ex, model, meta):
                 # todo (maybe) use plane class to track data better?
 
                 # make robot go via safe point, instead of through object!
-                common.move_to(new_location, new_orient, ex.robot, meta,height=new_height+1)
+                common.move_to(new_location, np.rad2deg(new_orient), ex.robot, meta,height=new_height+5)
 
 
                 # collect height profile (doing cross method)
