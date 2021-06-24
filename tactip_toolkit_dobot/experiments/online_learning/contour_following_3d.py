@@ -883,22 +883,22 @@ def main(ex, model, meta):
                 )
 
                 # predict distance to edge
-                disp_tap_1, mu_tap_1, height_tap_1 = model.optim_single_mu_disp_height(
+                disp_tap_1, mu_tap_1, pred_height_1 = model.optim_single_mu_disp_height(
                     tap_1
                 )
                 print(
-                    f"tap 1 optimised as disp={disp_tap_1} and mu={mu_tap_1} and height={height_tap_1}"
+                    f"tap 1 optimised as disp={disp_tap_1} and mu={mu_tap_1} and height={pred_height_1}"
                 )
 
                 # if exceed sensible limit #TODO find vals from matlab
                 if (
                     -15 > disp_tap_1
                     or disp_tap_1 > 15
-                    or height_tap_1 > 2
-                    or height_tap_1 < -2
+                    or pred_height_1 > 2
+                    or pred_height_1 < -2
                 ):  # todo move to meta!!!
                     print(
-                        f"distance to move from tap_1 prediction (={disp_tap_1}) or height (={height_tap_1}) is outside safe range"
+                        f"distance to move from tap_1 prediction (={disp_tap_1}) or height (={pred_height_1}) is outside safe range"
                     )
                     collect_more_data = True
 
@@ -909,7 +909,7 @@ def main(ex, model, meta):
                         new_location, -disp_tap_1, new_orient
                     )
 
-                    tap_2_height = (-height_tap_1)  # todo 3d double check this logic when awake
+                    tap_2_height = new_height - pred_height_1
 
                     tap_2, _ = ex.processed_tap_at(
                         tap_2_location, new_orient, meta, height=tap_2_height
@@ -919,10 +919,10 @@ def main(ex, model, meta):
                     (
                         disp_tap_2,
                         mu_tap_2,
-                        height_tap_2,
+                        pred_height_2,
                     ) = model.optim_single_mu_disp_height(tap_2)
                     print(
-                        f"tap 2 optimised as disp={disp_tap_2} and mu={mu_tap_2} and height={height_tap_2}"
+                        f"tap 2 optimised as disp={disp_tap_2} and mu={mu_tap_2} and height={pred_height_2}"
                     )
 
                     # was model good? was it within 0+-tol?
@@ -932,18 +932,18 @@ def main(ex, model, meta):
                     if (
                         -tol_d > disp_tap_2
                         or disp_tap_2 > tol_d
-                        or height_tap_2 > tol_h
-                        or height_tap_2 < -tol_h
+                        or pred_height_2 > tol_h
+                        or pred_height_2 < -tol_h
                     ):
                         print(
-                            f"tap 2 pred (disp={disp_tap_2}, height={height_tap_2}) outside of tol"
+                            f"tap 2 pred (disp={disp_tap_2}, height={pred_height_2}) outside of tol"
                         )
                         collect_more_data = True
                     else:
                         # note which to add location to list
                         print(f"tap 2 within of tol")
                         edge_location = tap_2_location
-                        edge_height = height_tap_2
+                        edge_height = pred_height_2
 
             if collect_more_data is True:
                 print("Collecting data line")
