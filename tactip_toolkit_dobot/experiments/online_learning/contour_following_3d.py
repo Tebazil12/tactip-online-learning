@@ -154,10 +154,10 @@ class Experiment:
         # see if this fixes first tap being wierd...
         # self.processed_tap_at([-10,0],0,meta) # it does! why is the camera not working proplerly
 
-        new_keypoints = [None] * len(meta["line_range"])
-        new_heights = [None] * len(meta["line_range"])
-        best_frames = [None] * len(meta["line_range"])
-        next_test_location = [new_location] * len(meta["line_range"])
+        new_keypoints = [None] * len(meta["height_range"])
+        new_heights = [None] * len(meta["height_range"])
+        best_frames = [None] * len(meta["height_range"])
+        next_test_location = [new_location] * len(meta["height_range"])
 
         for i, height_offset in enumerate(meta["height_range"]):
             new_heights[i] = start_height+height_offset
@@ -510,7 +510,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
-        "STEP_LENGTH": 10,  # 5,  # nb, opposite direction to matlab experiments
+        "STEP_LENGTH": 5,  # nb, opposite direction to matlab experiments
         "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
         "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),  # in mm
         "collect_ref_tap": True,
