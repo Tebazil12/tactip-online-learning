@@ -52,6 +52,7 @@ class Experiment:
     edge_height = None  # should be same length as edge locations
 
     line_locations = []
+    line_height_locations= []
 
     neutral_tap = None
 
@@ -107,6 +108,7 @@ class Experiment:
         new_keypoints = [None] * len(meta["line_range"])
         best_frames = [None] * len(meta["line_range"])
         next_test_location = [None] * len(meta["line_range"])
+        new_heights = [height] * len(meta["line_range"])
 
         for i, displacements in enumerate(meta["line_range"]):
 
@@ -131,10 +133,60 @@ class Experiment:
 
         self.line_locations.append(next_test_location)
         print(self.line_locations)
+        self.line_height_locations.append(new_heights)
         common.save_data(
             next_test_location, meta, name="location_line_" + n_saves_str + ".json"
         )
+        common.save_data(
+            new_heights, meta, name="height_line_" + n_saves_str + ".json"
+        )
+
         return best_frames
+
+    def collect_height_line(self, new_location, new_orient, meta, start_height):
+        """
+        Collect a straight line of taps at heights specified in meta. (does
+        not currently support sparse grids...)
+
+        :param new_orient: needs to be in RADIANS!
+        :returns: the best frames from each tap on the line (as n_taps x (2xn_pins) x 1)
+        """
+        # see if this fixes first tap being wierd...
+        # self.processed_tap_at([-10,0],0,meta) # it does! why is the camera not working proplerly
+
+        new_keypoints = [None] * len(meta["line_range"])
+        new_heights = [None] * len(meta["line_range"])
+        best_frames = [None] * len(meta["line_range"])
+        next_test_location = [new_location] * len(meta["line_range"])
+
+        for i, height_offset in enumerate(meta["height_range"]):
+            new_heights[i] = start_height+height_offset
+
+            best_frames[i], new_keypoints[i] = self.processed_tap_at(
+                new_location, new_orient, meta, height=new_heights[i]
+            )
+
+
+        # save line of data
+        # file_name = "data_line_" + str(self.num_line_saves).rjust(3, "0")
+        n_saves_str = str(self.num_line_saves).rjust(3, "0")
+        new_keypoints_np = np.array(new_keypoints)  # needed so can json.dump properly
+        common.save_data(
+            new_keypoints_np.tolist(), meta, name="data_line_" + n_saves_str + ".json"
+        )
+
+        self.line_locations.append(next_test_location)
+        self.line_height_locations.append(new_heights)
+        print(self.line_locations)
+        common.save_data(
+            next_test_location, meta, name="location_line_" + n_saves_str + ".json"
+        )
+        common.save_data(
+            new_heights, meta, name="height_line_" + n_saves_str + ".json"
+        )
+
+        return best_frames
+
 
     def add_to_alldata(self, keypoints, position):
         """
@@ -854,9 +906,9 @@ def main(ex, model, meta):
 
                 # todo (maybe) use plane class to track data better?
 
-                # todo 3d collect height profile (doing cross method)
+                # collect height profile (doing cross method)
                 new_taps_height = ex.collect_height_line(
-                    edge_location, new_orient, meta
+                    edge_location, new_orient, meta, new_height
                 )
                 # todo 3d find minima in height profile
                 edge_height, adjusted_heights = ex.find_edge_in_line_height(
