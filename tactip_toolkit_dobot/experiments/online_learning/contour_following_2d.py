@@ -308,6 +308,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
     if stimuli_name is None: # so can be overwritten in test files
         stimuli_name = "flower"
         # stimuli_name ="70mm-circle"
+        # stimuli_name = "105mm-circle"
 
     if stimuli_name == "70mm-circle":
         stimuli_height = -190
@@ -315,16 +316,19 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # x_y_offset = [0, 0]
         max_steps = 20
 
+
     elif stimuli_name == "105mm-circle":
         stimuli_height = -190 + 2
         # x_y_offset = [57.5, -57.5]
-        x_y_offset = [-17.5, 0]
-        max_steps = 25
+        x_y_offset = [35.5, -45.5]
+        # x_y_offset = [-17.5, 0]
+        # max_steps = 25
+        max_steps = 15
 
     elif stimuli_name == "flower":
         stimuli_height = -190 + 2
         x_y_offset = [35, -35 - 10 - 10]
-        max_steps = 15#30
+        max_steps = 30#15#30
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
     # max_steps = 3 # for testing
@@ -385,7 +389,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
-        "STEP_LENGTH": 10,#5,  # nb, opposite direction to matlab experiments
+        "STEP_LENGTH": 5,#10,#5,  # nb, opposite direction to matlab experiments
         "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": [0, 0, np.pi / 2],  # [x,y,sensor angle in rads]
