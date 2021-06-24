@@ -252,6 +252,58 @@ class Experiment:
 
         return edge_location, corrected_disps
 
+    def find_edge_in_line_height(self, taps, ref_tap, base_height, meta, plot_on=False):
+        """
+        Identify the location of the edge
+        :param taps: taps needs to be a line of processed taps taken in order
+        at known spacial intervals (as held in meta)
+        :param keypoints: raw data from a line of taps
+        :param meta: the range of tap locations is held in here (assuming always the same...)
+        :return:
+        """
+
+        # get dissim profile
+        dissim_profile = dp.calc_dissims(
+            np.array(taps), ref_tap
+        )  # taps needs casting as the eulicd distance can be done on all at once (instead of looping list)
+
+        if plot_on:
+            # plot dissim profile (NB, pauses experiemnt)
+            plt.plot(meta["line_range"], dissim_profile)
+            # plt.show()
+
+            # save image of graph - NB, this gets overwritten with every new line
+            # remove meta.json bit to add new name
+            part_path, _ = os.path.split(meta["meta_file"])
+            full_path = os.path.join(meta["home_dir"], part_path, "dissim_prof.png")
+            plt.savefig(full_path)
+
+        # find min in profile
+        corrected_heights, offset = dp.align_radius(
+            np.array(meta["height_range"]), dissim_profile
+        )
+
+        print(offset)
+
+        if plot_on:
+            plt.plot(meta["line_range"], dissim_profile)
+            plt.plot(corrected_heights, dissim_profile)
+            # plt.show()
+            # remove meta.json bit to add new name
+            part_path, _ = os.path.split(meta["meta_file"])
+            full_path = os.path.join(
+                meta["home_dir"], part_path, "dissim_prof_corrected.png"
+            )
+            plt.savefig(full_path)
+            plt.close()
+
+        # find real height (not just relative to line)
+        edge_height = base_height + offset
+
+        corrected_heights = np.reshape(corrected_heights, (np.shape(corrected_heights)[0], 1))
+
+        return edge_height, corrected_heights
+
     def processed_tap_at(
         self,
         new_location,
@@ -910,39 +962,44 @@ def main(ex, model, meta):
                 new_taps_height = ex.collect_height_line(
                     edge_location, new_orient, meta, new_height
                 )
-                # todo 3d find minima in height profile
+                # find minima in height profile
                 edge_height, adjusted_heights = ex.find_edge_in_line_height(
-                    new_taps_height, ref_tap, meta
+                    new_taps_height, ref_tap, new_height, meta
                 )
 
-                # todo 3d add taps together to make x
+                # add taps together to make partial x = dips height, no mu yet
+                plane_y = np.concatenate((new_taps, new_taps_height), axis=0)
 
-                # todo correct height offset for all
+                plane_disps = np.concatenate((adjusted_disps, np.zeros((len(adjusted_heights),1))), axis=0)
+                plane_heights =np.concatenate((edge_height*np.ones((len(adjusted_disps),1)),adjusted_heights ), axis=0)
+
+                plane_x_no_mu = np.concatenate((plane_disps, plane_heights), axis=1)
+
+
+
 
                 if model is None:
                     print("Model is None, mu will be 1")
                     # set mus to 1 for first line only - elsewhere mu is optimised
-                    x_line = dp.add_line_mu(adjusted_disps, 1)
+                    plane_mus = 1 * np.ones((len(plane_disps),1))
+                    plane_x = np.concatenate((plane_x_no_mu, plane_mus), axis=1)
 
-                    # init model (sets hyperpars)
+                    # init model (sets hyperpars)`
                     state.model = gplvm.GPLVM(
-                        x_line, np.array(new_taps), start_hyperpars=[1, 10, 5, 5]
+                        plane_x, np.array(plane_y), start_hyperpars=[1, 10, 5, 5]
                     )
                     model = state.model
 
                 else:
-                    # pass
                     # optimise mu of line given old data and hyperpars
-                    optm_mu = model.optim_line_mu(
-                        adjusted_disps, new_taps
-                    )  # todo 3d not just adjusted disps here
+                    optm_mu = model.optim_line_mu(plane_x_no_mu, plane_y)
 
-                    x_line = dp.add_line_mu(adjusted_disps, optm_mu)
-                    print(f"line x to add to model = {x_line}")
+                    plane_x = dp.add_line_mu(plane_x_no_mu, optm_mu)
+                    print(f"line x to add to model = {plane_x}")
 
                     # save line to model (taking care with dimensions...)
-                    model.x = np.vstack((model.x, x_line))
-                    model.y = np.vstack((model.y, new_taps))
+                    model.x = np.vstack((model.x, plane_x))
+                    model.y = np.vstack((model.y, plane_y))
 
                 print(
                     f"model inited with ls: {str(model.ls)} sigma_f: {str(model.sigma_f)}"

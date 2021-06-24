@@ -16,7 +16,7 @@ def add_line_mu(disps, mu_for_line):
 
 
 
-    if np.shape(disps)[1]>1: # in case of 3d using planes, need to replace phi
+    if np.shape(disps)[1]>2: # in case of 3d using planes, need to replace phi
         disps[:,-1] = mu_for_line
         result = disps
     else:
