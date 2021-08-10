@@ -366,7 +366,8 @@ class Experiment:
         offset = meta["work_frame_offset"]
 
         self.neutral_tap, _ = self.processed_tap_at(
-            [-20 - offset[0], -(-80) + offset[1]],
+            # [-20 - offset[0], -(-80) + offset[1] - 80 ],
+            [-30, -100],
             0,
             meta,
             selection_criteria="Mean",
@@ -450,6 +451,37 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         stimuli_height = -190 + 2
         x_y_offset = [35, -35 - 10 - 10]
         max_steps = 15  # 30
+
+    elif stimuli_name == "squishy-brick":
+        stimuli_height = -190 - 1
+        x_y_offset = [35, -35 - 10 - 10]
+        max_steps = 30
+
+    elif stimuli_name == "squishy-saddle":
+        stimuli_height = -190 + 10 + 30 - 4
+        x_y_offset = [35, -35 - 10 - 10]
+        max_steps = 30
+
+    elif stimuli_name == "tilt-0deg":
+        stimuli_height = -190 + 3
+        x_y_offset = [0, 0]
+        max_steps = 30
+
+    elif stimuli_name == "tilt-10deg-up":
+        stimuli_height = -190 -1
+        x_y_offset = [-10, 0]
+        max_steps = 30
+
+    elif stimuli_name == "tilt-10deg-down":
+        stimuli_height = -190 + 17 - 4
+        x_y_offset = [-8, 0]
+        max_steps = 30
+
+    elif stimuli_name == "tilt-05deg-down":
+        stimuli_height = -190 + 17 - 4 -8
+        x_y_offset = [-8, 0]
+        max_steps = 30
+
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
     # max_steps = 3 # for testing
@@ -510,15 +542,15 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
-        "STEP_LENGTH": 5,  # nb, opposite direction to matlab experiments
+        "STEP_LENGTH": 2,  # nb, opposite direction to matlab experiments
         "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
         "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),  # in mm
         "collect_ref_tap": True,
-        "ref_location": [0, 0, np.pi / 2],  # [x,y,sensor angle in rads]
+        "ref_location": [0, 0, 0],  # [x,y,sensor angle in rads]
         "tol": 2,  # tolerance for displacement of second tap (0+_tol)
         "tol_height": 1,  # tolerance for height of second tap (0+_tol)
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
-        "comments": "3d trials",  # so you can identify runs later
+        "comments": "3d trials - angled brick",  # so you can identify runs later
     }
 
     if extra_dict is not None:
@@ -544,7 +576,7 @@ def find_first_orient():
 
     # find best frames
     # set new_location too
-    return np.pi / 2, [0, 0], 0  # TODO implement real!
+    return 0, [0, 0], 0  # TODO implement real!
     # return 0, [0, 0]  # TODO implement real!
 
 
@@ -894,8 +926,8 @@ def main(ex, model, meta):
                 if (
                     -15 > disp_tap_1
                     or disp_tap_1 > 15
-                    or pred_height_1 > 2
-                    or pred_height_1 < -2
+                    or pred_height_1 > 4
+                    or pred_height_1 < -4
                 ):  # todo move to meta!!!
                     print(
                         f"distance to move from tap_1 prediction (={disp_tap_1}) or height (={pred_height_1}) is outside safe range"
@@ -1070,7 +1102,7 @@ class State:
         self.success = success
         self.ex = Experiment()
         if meta is None:
-            self.meta = make_meta()
+            self.meta = make_meta(stimuli_name="tilt-05deg-down")
         else:
             self.meta = meta
 
