@@ -546,7 +546,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
         "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),  # in mm
         "collect_ref_tap": True,
-        "ref_location": [0, 0, 0],  # [x,y,sensor angle in rads]
+        "ref_location": [18, -105, 0],  # [x,y,sensor angle in rads]
         "tol": 2,  # tolerance for displacement of second tap (0+_tol)
         "tol_height": 1,  # tolerance for height of second tap (0+_tol)
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
