@@ -950,11 +950,10 @@ def main(ex, model, meta):
                     # predict again
                     (
                         disp_tap_2,
-                        mu_tap_2,
                         pred_height_2,
-                    ) = model.optim_single_mu_disp_height(tap_2)
+                    ) = model.optim_single_disp_height(tap_2, mu_tap_1)
                     print(
-                        f"tap 2 optimised as disp={disp_tap_2} and mu={mu_tap_2} and height={pred_height_2}"
+                        f"tap 2 optimised as disp={disp_tap_2} and mu=same and height={pred_height_2}"
                     )
 
                     # was model good? was it within 0+-tol?
