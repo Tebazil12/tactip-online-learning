@@ -974,7 +974,7 @@ def main(ex, model, meta):
                         # note which to add location to list
                         print(f"tap 2 within of tol")
                         edge_location = tap_2_location
-                        edge_height = pred_height_2
+                        edge_height =  tap_2_height
 
             if collect_more_data is True:
                 print("Collecting data line")
