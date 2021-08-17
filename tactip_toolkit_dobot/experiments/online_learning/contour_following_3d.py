@@ -401,6 +401,7 @@ class Experiment:
         if state.model is not None:  # crude way of telling if things are inited
             # plot results
             plot_all_movements(self, state.meta)
+            plot_all_movements_3d(self, state.meta)
 
     def make_gplvm_graph_final(self):
         if state.model is not None:  # crude way of telling if things are inited
@@ -473,12 +474,17 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         max_steps = 30
 
     elif stimuli_name == "tilt-10deg-down":
-        stimuli_height = -190 + 17 - 4
+        stimuli_height = -190 + 17 - 4 -3
         x_y_offset = [-8, 0]
         max_steps = 30
 
     elif stimuli_name == "tilt-05deg-down":
         stimuli_height = -190 + 17 - 4 -8
+        x_y_offset = [-8, 0]
+        max_steps = 30
+
+    elif stimuli_name == "tilt-20deg-down":
+        stimuli_height = -190 + 17 - 4 -3 + 13
         x_y_offset = [-8, 0]
         max_steps = 30
 
@@ -542,7 +548,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
-        "STEP_LENGTH": 2,  # nb, opposite direction to matlab experiments
+        "STEP_LENGTH": 5,  # nb, opposite direction to matlab experiments
         "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
         "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),  # in mm
         "collect_ref_tap": True,
@@ -612,7 +618,7 @@ def next_sensor_placement(ex, meta):
     return new_orient, new_location, new_height
 
 
-def plot_all_movements(ex, meta):
+def plot_all_movements(ex, meta, show_figs=True):
     line_width = 0.5
     marker_size = 1
     ax = plt.gca()
@@ -642,6 +648,9 @@ def plot_all_movements(ex, meta):
             extent=[-f_size / 2, 0, 0 + f_y_offset, f_size + f_y_offset],
             alpha=0.5,
         )
+
+    elif meta["stimuli_name"].split("-")[0] == "tilt":
+        plt.plot([0, 0, 100],[0, 80, 80])
 
     # print all tap locations
     all_tap_positions_np = np.array(ex.all_tap_positions)
@@ -759,7 +768,170 @@ def plot_all_movements(ex, meta):
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
-    plt.show()
+    if show_figs:
+        plt.show()
+    plt.clf()
+
+def plot_all_movements_3d(ex, meta, show_figs=True):
+    # print(ex.all_tap_positions)
+
+    line_width = 0.5
+    marker_size = 1
+    ax = plt.gca()
+    if meta["stimuli_name"] == "70mm-circle":
+        # print small circle location
+        radius = 35
+        x_offset = 35 - 35
+        y_offset = 0 + 35
+        # --- https://uk.mathworks.com/matlabcentral/answers/3058-plotting-circles
+        ang = np.linspace(np.pi / 2, -np.pi / 2, 100)
+        x = x_offset + radius * -np.cos(ang)
+        y = y_offset + radius * np.sin(ang)
+        plt.plot(x, y, "tab:brown", linewidth=line_width)
+        # y=y*.8
+        # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
+
+        # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
+        w2 = Wedge((x_offset, y_offset), radius, 90, -90, fc="tab:brown", alpha=0.5)
+        ax.add_artist(w2)
+    elif meta["stimuli_name"] == "flower":
+        img = plt.imread("/home/lizzie/Pictures/stimulus-flower.png")
+        img_cropped = img[:, 0 : int(img.shape[0] / 2), :]
+        f_size = 126
+        f_y_offset = -5.2
+        ax.imshow(
+            img_cropped,
+            extent=[-f_size / 2, 0, 0 + f_y_offset, f_size + f_y_offset],
+            alpha=0.5,
+        )
+
+    if meta["stimuli_name"] == "tilt-05deg-down":
+        plt.plot([0,100],[0, -8.7])
+    elif meta["stimuli_name"] == "tilt-10deg-down":
+        plt.plot([0,100],[0, -17.6])
+    elif meta["stimuli_name"] == "tilt-20deg-down":
+        plt.plot([0,100],[0, -36.4])
+
+    # print all tap locations
+    all_tap_positions_np = np.array(ex.all_tap_positions)
+    pos_xs = all_tap_positions_np[2:, 0] # remove ref and neutral taps
+    pos_ys = all_tap_positions_np[2:, 1]
+    heights = all_tap_positions_np[2:, 3]
+    # pos_ys = pos_ys/0.8
+    n = range(len(pos_xs))
+    plt.plot(
+         pos_ys, heights, "k", marker="o", markersize=marker_size, linewidth=line_width
+    )
+    # plt.scatter(pos_xs, pos_ys, color="k", s=marker_size)
+
+    [
+        ax.annotate(
+            int(x[0]), (x[1], x[2]), fontsize=1, ha="center", va="center", color="grey"
+        )
+        for x in np.array([n, pos_xs, pos_ys]).T
+    ]
+
+    # # print data collection lines
+    # for line in ex.line_locations:
+    #     line_locations_np = np.array(line)
+    #     plt.plot(
+    #         line_locations_np[:, 0],
+    #         line_locations_np[:, 1],
+    #         "r",
+    #         marker="o",
+    #         markersize=marker_size,
+    #         linewidth=line_width,
+    #     )
+    #     # plt.scatter(line_locations_np[:, 0], line_locations_np[:, 1], color="g",s=marker_size)
+
+    if ex.edge_locations is not None:
+        # print predicted edge locations
+        all_edge_np = np.array(ex.edge_locations)
+        pos_xs = all_edge_np[:, 0]
+        pos_ys = all_edge_np[:, 1]
+        heights = ex.edge_height
+        # pos_ys = pos_ys/0.8
+        n = range(len(pos_xs))
+        plt.plot(
+            pos_ys,
+            heights,
+            color="#15b01a",
+            marker="+",
+            markersize=marker_size + 1,
+            linewidth=line_width,
+        )
+    # plt.scatter(pos_xs, pos_ys, color="r",marker='+',s=marker_size)
+    plt.gca().set_aspect("equal")
+
+    # Show the major grid lines with dark grey lines
+    plt.grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
+    ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+
+    # Show the minor grid lines with very faint and almost transparent grey lines
+    plt.minorticks_on()
+    plt.grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
+    ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
+    ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+
+    # set axis font size
+    plt.tick_params(labelsize=5)
+
+    # axis labels
+    plt.xlabel("x displacement (mm)", fontsize=5, va="top")
+    plt.ylabel("y displacement (mm)", fontsize=5, va="top")
+
+    # add identifier labels
+    part_path, _ = os.path.split(meta["meta_file"])
+
+    exp_name = part_path.split("/")
+    readable_name = parse_exp_name(exp_name[1])
+
+    plt.gcf().text(
+        0.01, 1.01, meta["stimuli_name"], transform=ax.transAxes, fontsize=4, alpha=0.2
+    )
+    plt.gcf().text(
+        1,
+        1.01,
+        readable_name,
+        transform=ax.transAxes,
+        fontsize=4,
+        alpha=0.2,
+        ha="right",
+    )
+    #     # Don't allow the axis to be on top of your data
+    ax.set_axisbelow(True)
+
+    # ax.set(auto=True)
+    xmin, xmax, ymin, ymax = plt.axis()
+    print(xmax)
+    plt.axis([xmin, xmax + 2, ymin, ymax])
+
+    #
+    # # Turn on the minor TICKS, which are required for the minor GRID
+    # ax.minorticks_on()
+    #
+    # # Customize the major grid
+    # ax.grid(which='major', linestyle='-', linewidth='0.5', color='black')
+    # # Customize the minor grid
+    # ax.grid(which='minor', linestyle='-', linewidth='0.5', color='grey')
+    #
+    # # Turn off the display of all ticks.
+    # ax.tick_params(which='both', # Options for both major and minor ticks
+    #                 top='off', # turn off top ticks
+    #                 left='off', # turn off left ticks
+    #                 right='off',  # turn off right ticks
+    #                 bottom='off') # turn off bottom ticks
+
+    # save graphs automatically
+    part_path, _ = os.path.split(meta["meta_file"])
+    full_path_png = os.path.join(meta["home_dir"], part_path, "all_movements_3d_final.png")
+    full_path_svg = os.path.join(meta["home_dir"], part_path, "all_movements_3d_final.svg")
+    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+
+    if show_figs:
+        plt.show()
     plt.clf()
 
 
@@ -899,6 +1071,8 @@ def main(ex, model, meta):
             pass
             # ref_tap = common.load_data( <some-path> )
             # todo load a ref tap, using a path specified in meta
+
+        common.go_home(ex.robot, meta)
 
         collect_more_data = True  # first loop should always collect data
 
@@ -1101,7 +1275,7 @@ class State:
         self.success = success
         self.ex = Experiment()
         if meta is None:
-            self.meta = make_meta(stimuli_name="tilt-05deg-down")
+            self.meta = make_meta(stimuli_name="tilt-20deg-down")
         else:
             self.meta = meta
 
