@@ -468,29 +468,29 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         max_steps = 30
 
     elif stimuli_name == "tilt-0deg":
-        stimuli_height = -190 + 3
-        x_y_offset = [0, 0]
-        max_steps = 30
+        stimuli_height = -190 -1
+        x_y_offset = [-10, 0]
+        max_steps = 15
 
     elif stimuli_name == "tilt-10deg-up":
         stimuli_height = -190 -1
-        x_y_offset = [-10, 0]
-        max_steps = 30
+        x_y_offset = [-8, 0]
+        max_steps = 15
 
     elif stimuli_name == "tilt-10deg-down":
-        stimuli_height = -190 + 17 - 4 -3
-        x_y_offset = [-8, 0]
-        max_steps = 30
+        stimuli_height = -190 + 17 - 4
+        x_y_offset = [-10, 0]
+        max_steps = 15
 
     elif stimuli_name == "tilt-05deg-down":
-        stimuli_height = -190 + 17 - 4 -8
-        x_y_offset = [-8, 0]
-        max_steps = 30
+        stimuli_height = -190 + 17 - 4 -8 +2
+        x_y_offset = [-10, 0]
+        max_steps = 15
 
     elif stimuli_name == "tilt-20deg-down":
-        stimuli_height = -190 + 17 - 4 -3 + 13
-        x_y_offset = [-8, 0]
-        max_steps = 30
+        stimuli_height = -190 + 17 - 4 + 13 +1
+        x_y_offset = [-10, 0]
+        max_steps = 15
 
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
@@ -552,15 +552,15 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
-        "STEP_LENGTH": 5,  # nb, opposite direction to matlab experiments
+        "STEP_LENGTH": 2,#5,  # nb, opposite direction to matlab experiments
         "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
-        "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),  # in mm
+        "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": [18, -105, 0],  # [x,y,sensor angle in rads]
         "tol": 2,  # tolerance for displacement of second tap (0+_tol)
         "tol_height": 1,  # tolerance for height of second tap (0+_tol)
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
-        "comments": "3d trials - angled brick",  # so you can identify runs later
+        "comments": "3d trials - increased pause between taps",  # so you can identify runs later
     }
 
     if extra_dict is not None:
