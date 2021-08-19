@@ -961,17 +961,28 @@ def plot_gplvm(model, meta):
 
     dissims = dp.calc_dissims(model.y, ref_tap)
 
-    len_line = len(meta["line_range"])
+    len_line = len(meta["line_range"]) #+ len(meta["height_range"])
+    len_h_line = len(meta["height_range"])
 
     print(f"line length= {len_line}")
 
     for i in range(int(len(dissims) / len_line)):
 
-        plt.plot(
-            model.x[len_line * (i) : len_line * (i + 1), 0],
-            model.x[len_line * (i) : len_line * (i + 1), 1],
-            zs=dissims[len_line * (i) : len_line * (i + 1)],
-        )
+        s_start = (len_line + len_h_line) * (i)
+        s_end = (len_line ) * (i +1 ) + (len_h_line * i)
+        x_s = model.x[s_start : s_end, 0]
+        y_s = model.x[s_start : s_end, 2]
+        z_s = dissims[s_start : s_end]
+
+        h_start = s_end
+        h_end = (len_line + len_h_line) * (i + 1)
+        x_h = model.x[h_start : h_end, 1]
+        y_h = model.x[h_start : h_end, 2]
+        z_h = dissims[h_start : h_end]
+
+        plt.plot(x_s, y_s, zs=z_s)
+        plt.plot(x_h, y_h, zs=z_h)
+
         print(i)
         ax.text(
             model.x[len_line * (i), 0],
@@ -986,8 +997,8 @@ def plot_gplvm(model, meta):
 
     # axis labels
     ax.set_xlabel("Estimated Displacement (mm)", fontsize=5, va="top")
-    ax.set_ylabel("Dissimilarity", fontsize=5, va="top")
-    ax.set_zlabel(r"Optimised $\phi$", fontsize=5, va="top")
+    ax.set_ylabel(r"Optimised $\phi$", fontsize=5, va="top")
+    ax.set_zlabel("Dissimilarity", fontsize=5, va="top")
 
     # Show the major grid lines with dark grey lines
     ax.grid(b=True, which="major", linestyle=":", color="black")
