@@ -353,10 +353,14 @@ class Experiment:
         return best_frames, keypoints
 
     def collect_ref_tap(self, meta):
+        ref_plat_height = -190
+        height_diff = ref_plat_height - meta["stimuli_height"]
+
         ref_tap, _ = self.processed_tap_at(
             [meta["ref_location"][0], meta["ref_location"][1]],
             meta["ref_location"][2],
             meta,
+            height=height_diff
         )
         common.save_data(ref_tap, meta, "ref_tap.json")
         return ref_tap
