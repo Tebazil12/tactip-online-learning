@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gplvm as gplvm
 import tactip_toolkit_dobot.experiments.min_example.common as common
-from tactip_toolkit_dobot.experiments.online_learning.contour_following_2d import (
+from tactip_toolkit_dobot.experiments.online_learning.contour_following_3d import (
     Experiment,
     make_meta,
     plot_gplvm,
@@ -45,7 +45,10 @@ if __name__ == "__main__":
     # current_experiment = "contour_following_2d_2021y-01m-25d_17h37m24s/"
     # current_experiment = "contour_following_2d_2021y-01m-25d_18h08m31s/"
     # current_experiment = "contour_following_2d_2021y-01m-26d_15h13m00s/"
-    current_experiment = "contour_following_2d_01m-25d_14h42m04s/"
+    # current_experiment = "contour_following_2d_01m-25d_14h42m04s/"
+    # current_experiment = "contour_following_3d_2021y-08m-18d_14h53m19s/"
+    current_experiment = "contour_following_3d_2021y-08m-18d_14h25m12s/"
+    # current_experiment = "contour_following_3d_2021y-08m-16d_15h44m12s/"
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
