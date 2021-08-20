@@ -488,8 +488,18 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         max_steps = 15
 
     elif stimuli_name == "tilt-20deg-down":
-        stimuli_height = -190 + 17 - 4 + 13 +1
-        x_y_offset = [-10, 0]
+        stimuli_height = -190 + 17 - 4 + 13
+        x_y_offset = [-12, 0]
+        max_steps = 15
+
+    elif stimuli_name == "tilt-25deg-down":
+        stimuli_height = -190 + 17 - 4 + 13 + 10 -2
+        x_y_offset = [-12, 0]
+        max_steps = 15
+
+    elif stimuli_name == "tilt-30deg-down":
+        stimuli_height = -190 + 17 - 4 + 13 + 10 -2 +10 -13 -4
+        x_y_offset = [-11, 0]
         max_steps = 15
 
     else:
@@ -507,7 +517,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ~~~~~~~~~ Robot movements ~~~~~~~~~#
         "robot_tcp": [0, 0, 150, 0, 0, 0],  # in mm, will change between sensors
         "base_frame": [0, 0, 0, 0, 0, 0],  # see dobot manual for location
-        "home_pose": [170, 0, -150, 0, 0, 0],  # choose a safe "resting" pose
+        "home_pose": [170, 0, -120, 0, 0, 0],  # choose a safe "resting" pose
         "stimuli_name": stimuli_name,
         "stimuli_height": stimuli_height,  # location of stimuli relative to base frame
         "work_frame": [
@@ -1087,6 +1097,7 @@ def main(ex, model, meta):
             # ref_tap = common.load_data( <some-path> )
             # todo load a ref tap, using a path specified in meta
 
+        # try not to hit everything
         common.go_home(ex.robot, meta)
 
         collect_more_data = True  # first loop should always collect data
@@ -1290,7 +1301,7 @@ class State:
         self.success = success
         self.ex = Experiment()
         if meta is None:
-            self.meta = make_meta(stimuli_name="tilt-20deg-down")
+            self.meta = make_meta(stimuli_name="tilt-30deg-down")
         else:
             self.meta = meta
 
