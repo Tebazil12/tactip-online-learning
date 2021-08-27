@@ -246,7 +246,7 @@ class Experiment:
         plt.close()
 
         # use orientation and location to find real location in 2d space
-        edge_location = location + offset * np.array([np.cos(orient), np.sin(orient)])
+        edge_location = location - offset * np.array([np.cos(orient), np.sin(orient)])
 
         corrected_disps = np.reshape(corrected_disps, (np.shape(corrected_disps)[0], 1))
 
