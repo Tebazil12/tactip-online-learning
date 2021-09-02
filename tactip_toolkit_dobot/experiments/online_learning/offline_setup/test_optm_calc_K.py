@@ -17,7 +17,7 @@ def calc_K_faster(x, sigma_f, L, sigma_n):
     for i in range(0,n_xs):
         for j in range(0, n_xs):
             if j <= i : # matrix is symmetric
-                val = calc_covariance(x[i], x[j], sigma_f, L)
+                val = gp.calc_covariance(x[i], x[j], sigma_f, L)
                 k_cap[i, j] = val
                 k_cap[j, i] = val
 
@@ -43,7 +43,7 @@ def calc_K_batch(x, sigma_f, L, sigma_n):
 
     for i in range(0,n_xs):
         # matrix is symmetric, so less is calculated as time goes on
-        val = calc_covariance_batch(x[i], x[i:], sigma_f, L)
+        val = gp.calc_covariance(x[i], x[i:], sigma_f, L)
         k_cap[i,i:] = val
         k_cap[i:,i] = val
 
@@ -162,16 +162,65 @@ def calc_covariance(x, x_prime, sigma_f, L):
 
     return k
 
-np.set_printoptions(precision=3,suppress=True)
+def calc_K(x, sigma_f, L, sigma_n):
+    np.set_printoptions(suppress=True)
+    n_xs = len(x)
+
+    k_cap = np.empty([n_xs, n_xs])
+
+    # for i in range(0,n_xs):
+    #     # matrix is symmetric, so less is calculated as time goes on
+    #     val = calc_covariance(x[i], x[i:], sigma_f, L)
+    #     # val = calc_covariance(x[i], x, sigma_f, L)
+    #     print(f"val = {val}")
+    #     k_cap[i,i:] = val
+    #     k_cap[i:,i] = val
+
+    for i in range(0, n_xs):
+        for j in range(0, n_xs):
+            k_cap[i, j] = calc_covariance(x[i], x[j], sigma_f, L)
+
+    # print(k_cap)
+    # print(k_cap.shape)
+
+    k_cap = k_cap + (np.identity(n_xs) * sigma_n)
+    print(f"kcap = {k_cap}")
+
+    return k_cap
+
+
+# np.set_printoptions(precision=3,suppress=True)
 x = np.array([
-    [1,2,3],
-    [4,5,6],
-    [7,8,9],
+    [11.5,2,3],
+    [6,5,6],
+    [7,8.345,9],
+    [10,11,12],
+    [13,14,15],
+    [11.5,2,3],
+    [6,5,6],
+    [7,8.345,9],
+    [10,11,12],
+    [13,14,15],
+    [11.5,2,3],
+    [6,5,6],
+    [7,8.345,9],
     [10,11,12],
     [13,14,15]
 ])
-sigma_f = 1
-ls = [2.7,5,1]
+
+print(x.shape)
+# x = np.array([
+#     [11.5],
+#     [6,],
+#     [7],
+#     [10],
+#     [13],
+# ])
+
+# x = np.array([1,2,3,4,5,6])
+
+sigma_f = 5
+ls = [4,5,5]
 sigma_n_y = 0.5
 
 print("### OLD CODE ###")
@@ -205,3 +254,15 @@ print(f"run time: {time_2 - time_1}")
 
 
 print(f"both same: {(answer_3 == answer_1).all()}")
+
+print("### old code ###")
+# hopefully faster but still functioning code
+time_1 = time.perf_counter()
+answer_4 = calc_K(x, sigma_f, np.array(ls), sigma_n_y)
+time_2 = time.perf_counter()
+
+print(answer_4)
+print(f"run time: {time_2 - time_1}")
+
+
+print(f"both same: {(answer_4 == answer_1).all()}")

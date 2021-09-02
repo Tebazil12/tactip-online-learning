@@ -230,11 +230,11 @@ class Experiment:
 
         # find min in profile
         corrected_disps, offset = dp.align_radius(
-            np.array(meta["line_range"]), dissim_profile
+            np.array(meta["line_range"]), dissim_profile, gp_extrap=True
         )
 
         print(offset)
-        plt.plot(meta["line_range"], dissim_profile)
+        plt.plot(meta["line_range"], dissim_profile, 'k')
         plt.plot(corrected_disps, dissim_profile)
         # plt.show()
         # remove meta.json bit to add new name
@@ -353,11 +353,11 @@ class Experiment:
         return best_frames, keypoints
 
     def collect_ref_tap(self, meta):
-        ref_plat_height = -190
-        height_diff = ref_plat_height - meta["stimuli_height"]
-
+        height_diff = meta["ref_plat_height"] - meta["stimuli_height"]
+        #meta["work_frame_offset"]
         ref_tap, _ = self.processed_tap_at(
-            [meta["ref_location"][0], meta["ref_location"][1]],
+            [meta["ref_location"][0],
+             meta["ref_location"][1]],
             meta["ref_location"][2],
             meta,
             height=height_diff
@@ -368,14 +368,16 @@ class Experiment:
     def collect_neutral_tap(self, meta):
         # collect neutral, non-contact position (as reference for other taps)
         offset = meta["work_frame_offset"]
+        height_diff = meta["ref_plat_height"] - meta["stimuli_height"]
 
         self.neutral_tap, _ = self.processed_tap_at(
             # [-20 - offset[0], -(-80) + offset[1] - 80 ],
-            [-30, -100],
+            [-30, -100 ],
             0,
             meta,
             selection_criteria="Mean",
             neutral_tap=None,
+            height=height_diff
         )
         # self.neutral_tap, _ = self.processed_tap_at(
         #     [-20 , -(-80)], 0, meta, selection_criteria="Mean", neutral_tap=None
@@ -502,9 +504,41 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         x_y_offset = [-11, 0]
         max_steps = 15
 
+    elif stimuli_name == "slide-minipeak":
+        stimuli_height = -170 +20 - 15 +2 +2
+        x_y_offset = [25 , 18, 0]
+        max_steps = 25
+        ref_plat_height = stimuli_height -1
+        ref_location = np.array([0,0,0])
+
+    elif stimuli_name == "slide-dip":
+        stimuli_height = -170 +20 - 15 +2 - 13
+        x_y_offset = [26, 18-60+12, 0]
+        max_steps = 35
+        ref_plat_height = stimuli_height -1
+        ref_location = np.array([0,0,0])
+
+    elif stimuli_name == "saddle-high":
+        stimuli_height = -170 +2
+        x_y_offset = [0 , 15, 0]
+        max_steps = 35
+        ref_plat_height = -190 +1
+        ref_location = (np.array([18, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
+    elif stimuli_name == "saddle-low":
+        stimuli_height = -190 + 17 - 4 + 13 + 10 -2 -13 -4 +3 - 30 + 6 +3
+        x_y_offset = [0 , 15, 0]
+        max_steps = 15
+        ref_plat_height = -190
+
+
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
     # max_steps = 3 # for testing
+
+    # ref_location = (np.array([18, -101, 0]) + np.array([-13, 0, 0])) - x_y_offset
+
+
     meta = {
         # ~~~~~~~~~ Paths ~~~~~~~~~#
         "home_dir": os.path.join(
@@ -563,10 +597,11 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
         "STEP_LENGTH": 2,#5,  # nb, opposite direction to matlab experiments
-        "line_range": np.arange(-10, 11, 4).tolist(),  # in mm
+        "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
         "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
         "collect_ref_tap": True,
-        "ref_location": [18, -105, 0],  # [x,y,sensor angle in rads]
+        "ref_location": ref_location.tolist(),  # [x,y,sensor angle in rads]
+        "ref_plat_height" : ref_plat_height,
         "tol": 2,  # tolerance for displacement of second tap (0+_tol)
         "tol_height": 1,  # tolerance for height of second tap (0+_tol)
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
@@ -668,8 +703,8 @@ def plot_all_movements(ex, meta, show_figs=True):
 
     # print all tap locations
     all_tap_positions_np = np.array(ex.all_tap_positions)
-    pos_xs = all_tap_positions_np[1:, 0]
-    pos_ys = all_tap_positions_np[1:, 1]
+    pos_xs = all_tap_positions_np[2:, 0]
+    pos_ys = all_tap_positions_np[2:, 1]
     # pos_ys = pos_ys/0.8
     n = range(len(pos_xs))
     plt.plot(
@@ -1089,6 +1124,9 @@ def main(ex, model, meta):
 
         ex.collect_neutral_tap(meta)
 
+        # try not to hit everything
+        common.go_home(ex.robot, meta)
+
         # Collect / load reference tap
         if meta["collect_ref_tap"] is True:
             ref_tap = ex.collect_ref_tap(meta)
@@ -1126,7 +1164,7 @@ def main(ex, model, meta):
                 if (
                     -15 > disp_tap_1
                     or disp_tap_1 > 15
-                    or pred_height_1 > 4
+                    or pred_height_1 > 5
                     or pred_height_1 < -4
                 ):  # todo move to meta!!!
                     print(
@@ -1148,12 +1186,16 @@ def main(ex, model, meta):
                     )
 
                     # predict again
-                    (
-                        disp_tap_2,
-                        pred_height_2,
-                    ) = model.optim_single_disp_height(tap_2, mu_tap_1)
+                    # (
+                    #     disp_tap_2,
+                    #     pred_height_2,
+                    # ) = model.optim_single_disp_height(tap_2, mu_tap_1)
+                    disp_tap_2, mu_tap_2, pred_height_2 = model.optim_single_mu_disp_height(
+                        tap_2
+                    )
+
                     print(
-                        f"tap 2 optimised as disp={disp_tap_2} and mu=same and height={pred_height_2}"
+                        f"tap 2 optimised as disp={disp_tap_2} and mu={mu_tap_2} and height={pred_height_2}"
                     )
 
                     # was model good? was it within 0+-tol?
@@ -1221,7 +1263,7 @@ def main(ex, model, meta):
 
                     # init model (sets hyperpars)`
                     state.model = gplvm.GPLVM(
-                        plane_x, np.array(plane_y), start_hyperpars=[1, 10, 5, 5]
+                        plane_x, np.array(plane_y), start_hyperpars=[1, 10, 5, 1]
                     )
                     model = state.model
 
@@ -1301,7 +1343,7 @@ class State:
         self.success = success
         self.ex = Experiment()
         if meta is None:
-            self.meta = make_meta(stimuli_name="tilt-30deg-down")
+            self.meta = make_meta(stimuli_name="slide-dip")
         else:
             self.meta = meta
 

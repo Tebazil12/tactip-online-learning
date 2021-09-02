@@ -268,21 +268,25 @@ def align_radius(disp, dissim, gp_extrap=False, show_graph=False, start_hypers=N
     if type(dissim) is not np.ndarray:
         raise NameError(f"disp should be np.array not {type(dissim)}")
 
+    if len(disp) != len(dissim):
+        raise NameError(f"disp is len({len(disp)}) but dissim is len({len(dissim)})")
+
     if gp_extrap:
         if  start_hypers is None:
-            sigma_n_diss = 0.1 # this should really be calculated from sigma_n_y/same data
+            sigma_n_diss = .5 # this should really be calculated from sigma_n_y/same data
             # start_params = [100, 9]  # sigma_f and L respectively
-            start_params = [10, .1]  # sigma_f and L respectively
+            start_params = np.array([5,5])  # sigma_f and L respectively
         else:
             sigma_n_diss = start_hypers[0]
             start_params = start_hypers[1:] # sigma_f and L respectively
 
-        data = [disp, dissim, sigma_n_diss]
+        data = [disp, np.array([dissim]).T, sigma_n_diss]
         # minimizer_kwargs = {"args": data}
         result = scipy.optimize.minimize(
-            gp.max_log_like, start_params, args=data, method="BFGS",tol=0.000001,
-            options={"gtol": 0.00001, "maxiter": 300000},
-        )
+            gp.max_log_like, start_params, args=data,method="BFGS",
+            options={"gtol": 0.0000001, "maxiter": 30000})#, method="BFGS",tol=0.000001,
+            # options={"gtol": 0.00001, "maxiter": 300000},
+        # )
         # print(result)
 
         [sigma_f, L] = result.x
@@ -291,6 +295,8 @@ def align_radius(disp, dissim, gp_extrap=False, show_graph=False, start_hypers=N
         disp_stars, dissim_stars = gp.interpolate(
             disp, dissim, sigma_f, L, sigma_n_diss
         )
+        print(f"disp_stars = {disp_stars}")
+        print(f"dissim_stars = {dissim_stars}")
         if show_graph is True:
             show_dissim_profile([disp_stars, disp], [dissim_stars, dissim])
         # show_dissim_profile(np.vstack(([disp_stars],disp)), np.vstack(([dissim_stars],dissim)))
