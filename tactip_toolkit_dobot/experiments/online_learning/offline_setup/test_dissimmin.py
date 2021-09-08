@@ -8,6 +8,7 @@ import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_proce
 data = common.load_data(
     # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/contour_following_2d_11m-17d_14h19m40s/data.json"
     "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/contour_following_3d_2021y-09m-01d_11h18m48s/gplvm_000.json"
+    # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/contour_following_3d_2021y-09m-08d_15h00m40s/gplvm_000.json"
 )
 data= data['y']
 
@@ -16,11 +17,13 @@ data= data['y']
 ref_tap = common.load_data(
     # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/contour_following_2d_11m-13d_12h00m22s/ref_tap.json"
     "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/contour_following_3d_2021y-09m-01d_11h18m48s/ref_tap.json"
+    # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/contour_following_3d_2021y-09m-08d_15h00m40s/ref_tap.json"
 
 )
 meta = common.load_data(
     # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/contour_following_2d_11m-17d_14h19m40s/meta.json"
     "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/contour_following_3d_2021y-09m-01d_11h18m48s/meta.json"
+    # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/contour_following_3d_2021y-09m-08d_15h00m40s/meta.json"
 
 )
 

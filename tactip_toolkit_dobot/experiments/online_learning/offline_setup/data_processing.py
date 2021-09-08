@@ -273,7 +273,7 @@ def align_radius(disp, dissim, gp_extrap=False, show_graph=False, start_hypers=N
 
     if gp_extrap:
         if  start_hypers is None:
-            sigma_n_diss = .5 # this should really be calculated from sigma_n_y/same data
+            sigma_n_diss = .01 # this should really be calculated from sigma_n_y/same data
             # start_params = [100, 9]  # sigma_f and L respectively
             start_params = np.array([5,5])  # sigma_f and L respectively
         else:

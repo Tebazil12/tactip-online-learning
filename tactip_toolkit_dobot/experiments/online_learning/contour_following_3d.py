@@ -372,12 +372,12 @@ class Experiment:
 
         self.neutral_tap, _ = self.processed_tap_at(
             # [-20 - offset[0], -(-80) + offset[1] - 80 ],
-            [-30, -100 ],
+            [0, 0],
             0,
             meta,
             selection_criteria="Mean",
             neutral_tap=None,
-            height=height_diff
+            height=60
         )
         # self.neutral_tap, _ = self.processed_tap_at(
         #     [-20 , -(-80)], 0, meta, selection_criteria="Mean", neutral_tap=None
@@ -455,9 +455,11 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         max_steps = 25
 
     elif stimuli_name == "flower":
-        stimuli_height = -190 + 2
-        x_y_offset = [35, -35 - 10 - 10]
-        max_steps = 15  # 30
+        stimuli_height = -190 + 2 +10 -2
+        x_y_offset = [-6, 15, 0]
+        max_steps =  30
+        ref_plat_height = -190 +1+1
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "squishy-brick":
         stimuli_height = -190 - 1
@@ -470,39 +472,116 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         max_steps = 30
 
     elif stimuli_name == "tilt-0deg":
-        stimuli_height = -190 -1
-        x_y_offset = [-10, 0]
-        max_steps = 15
+        stimuli_height = -190
+        x_y_offset = [-10, 0, 0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
+    elif stimuli_name == "tilt-05deg-up":
+        stimuli_height = -190 + 17 - 4 -10 - 2 -2
+        x_y_offset = [-10, 0,0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-10deg-up":
-        stimuli_height = -190 -1
-        x_y_offset = [-8, 0]
-        max_steps = 15
+        stimuli_height = -190 + 17 - 4 -10 - 2 -2
+        x_y_offset = [-10, 0,0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
+    elif stimuli_name == "tilt-15deg-up":
+        stimuli_height = -190 + 17 - 4 -10 - 2 -2
+        x_y_offset = [-10, 0,0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
+    elif stimuli_name == "tilt-20deg-up":
+        stimuli_height = -190 + 17 - 4 -10 - 2
+        x_y_offset = [-10, 0,0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
+    elif stimuli_name == "tilt-25deg-up":
+        stimuli_height = -190 + 17 - 4 -10
+        x_y_offset = [-10, 0,0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
+    elif stimuli_name == "tilt-30deg-up":
+        stimuli_height = -190 + 17 - 4 -10
+        x_y_offset = [-10, 0,0]
+        max_steps = 25
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
+    elif stimuli_name == "tilt-35deg-up":
+        stimuli_height = -190 + 17 - 4 -10 +3
+        x_y_offset = [-10, 0,0]
+        max_steps = 25
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
+    elif stimuli_name == "tilt-40deg-up":
+        stimuli_height = -190 + 17 - 4 -10 +5
+        x_y_offset = [-10, 0,0]
+        max_steps = 25
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
+    elif stimuli_name == "tilt-45deg-up":
+        stimuli_height = -190 + 17 - 4 -10 +5 +4
+        x_y_offset = [-10, 0,0]
+        max_steps = 20
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-10deg-down":
         stimuli_height = -190 + 17 - 4
-        x_y_offset = [-10, 0]
-        max_steps = 15
+        x_y_offset = [-10, 0, 0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-05deg-down":
         stimuli_height = -190 + 17 - 4 -8 +2
-        x_y_offset = [-10, 0]
-        max_steps = 15
+        x_y_offset = [-10, 0, 0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
+    elif stimuli_name == "tilt-15deg-down":
+        stimuli_height = -190 + 17 - 4 + 6
+        x_y_offset = [-10, 0,0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-20deg-down":
-        stimuli_height = -190 + 17 - 4 + 13
-        x_y_offset = [-12, 0]
-        max_steps = 15
+        stimuli_height = -190 + 17 - 4 + 13 -1
+        x_y_offset = [-10, 0,0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-25deg-down":
         stimuli_height = -190 + 17 - 4 + 13 + 10 -2
-        x_y_offset = [-12, 0]
-        max_steps = 15
+        x_y_offset = [-10, 0,0]
+        max_steps = 30
+        ref_plat_height = -190 -1
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-30deg-down":
         stimuli_height = -190 + 17 - 4 + 13 + 10 -2 +10 -13 -4
-        x_y_offset = [-11, 0]
-        max_steps = 15
+        x_y_offset = [-11, 0,0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "slide-minipeak":
         stimuli_height = -170 +20 - 15 +2 +2
@@ -513,17 +592,17 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
 
     elif stimuli_name == "slide-dip":
         stimuli_height = -170 +20 - 15 +2 - 13
-        x_y_offset = [26, 18-60+12, 0]
-        max_steps = 35
+        x_y_offset = [26+1, 18-60+12, 0]
+        max_steps = 40
         ref_plat_height = stimuli_height -1
         ref_location = np.array([0,0,0])
 
     elif stimuli_name == "saddle-high":
-        stimuli_height = -170 +2
-        x_y_offset = [0 , 15, 0]
+        stimuli_height = -170 +2-1
+        x_y_offset = [0-3 , 15, 0]
         max_steps = 35
-        ref_plat_height = -190 +1
-        ref_location = (np.array([18, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = -190 +1+1
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "saddle-low":
         stimuli_height = -190 + 17 - 4 + 13 + 10 -2 -13 -4 +3 - 30 + 6 +3
@@ -590,7 +669,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "brightness": 255,
         "contrast": 255,
         "crop": None,
-        "source": 0,
+        "source": 1,
         # ~~~~~~~~~ Processing Settings ~~~~~~~~~#
         "num_frames": 1,
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
@@ -1121,6 +1200,7 @@ def main(ex, model, meta):
 
     with common.make_robot() as ex.robot, common.make_sensor(meta) as ex.sensor:
         common.init_robot(ex.robot, meta, do_homing=False)
+        common.go_home(ex.robot, meta) # explicit becuase init doesnt always work!
 
         ex.collect_neutral_tap(meta)
 
@@ -1176,7 +1256,7 @@ def main(ex, model, meta):
 
                     # move predicted distance
                     tap_2_location = ex.displace_along_line(
-                        new_location, -disp_tap_1, new_orient
+                        new_location, disp_tap_1, new_orient
                     )
 
                     tap_2_height = new_height - pred_height_1
@@ -1343,7 +1423,7 @@ class State:
         self.success = success
         self.ex = Experiment()
         if meta is None:
-            self.meta = make_meta(stimuli_name="slide-dip")
+            self.meta = make_meta(stimuli_name="tilt-25deg-down")
         else:
             self.meta = meta
 
