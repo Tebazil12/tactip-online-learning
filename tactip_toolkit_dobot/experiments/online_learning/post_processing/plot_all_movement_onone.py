@@ -60,7 +60,20 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
 
     if meta["stimuli_name"].split("-")[0] == "tilt":
         # plt.plot([0, 0, 100],[0, 80, 80])
-        plt.plot([0, 60],[0, 0], 'k:')
+        # plt.plot([0, 60],[0, 0], 'k:')
+
+        # x1 = (31.97--34.82)/0.765
+        # x1_smaller = x1* (60/x1)
+        # y1 = (170.84-168.58) * (60/x1)
+        #
+        # plt.plot([0, x1_smaller],[0, y1], 'k:')
+
+        x1 = (56.42--12.05)/0.765
+        x1_smaller = x1* (60/x1)
+        y1 = (171.67-167.95) * (60/x1)
+
+
+        plt.plot([0, x1_smaller],[0, y1], 'k:')
 
     # # print all tap locations
     # all_tap_positions_np = np.array(ex.all_tap_positions)
@@ -146,18 +159,18 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
     exp_name = part_path.split("/")
     readable_name = parse_exp_name(exp_name[1])
 
-    plt.gcf().text(
-        0.01, 1.01, meta["stimuli_name"], transform=ax.transAxes, fontsize=4, alpha=0.2
-    )
-    plt.gcf().text(
-        1,
-        1.01,
-        readable_name,
-        transform=ax.transAxes,
-        fontsize=4,
-        alpha=0.2,
-        ha="right",
-    )
+    # plt.gcf().text(
+    #     0.01, 1.01, meta["stimuli_name"], transform=ax.transAxes, fontsize=4, alpha=0.2
+    # )
+    # plt.gcf().text(
+    #     1,
+    #     1.01,
+    #     readable_name,
+    #     transform=ax.transAxes,
+    #     fontsize=4,
+    #     alpha=0.2,
+    #     ha="right",
+    # )
     #     # Don't allow the axis to be on top of your data
     ax.set_axisbelow(True)
 
@@ -166,9 +179,9 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
     # print(xmax)
     # plt.axis([xmin, xmax + 2, ymin, ymax])
 
-    ax.annotate(
-        str(tilt_angle)+"$\degree$", (pos_xs[-1]+1.75,pos_ys[-1]), fontsize=5, ha="center", va="center", color="black"
-    )
+    # ax.annotate(
+    #     str(tilt_angle)+"$\degree$", (pos_xs[-1]+1.75,pos_ys[-1]), fontsize=5, ha="center", va="center", color="black"
+    # )
 
     #
     # # Turn on the minor TICKS, which are required for the minor GRID
@@ -199,6 +212,18 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
 
     if save_figs:
         plt.clf()
+
+    p1 = np.array([0,0])
+    p2 = np.array([x1_smaller,y1])
+    p3 = np.concatenate(([pos_xs],[pos_ys])).T
+    # print(p3)
+
+    # d=np.cross(p2-p1,p3-p1)/np.linalg.norm(p2-p1)
+    d = np.abs(np.cross(p2-p1, p3-p1)) / np.linalg.norm(p2-p1)
+    print(f"##### distance = {d} #####")
+    averages = np.mean(np.abs(d))
+    print(f"#### mean = {np.around(averages,1)} ####")
+    return (tilt_angle, np.around(averages,1))
 
 def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
     # print(ex.all_tap_positions)
@@ -253,7 +278,16 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
     #     )
     #     for x in np.array([n,  pos_ys, heights]).T
     # ]
+    p1 = np.array([0,0])
+    p2 = np.array([x_distance,y_distance])
+    p3 = np.concatenate(([pos_ys],[heights])).T
+    # print(p3)
 
+    # d=np.cross(p2-p1,p3-p1)/np.linalg.norm(p2-p1)
+    d = np.abs(np.cross(p2-p1, p3-p1)) / np.linalg.norm(p2-p1)
+    print(f"##### distance = {d} #####")
+    averages = np.mean(np.abs(d))
+    print(f"#### mean = {np.around(averages,1)} ####")
 
     ax.annotate(
         str(tilt_angle)+"$\degree$", (x_distance+1.75, y_distance), fontsize=5, ha="center", va="center", color="black"
@@ -373,6 +407,8 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
     if save_figs:
         plt.clf()
 
+    return (tilt_angle, np.around(averages,1))
+
 
 
 if __name__ == "__main__":
@@ -380,6 +416,8 @@ if __name__ == "__main__":
     data_home = (
         "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2022/"
     )
+
+    averages_array =[]
 
     for subdir, dirs, files in os.walk(data_home):
         print(subdir)
@@ -420,15 +458,19 @@ if __name__ == "__main__":
             # print("hee")
             # print(stimuli.split("-"))
             if meta["stimuli_name"].split('-')[0] == "tilt":
-                plot_all_movements(ex,meta, show_figs, save_figs=False)
-                # plot_all_movements_3d(ex,meta, show_figs, save_figs=False)
+                averages_array.append(plot_all_movements(ex,meta, show_figs, save_figs=False))
+                # averages_array.append(plot_all_movements_3d(ex,meta, show_figs, save_figs=False))
             # except:
             #     print("Plot all failed, moving on")
+
+    print(averages_array)
+    print("sorted:")
+    print(sorted(averages_array, key=lambda x: x[0]))
 
     xmin, xmax, ymin, ymax = plt.axis()
     # print(xmax)
     # plt.axis([xmin+2, xmax + 1, ymin +2, ymax -1])
-    plt.axis([xmin, xmax , ymin , ymax ])
+    plt.axis([xmin+2, xmax-2 ,  ymax+1, ymin-1 ])
 
     # plt.legend(loc="upper left",fontsize=5)
 
