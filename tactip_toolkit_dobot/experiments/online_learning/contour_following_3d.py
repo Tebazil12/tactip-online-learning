@@ -1328,7 +1328,7 @@ def main(ex, model, meta):
                 plane_y = np.concatenate((new_taps, new_taps_height), axis=0)
 
                 plane_disps = np.concatenate((adjusted_disps, np.zeros((len(adjusted_heights),1))), axis=0)
-                plane_heights =np.concatenate((edge_height*np.ones((len(adjusted_disps),1)),adjusted_heights ), axis=0)
+                plane_heights =np.concatenate(((new_height-edge_height)*np.ones((len(adjusted_disps),1)),adjusted_heights ), axis=0)
 
                 plane_x_no_mu = np.concatenate((plane_disps, plane_heights), axis=1)
 
@@ -1423,7 +1423,7 @@ class State:
         self.success = success
         self.ex = Experiment()
         if meta is None:
-            self.meta = make_meta(stimuli_name="tilt-25deg-down")
+            self.meta = make_meta(stimuli_name="saddle-high")
         else:
             self.meta = meta
 
