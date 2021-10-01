@@ -7,7 +7,7 @@ import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_proce
 class GPLVM:
     # sigma_n_y = 1.14  # TODO this is for the normal tactip, needs setting for others!
     # sigma_n_y = 100
-    sigma_n_y = 0.01#0.379#0.0433#0.379#2061569338708 #Tacfoot #TODO this should really be passed from meta
+    sigma_n_y = 0.379#0.0433#0.379#2061569338708 #Tacfoot #TODO this should really be passed from meta
 
     def __init__(self, x, y, sigma_f=None, ls=None, start_hyperpars=None):
         """

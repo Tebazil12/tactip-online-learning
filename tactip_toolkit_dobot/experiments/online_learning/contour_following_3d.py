@@ -607,10 +607,13 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_location = np.array([2,0,0])
 
     elif stimuli_name == "saddle-low":
-        stimuli_height = -190 + 17 - 4 + 13 + 10 -2 -13 -4 +3 - 30 + 6 +3
+        stimuli_height = -170 +2-1 - 20 -2
         x_y_offset = [0 , 15, 0]
-        max_steps = 15
-        ref_plat_height = -190
+        max_steps = 35
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([2,0,0])
 
 
     else:
@@ -677,14 +680,14 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
-        "STEP_LENGTH": 1,#2,#5,  # nb, opposite direction to matlab experiments
+        "STEP_LENGTH": 2,#5,  # nb, opposite direction to matlab experiments
         "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
         "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": ref_location.tolist(),  # [x,y,sensor angle in rads]
         "ref_plat_height" : ref_plat_height,
-        "tol": 2,  # tolerance for displacement of second tap (0+_tol)
-        "tol_height": 1,  # tolerance for height of second tap (0+_tol)
+        "tol": 1,  # tolerance for displacement of second tap (0+_tol)
+        "tol_height": 0.5,  # tolerance for height of second tap (0+_tol)
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
         "comments": "3d trials",  # so you can identify runs later
     }
@@ -1425,7 +1428,7 @@ class State:
         self.success = success
         self.ex = Experiment()
         if meta is None:
-            self.meta = make_meta(stimuli_name="saddle-high")
+            self.meta = make_meta(stimuli_name="saddle-low")
         else:
             self.meta = meta
 
