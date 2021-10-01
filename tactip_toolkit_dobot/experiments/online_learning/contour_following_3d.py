@@ -1068,7 +1068,7 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
     plt.clf()
 
 
-def plot_gplvm(model, meta):
+def plot_gplvm(model, meta, show_fig=True):
     # dissim vs mu vs disp
     # per line (use meta range for counting)
     ax = plt.gca(projection="3d")
@@ -1151,9 +1151,9 @@ def plot_gplvm(model, meta):
     full_path_svg = os.path.join(meta["home_dir"], part_path, "gplvm_final.svg")
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
-
-    plt.show()
-    plt.clf()
+    if show_fig:
+        plt.show()
+        plt.clf()
 
 
 def parse_exp_name(name):

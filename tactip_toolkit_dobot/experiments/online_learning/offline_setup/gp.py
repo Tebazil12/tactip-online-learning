@@ -197,7 +197,7 @@ def calc_covariance(x, x_primes, sigma_f, L):
     return k
 
 
-def interpolate(x, y, sigma_f, L, sigma_n, x_limits=None, x_step=0.1):
+def interpolate(x, y, sigma_f, L, sigma_n, x_limits=None, x_step=0.1, mu=None, height=None):
     """
     Given example data, x and y, and (optimised) hyperparameters, use a gp
     to interpolate y at a range of x's between the x_limits (both inclusive).
@@ -208,10 +208,16 @@ def interpolate(x, y, sigma_f, L, sigma_n, x_limits=None, x_step=0.1):
     k_cap = calc_K(x, sigma_f, L, sigma_n)
     # k_cap = np.array([k_cap])  # so that transpose works...
 
+
     if x_limits is None:
         x_stars = np.arange(np.amin(x), np.amax(x) + x_step, x_step)
     else:
         x_stars = np.arange(x_limits[0], x_limits[1] + x_step, x_step)
+    len_x_stars = len(x_stars)
+    if height is not None and mu is not None:
+        x_stars = np.array([x_stars, np.ones(len_x_stars)*height, np.ones(len_x_stars)*mu]).T
+
+
 
     # x_stars = np.around(x_stars, 4)  # get rid of tiny errors
 
@@ -219,6 +225,11 @@ def interpolate(x, y, sigma_f, L, sigma_n, x_limits=None, x_step=0.1):
 
     for i, x_star in enumerate(x_stars):
         # print(i, x_star)
+
+        # print(x.shape)
+        # print(x_star.shape)
+        # print(f"x_star is {x_star}")
+        # dfg
 
         k_cap_star = cal_K_star(x, x_star, sigma_f, L, sigma_n)
         k_cap_star = np.array([k_cap_star])
