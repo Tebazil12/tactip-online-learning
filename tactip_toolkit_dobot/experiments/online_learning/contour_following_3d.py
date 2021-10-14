@@ -615,6 +615,15 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_plat_height = stimuli_height
         ref_location = np.array([2,0,0])
 
+    elif stimuli_name == "flower-tilted":
+        stimuli_height = -170 +2-1 -7
+        x_y_offset = [5 , 15, 0]
+        max_steps = 35
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([2,0,0])
+
 
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
@@ -1261,7 +1270,7 @@ def main(ex, model, meta):
 
                     # move predicted distance
                     tap_2_location = ex.displace_along_line(
-                        new_location, -disp_tap_1, new_orient
+                        new_location, disp_tap_1, new_orient
                     )
 
                     tap_2_height = new_height - pred_height_1
@@ -1282,6 +1291,9 @@ def main(ex, model, meta):
                     print(
                         f"tap 2 optimised as disp={disp_tap_2} and mu={mu_tap_2} and height={pred_height_2}"
                     )
+                    # print(
+                    #     f"tap 2 optimised as disp={disp_tap_2} and mu=same and height={pred_height_2}"
+                    # )
 
                     # was model good? was it within 0+-tol?
                     tol_d = meta["tol"]
@@ -1428,7 +1440,7 @@ class State:
         self.success = success
         self.ex = Experiment()
         if meta is None:
-            self.meta = make_meta(stimuli_name="saddle-low")
+            self.meta = make_meta(stimuli_name="flower-tilted")
         else:
             self.meta = meta
 
