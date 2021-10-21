@@ -23,6 +23,7 @@ class Plane:
     phis = None  # known / estimated sensor angle wrt edge
 
     x = None  # combination -> x = [locs, phis, heights]
+    x_no_mu = None # x but without mu, so mu can be optimised
 
     y = None  # the (processed) pin data at these points
 
@@ -35,16 +36,28 @@ class Plane:
         pass
 
     def make_x(self):
+        # if len(self.disps.shape) is not 2:
+        #     raise NameError(f"disps is wrong shape to make x: is {self.disps.shape} not (*,1)")
+        #
+        # if len(self.heights.shape) is not 2:
+        #     raise NameError(f"heights is wrong shape to make x: is {self.heights.shape} not (*,1)")
+        #
+        # if len(self.phis.shape) is not 1:
+        #     raise NameError(f"phis is wrong shape to make x: is {self.phis.shape} not (*,)")
+
         # combine locs and phis (if needed, heights) - reuse other funciotn?
         self.x = np.concatenate(
             (
-                np.array([self.disps]).T,
-                np.array([self.heights]).T,
+                self.disps,
+                self.heights,
                 np.array([self.phis]).T,
             ),
             axis=1,
         )
-        # print(f"x is shape: {np.shape(self.x)}")
+        print(f"x is shape: {np.shape(self.x)}")
+
+    def make_x_no_mu(self):
+        self.x_no_mu = np.concatenate((self.disps, self.heights), axis=1)
 
     def make_all_heights(self, height):
         # make heights the same length as disp and set to given height

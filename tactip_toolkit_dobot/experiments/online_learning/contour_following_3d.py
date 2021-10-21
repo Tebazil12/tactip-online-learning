@@ -38,6 +38,7 @@ import tactip_toolkit_dobot.experiments.min_example.common as common
 
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gplvm as gplvm
+from tactip_toolkit_dobot.experiments.online_learning.offline_3d.offline_train_3d import Plane
 
 
 np.set_printoptions(precision=2, suppress=True)
@@ -187,6 +188,63 @@ class Experiment:
 
         return best_frames
 
+
+    def collect_cross(self,new_location,new_orient, new_height, ref_tap, meta ):
+        ###----###
+        print("Collecting data cross")
+
+
+        # collect displacement line only
+        new_taps = self.collect_line(
+            new_location, new_orient, meta, height=new_height
+        )
+        edge_location, adjusted_disps = self.find_edge_in_line(
+            new_taps, ref_tap, new_location, new_orient, meta
+        )
+
+        # todo (maybe) use plane class to track data better?
+
+        # make robot go via safe point, instead of through object!
+        common.move_to(new_location, np.rad2deg(new_orient), self.robot, meta,height=new_height+5)
+
+
+        # collect height profile (doing cross method)
+        new_taps_height = self.collect_height_line(
+            edge_location, new_orient, meta, new_height
+        )
+        # find minima in height profile
+        edge_height, adjusted_heights = self.find_edge_in_line_height(
+            new_taps_height, ref_tap, new_height, meta
+        )
+
+        ###----###
+
+        plane = Plane()
+
+        # add taps together to make partial x = dips height, no mu yet
+        plane.y = np.concatenate((new_taps, new_taps_height), axis=0)
+
+        plane.disps = np.concatenate((adjusted_disps, np.zeros((len(adjusted_heights),1))), axis=0)
+        plane.heights =np.concatenate(((new_height-edge_height)*np.ones((len(adjusted_disps),1)),adjusted_heights ), axis=0)
+
+        plane.make_x_no_mu()
+
+        ###----###
+        return plane, edge_location, edge_height
+
+
+    def collect_grid(self,new_location,new_orient, new_height, ref_tap, meta  ):
+        print("Collecting data grid")
+
+        for height_delta in meta["height_range"]:
+
+            new_taps = self.collect_line(
+                new_location, new_orient, meta, height=new_height+height_delta
+            )
+
+
+        # return plane_y, plane_disps, plane_x_no_mu
+        # return plane, edge_location, edge_height
 
     def add_to_alldata(self, keypoints, position):
         """
@@ -691,6 +749,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "MAX_STEPS": max_steps,
         "STEP_LENGTH": 2,#5,  # nb, opposite direction to matlab experiments
         "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
+        # "line_range": np.arange(-1, 2, 1).tolist(),  # in mm
         "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": ref_location.tolist(),  # [x,y,sensor angle in rads]
@@ -1316,64 +1375,36 @@ def main(ex, model, meta):
                         edge_height =  tap_2_height
 
             if collect_more_data is True:
-                print("Collecting data line")
 
-                # collect displacement line only
-                new_taps = ex.collect_line(
-                    new_location, new_orient, meta, height=new_height
-                )
-                edge_location, adjusted_disps = ex.find_edge_in_line(
-                    new_taps, ref_tap, new_location, new_orient, meta
-                )
-
-                # todo (maybe) use plane class to track data better?
-
-                # make robot go via safe point, instead of through object!
-                common.move_to(new_location, np.rad2deg(new_orient), ex.robot, meta,height=new_height+5)
-
-
-                # collect height profile (doing cross method)
-                new_taps_height = ex.collect_height_line(
-                    edge_location, new_orient, meta, new_height
-                )
-                # find minima in height profile
-                edge_height, adjusted_heights = ex.find_edge_in_line_height(
-                    new_taps_height, ref_tap, new_height, meta
-                )
-
-                # add taps together to make partial x = dips height, no mu yet
-                plane_y = np.concatenate((new_taps, new_taps_height), axis=0)
-
-                plane_disps = np.concatenate((adjusted_disps, np.zeros((len(adjusted_heights),1))), axis=0)
-                plane_heights =np.concatenate(((new_height-edge_height)*np.ones((len(adjusted_disps),1)),adjusted_heights ), axis=0)
-
-                plane_x_no_mu = np.concatenate((plane_disps, plane_heights), axis=1)
-
-
-
+                # plane_y, plane_disps, plane_x_no_mu = ex.collect_grid()
+                plane, edge_location, edge_height = ex.collect_cross(new_location, new_orient, new_height, ref_tap, meta)
 
                 if model is None:
                     print("Model is None, mu will be 1")
                     # set mus to 1 for first line only - elsewhere mu is optimised
-                    plane_mus = 1 * np.ones((len(plane_disps),1))
-                    plane_x = np.concatenate((plane_x_no_mu, plane_mus), axis=1)
+                    # plane.mus = 1 * np.ones((len(plane.disps),1))
+                    plane.make_all_phis(1)
+                    # plane.x = np.concatenate((plane.x_no_mu, plane.mus), axis=1)
+                    plane.make_x()
 
                     # init model (sets hyperpars)`
                     state.model = gplvm.GPLVM(
-                        plane_x, np.array(plane_y), start_hyperpars=[1, 10, 5, 1]
+                        plane.x, np.array(plane.y), start_hyperpars=[1, 10, 5, 1]
                     )
                     model = state.model
 
                 else:
                     # optimise mu of line given old data and hyperpars
-                    optm_mu = model.optim_line_mu(plane_x_no_mu, plane_y)
+                    optm_mu = model.optim_line_mu(plane.x_no_mu, plane.y)
 
-                    plane_x = dp.add_line_mu(plane_x_no_mu, optm_mu)
-                    print(f"line x to add to model = {plane_x}")
+                    # plane.x = dp.add_line_mu(plane.x_no_mu, optm_mu)
+                    plane.make_all_phis(optm_mu)
+                    plane.make_x()
+                    print(f"line x to add to model = {plane.x}")
 
                     # save line to model (taking care with dimensions...)
-                    model.x = np.vstack((model.x, plane_x))
-                    model.y = np.vstack((model.y, plane_y))
+                    model.x = np.vstack((model.x, plane.x))
+                    model.y = np.vstack((model.y, plane.y))
 
                 print(
                     f"model inited with ls: {str(model.ls)} sigma_f: {str(model.sigma_f)}"
