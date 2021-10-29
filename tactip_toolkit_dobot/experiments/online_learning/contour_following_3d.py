@@ -233,18 +233,67 @@ class Experiment:
         return plane, edge_location, edge_height
 
 
-    def collect_grid(self,new_location,new_orient, new_height, ref_tap, meta  ):
+    def collect_grid(self, new_location, orient, new_height, ref_tap, meta):
         print("Collecting data grid")
+
+        plane = Plane()
 
         for height_delta in meta["height_range"]:
 
             new_taps = self.collect_line(
-                new_location, new_orient, meta, height=new_height+height_delta
+                new_location, orient, meta, height=new_height+height_delta
             )
+            if plane.y is None:
+                plane.y = new_taps
+            else:
+                plane.y = np.concatenate((plane.y, new_taps), axis=0)
+
+            if plane.disps is None:
+                plane.disps = np.array([meta["line_range"]]).T
+            else:
+                plane.disps = np.concatenate((plane.disps, np.array([meta["line_range"]]).T), axis=0)
+
+            if plane.heights is None:
+                plane.heights = (height_delta) * np.ones((len(meta["line_range"]),1))
+                # plane.heights = (new_height+height_delta) * np.ones((len(meta["line_range"]),1))
+            else:
+                plane.heights =np.concatenate((plane.heights, (height_delta) * np.ones((len(meta["line_range"]),1))), axis=0)
+
+        # adjust disps and heights based on minima
+
+        # calc dissims for all ys
+        plane.dissims = dp.calc_dissims(plane.y, ref_tap)
+
+        # identify minima index
+        index = plane.dissims.argmin()
+
+        # get height at same index # todo check dimensions
+        height_offset = plane.heights[index][0]
+
+        # subtract/add height to all
+        plane.heights = plane.heights - height_offset
 
 
-        # return plane_y, plane_disps, plane_x_no_mu
-        # return plane, edge_location, edge_height
+        # get displacement at same index
+        disp_offset = plane.disps[index]
+
+        # subtract/add disp to all
+        plane.disps = plane.disps - disp_offset
+
+        print(f"offsets are: disp {disp_offset} and height {height_offset}")
+
+        # use orientation and location to find real location in 2d space
+        edge_location = new_location + disp_offset * np.array([np.cos(orient), np.sin(orient)])
+        print(f"old location was {new_location} and edge is {edge_location}")
+
+        # find real height (not just relative to line)
+        edge_height = new_height + height_offset
+        print(f"old height is {new_height} and edge is {edge_height}")
+
+        # add taps together to make partial x = dips height, no mu yet
+        plane.make_x_no_mu()
+
+        return plane, edge_location, edge_height
 
     def add_to_alldata(self, keypoints, position):
         """
@@ -751,6 +800,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
         # "line_range": np.arange(-1, 2, 1).tolist(),  # in mm
         "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
+        # "height_range": np.array(np.arange(-1, 1.5001, 1)).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": ref_location.tolist(),  # [x,y,sensor angle in rads]
         "ref_plat_height" : ref_plat_height,
@@ -1376,8 +1426,8 @@ def main(ex, model, meta):
 
             if collect_more_data is True:
 
-                # plane_y, plane_disps, plane_x_no_mu = ex.collect_grid()
-                plane, edge_location, edge_height = ex.collect_cross(new_location, new_orient, new_height, ref_tap, meta)
+                plane, edge_location, edge_height = ex.collect_grid(new_location, new_orient, new_height, ref_tap, meta)
+                # plane, edge_location, edge_height = ex.collect_cross(new_location, new_orient, new_height, ref_tap, meta)
 
                 if model is None:
                     print("Model is None, mu will be 1")
