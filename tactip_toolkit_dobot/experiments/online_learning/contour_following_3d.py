@@ -275,7 +275,7 @@ class Experiment:
 
 
         # get displacement at same index
-        disp_offset = plane.disps[index]
+        disp_offset = plane.disps[index][0]
 
         # subtract/add disp to all
         plane.disps = plane.disps - disp_offset
@@ -1273,6 +1273,53 @@ def plot_gplvm(model, meta, show_fig=True):
         plt.show()
         plt.clf()
 
+def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False):
+
+
+
+    # plt.show()
+    # plt.clf()
+    disps_meshed = np.reshape(plane.disps , (len(meta["height_range"]), len(meta["line_range"])))
+    heights_meshed = np.reshape(plane.heights , (len(meta["height_range"]), len(meta["line_range"])))
+    dissims_meshed = np.reshape(plane.dissims , (len(meta["height_range"]), len(meta["line_range"])))
+    # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="jet")
+    # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="CMRmap")
+    # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="nipy_spectral")
+
+    min_num = 0
+    max_num = 75
+    # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo", vmin=min_num,vmax=max_num)
+    plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo")
+    plt.xlabel("Displacment (mm)")
+    plt.ylabel("Height (mm)")
+    plt.colorbar()
+
+    plt.plot([min(plane.disps),max(plane.disps)],[0,0], "k:")
+    plt.plot([0,0],[min(plane.heights),max(plane.heights)], "k:")
+
+
+    colour = plane.dissims/np.max(plane.dissims)
+    # plt.scatter(plane.disps, plane.heights, c=colour, cmap="jet", edgecolors='k')
+    # plt.scatter(plane.disps, plane.heights, c=colour, cmap="viridis", edgecolors='k')
+    # plt.scatter(plane.disps, plane.heights, c=colour, cmap="turbo", edgecolors='k')
+    plt.scatter(plane.disps, plane.heights, edgecolors='k', facecolors='none'  )
+    #
+    # plt.show()
+    # plt.clf()
+
+    # save graphs automatically
+    part_path, _ = os.path.split(meta["meta_file"])
+    if step_num_str is None:
+        full_path_png = os.path.join(meta["home_dir"], part_path, "grid_final.png")
+        full_path_svg = os.path.join(meta["home_dir"], part_path, "grid_final.svg")
+    else:
+        full_path_png = os.path.join(meta["home_dir"], part_path, "grid_"+step_num_str+".png")
+        full_path_svg = os.path.join(meta["home_dir"], part_path, "grid"+step_num_str+".svg")
+    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+    if show_fig:
+        plt.show()
+    plt.clf()
 
 def parse_exp_name(name):
     # contour_following_2d_01m-22d_14h58m05s
@@ -1428,6 +1475,9 @@ def main(ex, model, meta):
 
                 plane, edge_location, edge_height = ex.collect_grid(new_location, new_orient, new_height, ref_tap, meta)
                 # plane, edge_location, edge_height = ex.collect_cross(new_location, new_orient, new_height, ref_tap, meta)
+                print(f"plane is {plane} and has {plane.__dict__}")
+
+                plot_dissim_grid(plane, meta)
 
                 if model is None:
                     print("Model is None, mu will be 1")
@@ -1496,6 +1546,12 @@ def main(ex, model, meta):
                 ex.edge_height, meta, name="all_edge_heights_" + step_n_str + ".json"
             )
 
+            if plane is not None:
+                plot_dissim_grid(plane, meta, step_n_str)
+                common.save_data(
+                    plane.__dict__, meta, name="plane_" + step_n_str + ".json"
+                )
+            plane = None
             collect_more_data = False  # last thing in loop, reset for next loop
 
         common.go_home(ex.robot, meta)
