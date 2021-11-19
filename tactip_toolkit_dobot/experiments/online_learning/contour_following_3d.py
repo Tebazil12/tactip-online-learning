@@ -1273,36 +1273,50 @@ def plot_gplvm(model, meta, show_fig=True):
         plt.show()
         plt.clf()
 
-def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False):
+def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True):
+    plt.clf()
+    colour = plane.dissims/np.max(plane.dissims)
+
+    if filled:
+        # plt.show()
+        # print(f"shape of disps {plane.disps.tolist()} heights {plane.heights.T.shape} dissims {plane.dissims.T.shape}")
+        mesh_shape = (len(meta["height_range"]), len(meta["line_range"]))
 
 
+        disps_meshed = np.reshape(plane.disps , mesh_shape)
+        heights_meshed = np.reshape(plane.heights, mesh_shape)
+        dissims_meshed = np.reshape(plane.dissims, mesh_shape)
 
-    # plt.show()
-    # plt.clf()
-    disps_meshed = np.reshape(plane.disps , (len(meta["height_range"]), len(meta["line_range"])))
-    heights_meshed = np.reshape(plane.heights , (len(meta["height_range"]), len(meta["line_range"])))
-    dissims_meshed = np.reshape(plane.dissims , (len(meta["height_range"]), len(meta["line_range"])))
-    # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="jet")
-    # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="CMRmap")
-    # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="nipy_spectral")
+        print(f"disps m {disps_meshed.shape} \n {disps_meshed}")
+        print(f"heigh m {heights_meshed.shape} \n {heights_meshed}")
+        print(f"dissm m {dissims_meshed.shape} \n {dissims_meshed}")
 
-    min_num = 0
-    max_num = 75
-    # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo", vmin=min_num,vmax=max_num)
-    plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo")
+        # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="jet")
+        # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="CMRmap")
+        # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="nipy_spectral")
+
+        # min_num = 0
+        # max_num = 75
+        # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo", vmin=min_num,vmax=max_num)
+        plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo")
+        # plt.contourf(disps_meshed, heights_meshed, plane.dissims, 100, cmap="turbo")
+        plt.colorbar()
+
+        # plt.scatter(plane.disps, plane.heights, edgecolors='k', facecolors='none'  )
+        plt.scatter(plane.disps, plane.heights, c=colour, cmap="turbo", edgecolors='k')
+
+    else:
+
+        # plt.scatter(plane.disps, plane.heights, c=colour, cmap="jet", edgecolors='k')
+        # plt.scatter(plane.disps, plane.heights, c=colour, cmap="viridis", edgecolors='k')
+        plt.scatter(plane.disps, plane.heights, c=colour, cmap="turbo", edgecolors='k')
+
     plt.xlabel("Displacment (mm)")
     plt.ylabel("Height (mm)")
-    plt.colorbar()
 
+    # show where 0,0 is clearly
     plt.plot([min(plane.disps),max(plane.disps)],[0,0], "k:")
     plt.plot([0,0],[min(plane.heights),max(plane.heights)], "k:")
-
-
-    colour = plane.dissims/np.max(plane.dissims)
-    # plt.scatter(plane.disps, plane.heights, c=colour, cmap="jet", edgecolors='k')
-    # plt.scatter(plane.disps, plane.heights, c=colour, cmap="viridis", edgecolors='k')
-    # plt.scatter(plane.disps, plane.heights, c=colour, cmap="turbo", edgecolors='k')
-    plt.scatter(plane.disps, plane.heights, edgecolors='k', facecolors='none'  )
     #
     # plt.show()
     # plt.clf()
@@ -1314,7 +1328,7 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False):
         full_path_svg = os.path.join(meta["home_dir"], part_path, "grid_final.svg")
     else:
         full_path_png = os.path.join(meta["home_dir"], part_path, "grid_"+step_num_str+".png")
-        full_path_svg = os.path.join(meta["home_dir"], part_path, "grid"+step_num_str+".svg")
+        full_path_svg = os.path.join(meta["home_dir"], part_path, "grid_"+step_num_str+".svg")
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
     if show_fig:
@@ -1477,7 +1491,7 @@ def main(ex, model, meta):
                 # plane, edge_location, edge_height = ex.collect_cross(new_location, new_orient, new_height, ref_tap, meta)
                 print(f"plane is {plane} and has {plane.__dict__}")
 
-                plot_dissim_grid(plane, meta)
+                plot_dissim_grid(plane, meta) #TODO currently will break if not full grid
 
                 if model is None:
                     print("Model is None, mu will be 1")
@@ -1547,7 +1561,7 @@ def main(ex, model, meta):
             )
 
             if plane is not None:
-                plot_dissim_grid(plane, meta, step_n_str)
+                plot_dissim_grid(plane, meta, step_n_str) #TODO will break if not full grid
                 common.save_data(
                     plane.__dict__, meta, name="plane_" + step_n_str + ".json"
                 )

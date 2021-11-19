@@ -1028,7 +1028,7 @@ if __name__ == "__main__":
     data_home = (
         "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
     )
-    # current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
+    current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
     # current_experiment = "collect_dataset_3d_21y-03m-26d_15h11m11s/"
     # current_experiment = "collect_dataset_3d_21y-03m-26d_15h17m30s/"
     # current_experiment = "collect_dataset_3d_21y-03m-26d_15h21m03s/"
@@ -1072,7 +1072,7 @@ if __name__ == "__main__":
     # current_experiment = "collect_dataset_3d_21y-03m-30d_12h06m43s/"
     # current_experiment = "collect_dataset_3d_21y-04m-13d_14h57m22s/"
     # current_experiment = "collect_dataset_3d_21y-04m-19d_11h18m10s/"
-    current_experiment = "collect_dataset_3d_21y-04m-20d_13h47m03s/"
+    # current_experiment = "collect_dataset_3d_21y-04m-20d_13h47m03s/"
     # current_experiment = "collect_dataset_3d_21y-04m-20d_14h43m12s/"
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))

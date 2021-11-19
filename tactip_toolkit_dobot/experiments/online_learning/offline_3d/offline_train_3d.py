@@ -35,6 +35,74 @@ class Plane:
     def __init__(self):
         pass
 
+    def __add__(self, other_plane):
+
+        return_plane = Plane()
+        if self.disps is not None and other_plane.disps is not None:
+            return_plane.disps = np.concatenate(
+                (self.disps, other_plane.disps), axis=0
+            )
+        else:
+            return_plane.disps = None
+
+        if self.heights is not None and other_plane.heights is not None:
+            return_plane.heights = np.concatenate(
+                (self.heights, other_plane.heights), axis=0
+            )
+        else:
+            return_plane.heights = None
+
+        if self.phis is not None and other_plane.phis is not None:
+            return_plane.phis = np.concatenate(
+                (self.phis, other_plane.phis), axis=0
+            )
+        else:
+            return_plane.phis = None
+
+        if self.x is not None and other_plane.x is not None:
+            return_plane.x = np.concatenate(
+                (self.x, other_plane.x), axis=0
+            )
+        else:
+            return_plane.x = None
+
+        if self.x_no_mu is not None and other_plane.x_no_mu is not None:
+            return_plane.x_no_mu = np.concatenate(
+                (self.x_no_mu, other_plane.x_no_mu), axis=0
+            )
+        else:
+            return_plane.x_no_mu = None
+
+        if self.y is not None and other_plane.y is not None:
+            return_plane.y = np.concatenate(
+                (self.y, other_plane.y), axis=0
+            )
+        else:
+            return_plane.y = None
+
+        if self.dissims is not None and other_plane.dissims is not None:
+            return_plane.dissims = np.concatenate(
+                (self.dissims, other_plane.dissims), axis=0
+            )
+        else:
+            return_plane.dissims = None
+
+        if self.real_height is not None and other_plane.real_height is not None:
+            return_plane.real_height = np.concatenate(
+                (self.real_height, other_plane.real_height), axis=0
+            )
+        else:
+            return_plane.real_height = None
+
+        if self.real_angle is not None and other_plane.real_angle is not None:
+            return_plane.real_angle = np.concatenate(
+                (self.real_angle, other_plane.real_angle), axis=0
+            )
+        else:
+            return_plane.real_angle = None
+
+        return return_plane
+
     def make_x(self):
         # if len(self.disps.shape) is not 2:
         #     raise NameError(f"disps is wrong shape to make x: is {self.disps.shape} not (*,1)")
@@ -65,7 +133,7 @@ class Plane:
         if self.disps is None:
             raise NameError("disps must be defined before all_heights can be used")
 
-        self.heights = [height] * len(self.disps)
+        self.heights = np.array([[height] * len(self.disps)]).T
 
     def make_all_phis(self, phi):
         # make heights the same length as disp and set to given height
@@ -96,7 +164,7 @@ def extract_point_at(local, data, meta):
 
     return the_point
 
-def extract_line_at(local, data, meta):
+def extract_line_at(local, data, meta, dissims=None):
     # return the data at given height and angle, local=[height, angle(in deg)]
 
     heights = np.array(meta["height_range"])
@@ -116,10 +184,14 @@ def extract_line_at(local, data, meta):
     # print(f"getting index {index}")
 
     the_line = Plane()
-    the_line.y = data[index]
-    the_line.disps = real_disp
+    the_line.y = np.array([data[index]]).T
+    the_line.disps =  np.array([real_disp]).T
     the_line.make_all_phis(local[1])
     the_line.make_all_heights(local[0])
+    if dissims is not None:
+        the_line.dissims = np.array([dissims[index]]).T
+    print(f"the line: {the_line.__dict__}")
+
     the_line.make_x()
     the_line.real_height = local[0]
     the_line.real_angle = local[1]
@@ -128,9 +200,9 @@ def extract_line_at(local, data, meta):
 
 
 def at_plane_extract(
-    local, data, meta, method="cross", cross_length=None, cross_disp=0
+    local, data, meta, method="cross", cross_length=None, cross_disp=0, dissims=None
 ):
-    base_line = extract_line_at(local, data, meta)
+    base_line = extract_line_at(local, data, meta, dissims=dissims)
 
     local = np.array(local)
 
@@ -139,18 +211,18 @@ def at_plane_extract(
         # from center of line
 
         other_lines = []
-        other_ys = []
+        # other_ys = []
         height_step = 0.5  # todo, extract from meta
 
         for i in np.arange(
             height_step, (cross_length * height_step) + 0.000001, height_step
         ):  # todo, map to .5mm prooperly
-            other_lines.append(extract_line_at(local + np.array([i, 0]), data, meta))
-            other_ys.append(other_lines[-1].y)
-            other_lines.append(extract_line_at(local + np.array([-i, 0]), data, meta))
-            other_ys.append(other_lines[-1].y)
+            other_lines.append(extract_line_at(local + np.array([i, 0]), data, meta, dissims=dissims))
+            # other_ys.append(other_lines[-1].y)
+            other_lines.append(extract_line_at(local + np.array([-i, 0]), data, meta, dissims=dissims))
+            # other_ys.append(other_lines[-1].y)
 
-        other_ys = np.array(other_ys)
+        # other_ys = np.array(other_ys)
 
         index_to_take = cross_disp
         # cross disp is index shift atm, not mm shift
@@ -200,9 +272,10 @@ def at_plane_extract(
         for i in np.arange(
             height_step, (cross_length * height_step) + 0.000001, height_step
         ):  # todo, map to .5mm prooperly
-            other_lines.append(extract_line_at(local + np.array([i, 0]), data, meta))
+            # print(f"i {i}")
+            other_lines.append(extract_line_at(local + np.array([i, 0]), data, meta, dissims=dissims))
             other_ys.append(other_lines[-1].y)
-            other_lines.append(extract_line_at(local + np.array([-i, 0]), data, meta))
+            other_lines.append(extract_line_at(local + np.array([-i, 0]), data, meta, dissims=dissims))
             other_ys.append(other_lines[-1].y)
 
         other_ys = np.array(other_ys)
@@ -265,11 +338,100 @@ def at_plane_extract(
         #     f"baseline y is shape {np.shape(base_line.y)}, disp is {np.shape(base_line.disps)}"
         # )
 
+        print(f"baseline {base_line.__dict__}")
+
         return base_line
+
+    elif method == "full":
+        # full grid
+        result_plane = None
+        other_lines = []
+        # other_ys = []
+        height_step = 0.5  # todo, extract from meta
+
+        for i in np.arange(
+            -(cross_length * height_step), (cross_length * height_step) + 0.000001, height_step
+        ):
+            if result_plane is None:
+                result_plane = extract_line_at(local + np.array([i, 0]), data, meta, dissims=dissims)
+            else:
+                # print(f"i {i}")
+                other_lines.append(extract_line_at(local + np.array([i, 0]), data, meta, dissims=dissims))
+            # other_ys.append(other_lines[-1].y)
+            # other_lines.append(extract_line_at(local + np.array([-i, 0]), data, meta, dissims=dissims))
+            # other_ys.append(other_lines[-1].y)
+
+        # other_ys = np.array(other_ys)
+
+        index_to_take = cross_disp
+        # cross disp is index shift atm, not mm shift
+        # rounds down in case of even num of taps (which really shouldn't be the case)
+
+        # print(f"index: {index_to_take}")
+
+        # print(
+        #     f"other ys shape: {np.shape(other_ys)} slice: {np.shape(other_ys[:,index_to_take])}"
+        # )
+        # print(f"shape of base_line.y {np.shape(base_line.y)}")
+
+        # extremes of grid
+        # for line in other_lines[-2:]:
+        #     base_line.y = np.concatenate(
+        #         (base_line.y, np.array([line.y[0]])), axis=0
+        #     )
+        #     base_line.disps = np.concatenate(
+        #         (base_line.disps, np.array([line.disps[0]])), axis=0
+        #     )
+        #     base_line.heights = np.concatenate(
+        #         (base_line.heights, np.array([line.heights[0]])), axis=0
+        #     )
+        #
+        #     base_line.y = np.concatenate(
+        #         (base_line.y, np.array([line.y[-1]])), axis=0
+        #     )
+        #     base_line.disps = np.concatenate(
+        #         (base_line.disps, np.array([line.disps[-1]])), axis=0
+        #     )
+        #     base_line.heights = np.concatenate(
+        #         (base_line.heights, np.array([line.heights[-1]])), axis=0
+        #     )
+
+        for line in other_lines:
+            # print("---")
+            # print(f"line.y is shape {np.shape(line.y)}")
+            # new_point = np.array([line.y[index_to_take]])
+            # print(f"new point {np.shape(new_point)}")
+
+            result_plane.y = np.concatenate(
+                (result_plane.y, line.y), axis=0
+            )
+            result_plane.disps = np.concatenate(
+                (result_plane.disps, line.disps), axis=0
+            )
+            result_plane.heights = np.concatenate(
+                (result_plane.heights, line.heights), axis=0
+            )
+            # todo same for disp etc
+            result_plane.dissims = np.concatenate(
+                (result_plane.dissims, line.dissims), axis=0
+            )
+
+        result_plane.make_all_phis(None)  # could use None to show its not optimised?
+        result_plane.make_x()
+
+        # print(f"baseline = {base_line}, has vars {base_line.__dict__}")
+        # print(
+        #     f"baseline y is shape {np.shape(base_line.y)}, disp is {np.shape(base_line.disps)}"
+        # )
+
+        print(f"baseline {result_plane.__dict__}")
+
+        return result_plane
 
 
 def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
-    adjusted_disps = extract_line_at(local, optm_disps, meta).y
+    [adjusted_disps] = extract_line_at(local, optm_disps, meta).disps.T
+    print(f"sjusted disps= {adjusted_disps}")
     [[offset_index_disp]] = np.where(adjusted_disps == 0)
     # offset_index_disp = 4
 
@@ -292,7 +454,7 @@ def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
         cross_disp=offset_index_disp,
     )
 
-    # print(new_taps_plane.__dict__)
+    print(f"new taps plane {new_taps_plane.__dict__}\n of shapes y {new_taps_plane.y.shape} x {new_taps_plane.x.shape} disp {new_taps_plane.disps.shape}")
 
     # Adjust displacement of plane to edge loc #horrible hack for offline
     disp_mm_offset = new_taps_plane.disps[-1]  # should be found online in a better way!
@@ -310,6 +472,7 @@ def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
 
     # print(height_y)
     # print(height_x)
+    print(f"new taps plane {new_taps_plane.__dict__}\n of shapes y {new_taps_plane.y.shape} x {new_taps_plane.x.shape} disp {new_taps_plane.disps.shape}")
 
     # Adjust heights based on minima
     # calc dissims for plane
