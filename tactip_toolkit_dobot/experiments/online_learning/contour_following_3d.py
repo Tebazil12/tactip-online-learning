@@ -558,8 +558,10 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
     elif stimuli_name == "105mm-circle":
         stimuli_height = -190 + 2
         # x_y_offset = [57.5, -57.5]
-        x_y_offset = [-17.5, 0]
+        x_y_offset = [7, -77.5]
         max_steps = 25
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
 
     elif stimuli_name == "flower":
         stimuli_height = -190 + 2 +10 -2
@@ -1314,12 +1316,26 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True
     plt.xlabel("Displacment (mm)")
     plt.ylabel("Height (mm)")
 
+
+
     # show where 0,0 is clearly
     plt.plot([min(plane.disps),max(plane.disps)],[0,0], "k:")
     plt.plot([0,0],[min(plane.heights),max(plane.heights)], "k:")
     #
     # plt.show()
     # plt.clf()
+
+    ax = plt.gca()
+
+    plt.gcf().text(
+        1,
+        1.01,
+        "angle = " + str(step_num_str)[1:],
+        transform=ax.transAxes,
+        fontsize=10,
+        alpha=0.2,
+        ha="right",
+    )
 
     # save graphs automatically
     part_path, _ = os.path.split(meta["meta_file"])

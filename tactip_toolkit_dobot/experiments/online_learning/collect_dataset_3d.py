@@ -27,10 +27,11 @@ import atexit
 import tactip_toolkit_dobot.experiments.min_example.common as common
 from tactip_toolkit_dobot.experiments.online_learning.contour_following_2d import (
     Experiment,
-    make_meta,
     State,
     plot_all_movements,
 )
+
+from tactip_toolkit_dobot.experiments.online_learning.contour_following_3d import make_meta
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
 
 
@@ -128,10 +129,10 @@ def main(ex, model, meta):
 if __name__ == "__main__":
     extra_dict = {
         # range(-1, 2, 1)
-        "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),
+        "height_range": np.array(np.arange(-1, 2.5001, 0.5)).tolist(),
         # range(-45, 46, 5)
-        "angle_range": np.array(range(-15, 16, 5)).tolist(),
-        "line_range": np.arange(-10, 11, 2).tolist(),
+        "angle_range": np.array(range(-45, 46, 5)).tolist(),
+        "line_range": np.arange(-10, 11, 1).tolist(),
         "ref_location": [0, 0, 0],
         "comments": "bug should be fixed now"
     }

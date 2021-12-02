@@ -55,7 +55,7 @@ def main(ex, meta):
     training_local_1 = [0, 5]  # [height(in mm), angle(in deg)]
 
 
-    for local in np.concatenate((np.zeros((19,1),), np.array([np.arange(-45,46,5)]).T), axis=1).tolist():
+    for local in np.concatenate((np.zeros((num_angles,1),), np.array([np.arange(angles[0],angles[-1]+1,5,dtype=int)]).T), axis=1).tolist():
         # new_taps = extract_line_at(training_local_1, lines, meta).y
 
         # ready_plane = get_calibrated_plane(
@@ -89,7 +89,10 @@ if __name__ == "__main__":
     data_home = (
         "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
     )
-    current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
+    # current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
+    # current_experiment = "collect_dataset_3d_21y-11m-19d_12h24m42s/"
+    current_experiment = "collect_dataset_3d_21y-11m-22d_16h10m54s/"    
+
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 

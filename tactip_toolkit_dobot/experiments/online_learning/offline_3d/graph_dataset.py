@@ -242,9 +242,11 @@ def plot_minimas(
     offsets = []
     corrected_disps = []
 
+    print(f"dissims len {len(dissims)} ")
+
     for line_num, dissim in enumerate(dissims):
         angle = (line_num % num_angles) * 5 - 45  # todo, extract from meta
-        if line_num < 19:
+        if line_num < num_angles:
 
             label = str(angle) + "°"
 
@@ -275,7 +277,7 @@ def plot_minimas(
         offsets.append(offset)
         corrected_disps.append(corrected_disp)
 
-        ax = the_figure.add_subplot(1, 5, subplot_num)
+        ax = the_figure.add_subplot(1, num_heights, subplot_num)
         # f.set_figheight(3)
         # f.set_figwidth(3)
         # plt.subplots(1,5,figsize=(15,15))
@@ -297,7 +299,7 @@ def plot_minimas(
             color="grey",
         )
 
-        if line_num % 19 == 1:
+        if line_num % num_angles == 1:
 
             # Show the major grid lines with dark grey lines
             plt.grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
@@ -348,7 +350,7 @@ def plot_minimas(
             #     # Don't allow the axis to be on top of your data
             ax.set_axisbelow(True)
 
-        if line_num <= 19:
+        if line_num <= num_angles:
             plt.legend(fontsize=font_size)
 
     if gp_extrap:
@@ -988,7 +990,7 @@ def main(ex, meta, data_home=None, current_experiment=None, show_figs=True):
         # plot_seperate_heights(
         #     dissims, meta, data_home=data_home, current_experiment=current_experiment
         # )
-        plot_minimas(dissims, meta, gp_extrap=True, data_home=data_home, current_experiment=current_experiment)
+        plot_minimas(dissims, meta, gp_extrap=False, data_home=data_home, current_experiment=current_experiment)
         # plot_height_flat(
         #     dissims,
         #     meta,
@@ -1028,7 +1030,7 @@ if __name__ == "__main__":
     data_home = (
         "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
     )
-    current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
+    # current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
     # current_experiment = "collect_dataset_3d_21y-03m-26d_15h11m11s/"
     # current_experiment = "collect_dataset_3d_21y-03m-26d_15h17m30s/"
     # current_experiment = "collect_dataset_3d_21y-03m-26d_15h21m03s/"
@@ -1074,6 +1076,8 @@ if __name__ == "__main__":
     # current_experiment = "collect_dataset_3d_21y-04m-19d_11h18m10s/"
     # current_experiment = "collect_dataset_3d_21y-04m-20d_13h47m03s/"
     # current_experiment = "collect_dataset_3d_21y-04m-20d_14h43m12s/"
+    # current_experiment = "collect_dataset_3d_21y-11m-19d_12h24m42s/"
+    current_experiment = "collect_dataset_3d_21y-11m-22d_16h10m54s/"    
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 

@@ -176,6 +176,8 @@ def extract_line_at(local, data, meta, dissims=None):
 
     height_index = np.where(heights == local[0])[0][0]
     # print(f"height index {height_index}")
+    print(f"local {local} local 1 {local[1]}")
+    print(f"angles = {angles}")
     angle_index = np.where(angles == local[1])[0][0]
     # print(f"angle index {angle_index}")
 
@@ -202,9 +204,10 @@ def extract_line_at(local, data, meta, dissims=None):
 def at_plane_extract(
     local, data, meta, method="cross", cross_length=None, cross_disp=0, dissims=None
 ):
+    local = np.array(local)
     base_line = extract_line_at(local, data, meta, dissims=dissims)
 
-    local = np.array(local)
+
 
     if method == "cross":
         # take the points cross_length up and cross_length down (in height)
@@ -349,9 +352,8 @@ def at_plane_extract(
         # other_ys = []
         height_step = 0.5  # todo, extract from meta
 
-        for i in np.arange(
-            -(cross_length * height_step), (cross_length * height_step) + 0.000001, height_step
-        ):
+        # for i in np.arange(-(cross_length * height_step), (cross_length * height_step) + 0.000001, height_step):
+        for i in meta["height_range"]:
             if result_plane is None:
                 result_plane = extract_line_at(local + np.array([i, 0]), data, meta, dissims=dissims)
             else:
