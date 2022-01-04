@@ -84,11 +84,13 @@ def main(ex, model, meta):
         # results = ex.robot.sync_robot.clearAlarms()
 
         print("initing robot")
-        common.init_robot(ex.robot, meta, do_homing=False)
+        common.init_robot(ex.robot, meta, do_homing=True)
 
         print("Main code...")
 
         ex.collect_neutral_tap(meta)
+
+        common.go_home(ex.robot, meta)
 
         if meta["collect_ref_tap"] is True:
             ref_tap = ex.collect_ref_tap(meta)
@@ -131,8 +133,10 @@ if __name__ == "__main__":
         # range(-1, 2, 1)
         "height_range": np.array(np.arange(-1, 2.5001, 0.5)).tolist(),
         # range(-45, 46, 5)
-        "angle_range": np.array(range(-45, 46, 5)).tolist(),
-        "line_range": np.arange(-10, 11, 1).tolist(),
+        # "angle_range": np.array(range(-45, 46, 5)).tolist(),
+        "angle_range": np.array(range(-15, 16, 5)).tolist(),
+        # "line_range": np.arange(-10, 11, 1).tolist(),
+        "line_range": np.arange(-10, 11, 2).tolist(),
         "ref_location": [0, 0, 0],
         "comments": "bug should be fixed now"
     }
@@ -140,7 +144,8 @@ if __name__ == "__main__":
     state = State(
         meta=make_meta(
             file_name="collect_dataset_3d.py",
-            stimuli_name="105mm-circle",
+            # stimuli_name="105mm-circle",
+            stimuli_name="tilt-05deg-up-offline",
             extra_dict=extra_dict,
         )
     )

@@ -975,7 +975,7 @@ def main(ex, meta, data_home=None, current_experiment=None, show_figs=True):
         lines.append(np.array(best_frames))
 
         # calc dissims for each line
-        dissims.append(dp.calc_dissims(np.array(best_frames), ref_tap))
+        dissims.append(dp.calc_dissims(np.array(best_frames), ref_tap, method="cosine"))
 
     common.save_data(locations, meta, name="post_processing/all_locations.json")
     common.save_data(lines, meta, name="post_processing/all_lines.json")
@@ -1077,7 +1077,12 @@ if __name__ == "__main__":
     # current_experiment = "collect_dataset_3d_21y-04m-20d_13h47m03s/"
     # current_experiment = "collect_dataset_3d_21y-04m-20d_14h43m12s/"
     # current_experiment = "collect_dataset_3d_21y-11m-19d_12h24m42s/"
-    current_experiment = "collect_dataset_3d_21y-11m-22d_16h10m54s/"    
+    # current_experiment = "collect_dataset_3d_21y-11m-22d_16h10m54s/"
+
+    # current_experiment = "collect_dataset_3d_21y-12m-07d_16h00m01s/"
+    # current_experiment = "collect_dataset_3d_21y-12m-07d_15h24m32s/"
+    current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
+
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 

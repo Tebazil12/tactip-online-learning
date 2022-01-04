@@ -594,6 +594,13 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_plat_height = -190
         ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
+    elif stimuli_name == "tilt-05deg-up-offline":
+        stimuli_height = -190 + 17 - 4 -10 - 2 -2 + 4
+        x_y_offset = [-10, 0,0]
+        max_steps = 30
+        ref_plat_height = -190
+        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+
     elif stimuli_name == "tilt-10deg-up":
         stimuli_height = -190 + 17 - 4 -10 - 2 -2
         x_y_offset = [-10, 0,0]
