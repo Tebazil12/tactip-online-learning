@@ -149,7 +149,7 @@ def extract_ytrain(radii_data):
     return y_train
 
 
-def calc_dissims(y_train, ref_tap):
+def calc_dissims(y_train, ref_tap, method="euclidean"):
     # print("calc_dissim")
     print(f"ytrain shape {y_train.shape}")
 
@@ -207,7 +207,7 @@ def calc_dissims(y_train, ref_tap):
 
     # todo this one works well
     dissim = scipy.spatial.distance.cdist(
-        [ref_tap], y_train, "euclidean"
+        [ref_tap], y_train, method
     )  # NOTsame as above 2 methods
     # print(diffs.shape)
 
