@@ -27,6 +27,47 @@ from tactip_toolkit_dobot.experiments.online_learning.offline_3d.offline_train_3
     extract_point_at
 )
 
+def plot_minimas_graph(heights, disps, angles, meta, show_fig=True):
+    plt.clf()
+    plt.close()
+
+    fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
+    # fig.suptitle('Axes values are scaled individually by default')
+
+
+    ax1.plot(angles, heights)
+
+    ax2.plot(angles, disps)
+
+    magnitude = np.sqrt(np.array(heights)**2 + np.array(disps)**2)
+    ax3.plot(angles, magnitude)
+
+    # TODO plotting magnitude but with visual representation of angle too
+
+
+    ax4.plot(angles * something, magnitude * somethingelse)
+
+    plt.xlabel("Angle (deg)")
+    ax1.set(ylabel="Height (mm)")
+    ax2.set(ylabel="Disp (mm)")
+    ax3.set(ylabel="Magnitude (mm)")
+
+    ax = plt.gca()
+
+
+    # save graphs automatically
+    part_path, _ = os.path.split(meta["meta_file"])
+
+    full_path_png = os.path.join(meta["home_dir"], part_path, "min_drift.png")
+    full_path_svg = os.path.join(meta["home_dir"], part_path, "min_drift.svg")
+
+    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+    if show_fig:
+        plt.show()
+    plt.clf()
+    plt.close()
+
 
 def main(ex, meta):
 
@@ -51,9 +92,11 @@ def main(ex, meta):
     real_disp = meta["line_range"]
     num_disps = len(real_disp)
 
-    # Find location of disp minima
-    training_local_1 = [0, 5]  # [height(in mm), angle(in deg)]
+    # Find index location of disp minima
+    # training_local_1 = [0, 5]  # [height(in mm), angle(in deg)]
 
+    heights_at_mins = []
+    disps_at_mins = []
 
     for local in np.concatenate((np.zeros((num_angles,1),), np.array([np.arange(angles[0],angles[-1]+1,5,dtype=int)]).T), axis=1).tolist():
         # new_taps = extract_line_at(training_local_1, lines, meta).y
@@ -61,6 +104,7 @@ def main(ex, meta):
         # ready_plane = get_calibrated_plane(
         #     local, meta, lines, optm_disps, ref_tap, num_disps
         # )
+
 
         ready_plane = at_plane_extract(
             local,
@@ -72,15 +116,30 @@ def main(ex, meta):
             dissims=dissims
         )
 
-        print(f"calibrated plane is: {ready_plane.__dict__}")
-
 
         ready_plane.make_all_phis(1)
         ready_plane.make_x()
 
-        plot_dissim_grid(ready_plane, meta, step_num_str="0"+str(int(local[1])), show_fig=False, filled=True)
+        # make the grid graphs
+        # plot_dissim_grid(ready_plane, meta, step_num_str="0"+str(int(local[1])), show_fig=False, filled=True)
+
+        print(f"calibrated plane is: {ready_plane.__dict__}")
 
         plt.clf()
+
+        # find where in height/displacement the minima dissim is
+        # currently using simple method, not interpolating in any way
+        index = np.argmin(ready_plane.dissims)
+        height_at_min = ready_plane.heights[index]
+        disp_at_min = ready_plane.disps[index]
+
+        # save to arrays etc
+        heights_at_mins.append(height_at_min)
+        disps_at_mins.append(disp_at_min)
+
+
+    plot_minimas_graph(heights_at_mins, disps_at_mins, angles, meta)
+
 
 
 
