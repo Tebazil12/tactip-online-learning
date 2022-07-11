@@ -161,7 +161,7 @@ def main(ex, meta):
         ready_plane.make_x()
 
         # make the grid graphs
-        # plot_dissim_grid(ready_plane, meta, step_num_str="0"+str(int(local[1])), show_fig=False, filled=True)
+        plot_dissim_grid(ready_plane, meta, step_num_str="0"+str(int(local[1])), show_fig=False, filled=True)
 
         print(f"calibrated plane is: {ready_plane.__dict__}")
 

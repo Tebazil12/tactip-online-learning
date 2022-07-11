@@ -1356,7 +1356,7 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
     if show_fig:
         plt.show()
-    plt.clf()
+    plt.close()
 
 def parse_exp_name(name):
     # contour_following_2d_01m-22d_14h58m05s
