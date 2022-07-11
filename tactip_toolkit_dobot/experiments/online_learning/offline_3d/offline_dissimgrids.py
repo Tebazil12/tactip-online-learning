@@ -4,6 +4,7 @@ import time
 import json
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+from scipy import interpolate
 
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gplvm as gplvm
@@ -34,23 +35,62 @@ def plot_minimas_graph(heights, disps, angles, meta, show_fig=True):
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
     # fig.suptitle('Axes values are scaled individually by default')
 
+    colour = angles/np.max(angles)
+    line_width = 0.5
+    marker_size = 100
 
-    ax1.plot(angles, heights)
+    ax1.plot(angles, heights,linewidth=line_width)
+    ax1.scatter(angles, heights, marker='+', c=colour, s=marker_size)
+    ax1.plot([np.min(angles),np.max(angles)], [ 0, 0],'k:')
 
-    ax2.plot(angles, disps)
+    ax2.plot(angles, disps, linewidth=line_width)
+    ax2.scatter(angles, disps, marker='+', c=colour, s=marker_size)
+    ax2.plot([np.min(angles),np.max(angles)], [ 0, 0],'k:')
 
     magnitude = np.sqrt(np.array(heights)**2 + np.array(disps)**2)
-    ax3.plot(angles, magnitude)
+    ax3.plot(angles, magnitude, linewidth=line_width)
+    ax3.scatter(angles, magnitude, marker='+', c=colour, s=marker_size)
+    ax3.plot([np.min(angles),np.max(angles)], [ 0, 0],'k:')
 
-    # TODO plotting magnitude but with visual representation of angle too
+
+    # show where 0,0 is clearly
+    graph_size = 5
+    ax4.plot([-graph_size,graph_size], [ 0, 0],'k:')
+    ax4.plot([ 0, 0], [-graph_size,graph_size],'k:')
+    ax4.axis([-graph_size, graph_size, -graph_size, graph_size])
+
+    # side view of mins compared to object
+
+    ax4.scatter(disps, heights, marker='+', c=colour)
+    # plt.legend()
+
+    plt.gca().set_aspect("equal")
+
+    # rethink reftap location graphing when using ref taps from within dataset
+    # (much harder to place when seperate from dataset)
+    # # add where ref tap is in each graph
+    # ref_location = meta["ref_location"] # this should (probably), be x,y,angle but not sure what angle is relative to
+    # if ref_location[2] == 0:
+    #     ax1.scatter(ref_location[2], 0)
+    #     ax2.scatter(0, )
+    # else:
+    #     raise NameError("angle of reftap isn't 0 - code not yet implemented to handle this")
 
 
-    ax4.plot(angles * something, magnitude * somethingelse)
-
-    plt.xlabel("Angle (deg)")
     ax1.set(ylabel="Height (mm)")
     ax2.set(ylabel="Disp (mm)")
     ax3.set(ylabel="Magnitude (mm)")
+    ax3.set(xlabel="Angle (deg)")
+    ax4.set(xlabel="Disp (mm)")
+    ax4.set(ylabel="Height (mm)")
+
+    # n = range(len(disps))
+    # [
+    #     ax4.annotate(
+    #         int(x[0]), (x[1]+0.5, x[2]+0.5), fontsize=10, ha="center", va="center", color="black"
+    #     )
+    #     for x in np.array([angles, disps, heights]).T
+    # ]
 
     ax = plt.gca()
 
@@ -127,11 +167,57 @@ def main(ex, meta):
 
         plt.clf()
 
-        # find where in height/displacement the minima dissim is
-        # currently using simple method, not interpolating in any way
-        index = np.argmin(ready_plane.dissims)
-        height_at_min = ready_plane.heights[index]
-        disp_at_min = ready_plane.disps[index]
+        if True:
+            # find where in height/displacement the minima dissim is
+            # currently using simple method, not interpolating in any way
+            index = np.argmin(ready_plane.dissims)
+            height_at_min = ready_plane.heights[index]
+            disp_at_min = ready_plane.disps[index]
+
+        if False:
+            # interpolating method
+            # can't use dp.align_radius() because we need 2d rather than 2 sets of 1D
+            mesh_shape = (num_heights, num_disps)
+
+
+            # disps_meshed = np.reshape(ready_plane.disps , mesh_shape)
+            # heights_meshed = np.reshape(ready_plane.heights, mesh_shape)
+            # dissims_meshed = np.reshape(ready_plane.dissims, mesh_shape)
+            #
+            # print(disps_meshed)
+            # print(heights_meshed)
+            # print(dissims_meshed)
+
+            # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo")
+            # plt.show()
+
+            # f = interpolate.interp2d(ready_plane.disps.T, ready_plane.heights.T, ready_plane.dissims.T, kind='linear')
+            # f = interpolate.interp2d(disps_meshed, heights_meshed, dissims_meshed, kind='linear')
+            # f = interpolate.LinearNDInterpolator(ready_plane.x[:,:2], ready_plane.dissims)
+
+            # print(f"ready_plane.disps.T[0] {ready_plane.disps.T[0]}")
+            # print(f"before interp {list(zip(ready_plane.disps.T[0], ready_plane.heights.T[0]))}")
+            # print(f"ready_plane.dissims{ready_plane.dissims.T[0]}")
+            print(f"ready_plane.x[:,:2]  {ready_plane.x[:,:2]}")
+
+            f = interpolate.LinearNDInterpolator(ready_plane.x[:,:2], ready_plane.dissims.T[0])
+
+
+
+            xnew = np.linspace(np.min(real_disp),np.max(real_disp), 100)
+
+            ynew = np.linspace(np.min(heights),np.max(heights), 100)
+
+            print(f"y new {ynew} length {len(ynew)}")
+
+            znew = f(xnew, ynew)
+            print(f"after using f {znew} length {len(znew)}")
+
+            plt.plot( ynew, znew, 'b-', ready_plane.heights, ready_plane.dissims, 'ro-')
+            plt.show()
+
+            plt.plot( xnew, znew, 'b-', ready_plane.disps, ready_plane.dissims, 'ro-')
+            plt.show()
 
         # save to arrays etc
         heights_at_mins.append(height_at_min)
@@ -151,7 +237,7 @@ if __name__ == "__main__":
     # current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
     # current_experiment = "collect_dataset_3d_21y-11m-19d_12h24m42s/"
     # current_experiment = "collect_dataset_3d_21y-11m-22d_16h10m54s/"
-
+    #
     # current_experiment = "collect_dataset_3d_21y-12m-07d_16h00m01s/"
     # current_experiment = "collect_dataset_3d_21y-12m-07d_15h24m32s/"
     current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
