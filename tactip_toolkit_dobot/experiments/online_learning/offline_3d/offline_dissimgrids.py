@@ -1,3 +1,6 @@
+# To use this file, data must be pre-processed by running the following files:
+# > graph_dataset.py
+
 import numpy as np
 import os
 import time
@@ -18,50 +21,66 @@ from tactip_toolkit_dobot.experiments.online_learning.contour_following_2d impor
 )
 
 from tactip_toolkit_dobot.experiments.online_learning.contour_following_3d import (
-    plot_dissim_grid
+    plot_dissim_grid,
 )
 
 from tactip_toolkit_dobot.experiments.online_learning.offline_3d.offline_train_3d import (
     Plane,
     get_calibrated_plane,
     at_plane_extract,
-    extract_point_at
+    extract_point_at,
 )
 
-def plot_minimas_graph(heights, disps, angles, meta, show_fig=True):
+
+def plot_minimas_graph(heights, disps, angles, meta, show_fig=True, alt_ref=None):
     plt.clf()
     plt.close()
 
     fig, (ax1, ax2, ax3, ax4) = plt.subplots(4)
-    # fig.suptitle('Axes values are scaled individually by default')
 
-    colour = angles/np.max(angles)
+    if alt_ref is None:
+        fig.suptitle('Original ref_tap')
+    else:
+        title = alt_ref.split('/')[-1]
+        title = title.replace("ref_tap_", '')
+        title = title.replace(".json",'')
+        # print(title)
+        if title[0] == 'h':
+            fig.suptitle("Ref_tap at height "+ title[1:])
+        elif title[0] == 'a':
+            fig.suptitle("Ref_tap at angle "+ title[1:])
+        elif title[0] == 'd':
+            fig.suptitle("Ref_tap at disp "+ title[1:])
+        else:
+            raise NameError("title parsing incorrect")
+
+
+    colour = angles / np.max(angles)
     line_width = 0.5
     marker_size = 100
 
-    ax1.plot(angles, heights,linewidth=line_width)
-    ax1.scatter(angles, heights, marker='+', c=colour, s=marker_size)
-    ax1.plot([np.min(angles),np.max(angles)], [ 0, 0],'k:')
+    ax1.plot(angles, heights, linewidth=line_width)
+    ax1.scatter(angles, heights, marker="+", c=colour, s=marker_size)
+    ax1.plot([np.min(angles), np.max(angles)], [0, 0], "k:")
 
     ax2.plot(angles, disps, linewidth=line_width)
-    ax2.scatter(angles, disps, marker='+', c=colour, s=marker_size)
-    ax2.plot([np.min(angles),np.max(angles)], [ 0, 0],'k:')
+    ax2.scatter(angles, disps, marker="+", c=colour, s=marker_size)
+    ax2.plot([np.min(angles), np.max(angles)], [0, 0], "k:")
 
-    magnitude = np.sqrt(np.array(heights)**2 + np.array(disps)**2)
+    magnitude = np.sqrt(np.array(heights) ** 2 + np.array(disps) ** 2)
     ax3.plot(angles, magnitude, linewidth=line_width)
-    ax3.scatter(angles, magnitude, marker='+', c=colour, s=marker_size)
-    ax3.plot([np.min(angles),np.max(angles)], [ 0, 0],'k:')
-
+    ax3.scatter(angles, magnitude, marker="+", c=colour, s=marker_size)
+    ax3.plot([np.min(angles), np.max(angles)], [0, 0], "k:")
 
     # show where 0,0 is clearly
     graph_size = 5
-    ax4.plot([-graph_size,graph_size], [ 0, 0],'k:')
-    ax4.plot([ 0, 0], [-graph_size,graph_size],'k:')
+    ax4.plot([-graph_size, graph_size], [0, 0], "k:")
+    ax4.plot([0, 0], [-graph_size, graph_size], "k:")
     ax4.axis([-graph_size, graph_size, -graph_size, graph_size])
 
     # side view of mins compared to object
 
-    ax4.scatter(disps, heights, marker='+', c=colour)
+    ax4.scatter(disps, heights, marker="+", c=colour)
     # plt.legend()
 
     plt.gca().set_aspect("equal")
@@ -75,7 +94,6 @@ def plot_minimas_graph(heights, disps, angles, meta, show_fig=True):
     #     ax2.scatter(0, )
     # else:
     #     raise NameError("angle of reftap isn't 0 - code not yet implemented to handle this")
-
 
     ax1.set(ylabel="Height (mm)")
     ax2.set(ylabel="Disp (mm)")
@@ -94,32 +112,49 @@ def plot_minimas_graph(heights, disps, angles, meta, show_fig=True):
 
     ax = plt.gca()
 
-
     # save graphs automatically
     part_path, _ = os.path.split(meta["meta_file"])
 
-    full_path_png = os.path.join(meta["home_dir"], part_path, "min_drift.png")
-    full_path_svg = os.path.join(meta["home_dir"], part_path, "min_drift.svg")
+    if alt_ref is None:
+        full_path_png = os.path.join(meta["home_dir"], part_path, "min_drift.png")
+        full_path_svg = os.path.join(meta["home_dir"], part_path, "min_drift.svg")
+    else:
+        alt_ref_img = alt_ref.replace("ref_tap_", "min_drift_")
+        full_path_png = os.path.join(
+            meta["home_dir"], part_path, alt_ref_img.replace(".json", ".png")
+        )
+        full_path_svg = os.path.join(
+            meta["home_dir"], part_path, alt_ref_img.replace(".json", ".svg")
+        )
 
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+
     if show_fig:
         plt.show()
     plt.clf()
     plt.close()
 
 
-def main(ex, meta):
+def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_experiment=None):
 
     # load data
     path = data_home + current_experiment
 
     neutral_tap = np.array(common.load_data(path + "neutral_tap.json"))
-    ref_tap = np.array(common.load_data(path + "ref_tap.json"))
 
     locations = np.array(common.load_data(path + "post_processing/all_locations.json"))
     lines = np.array(common.load_data(path + "post_processing/all_lines.json"))
-    dissims = np.array(common.load_data(path + "post_processing/dissims.json"))
+
+    if alt_ref is None:
+        ref_tap = np.array(common.load_data(path + "ref_tap.json"))
+        dissims = np.array(common.load_data(path + "post_processing/dissims.json"))
+    else:
+        ref_tap = np.array(common.load_data(path + alt_ref))
+        dissims = np.array(
+            common.load_data(path + alt_ref.replace("ref_tap_", "dissims_"))
+        )
+        pass
 
     optm_disps = np.array(
         common.load_data(path + "post_processing/corrected_disps_basic.json")
@@ -138,13 +173,20 @@ def main(ex, meta):
     heights_at_mins = []
     disps_at_mins = []
 
-    for local in np.concatenate((np.zeros((num_angles,1),), np.array([np.arange(angles[0],angles[-1]+1,5,dtype=int)]).T), axis=1).tolist():
+    for local in np.concatenate(
+        (
+            np.zeros(
+                (num_angles, 1),
+            ),
+            np.array([np.arange(angles[0], angles[-1] + 1, 5, dtype=int)]).T,
+        ),
+        axis=1,
+    ).tolist():
         # new_taps = extract_line_at(training_local_1, lines, meta).y
 
         # ready_plane = get_calibrated_plane(
         #     local, meta, lines, optm_disps, ref_tap, num_disps
         # )
-
 
         ready_plane = at_plane_extract(
             local,
@@ -153,15 +195,21 @@ def main(ex, meta):
             method="full",
             cross_length=2,
             cross_disp=0,
-            dissims=dissims
+            dissims=dissims,
         )
-
 
         ready_plane.make_all_phis(1)
         ready_plane.make_x()
 
-        # make the grid graphs
-        plot_dissim_grid(ready_plane, meta, step_num_str="0"+str(int(local[1])), show_fig=False, filled=True)
+        if grid_graphs_on:
+            # make the grid graphs
+            plot_dissim_grid(
+                ready_plane,
+                meta,
+                step_num_str="0" + str(int(local[1])),
+                show_fig=False,
+                filled=True,
+            )
 
         print(f"calibrated plane is: {ready_plane.__dict__}")
 
@@ -178,7 +226,6 @@ def main(ex, meta):
             # interpolating method
             # can't use dp.align_radius() because we need 2d rather than 2 sets of 1D
             mesh_shape = (num_heights, num_disps)
-
 
             # disps_meshed = np.reshape(ready_plane.disps , mesh_shape)
             # heights_meshed = np.reshape(ready_plane.heights, mesh_shape)
@@ -200,33 +247,30 @@ def main(ex, meta):
             # print(f"ready_plane.dissims{ready_plane.dissims.T[0]}")
             print(f"ready_plane.x[:,:2]  {ready_plane.x[:,:2]}")
 
-            f = interpolate.LinearNDInterpolator(ready_plane.x[:,:2], ready_plane.dissims.T[0])
+            f = interpolate.LinearNDInterpolator(
+                ready_plane.x[:, :2], ready_plane.dissims.T[0]
+            )
 
+            xnew = np.linspace(np.min(real_disp), np.max(real_disp), 100)
 
-
-            xnew = np.linspace(np.min(real_disp),np.max(real_disp), 100)
-
-            ynew = np.linspace(np.min(heights),np.max(heights), 100)
+            ynew = np.linspace(np.min(heights), np.max(heights), 100)
 
             print(f"y new {ynew} length {len(ynew)}")
 
             znew = f(xnew, ynew)
             print(f"after using f {znew} length {len(znew)}")
 
-            plt.plot( ynew, znew, 'b-', ready_plane.heights, ready_plane.dissims, 'ro-')
+            plt.plot(ynew, znew, "b-", ready_plane.heights, ready_plane.dissims, "ro-")
             plt.show()
 
-            plt.plot( xnew, znew, 'b-', ready_plane.disps, ready_plane.dissims, 'ro-')
+            plt.plot(xnew, znew, "b-", ready_plane.disps, ready_plane.dissims, "ro-")
             plt.show()
 
         # save to arrays etc
         heights_at_mins.append(height_at_min)
         disps_at_mins.append(disp_at_min)
 
-
-    plot_minimas_graph(heights_at_mins, disps_at_mins, angles, meta)
-
-
+    plot_minimas_graph(heights_at_mins, disps_at_mins, angles, meta, alt_ref=alt_ref)
 
 
 if __name__ == "__main__":
@@ -262,7 +306,4 @@ if __name__ == "__main__":
 
     # main(state.ex, state.meta,train_or_test="train", train_folder="model_two_grid/")
     # main(state.ex, state.meta,train_or_test="test_line_angles",train_folder="model_two_grid/")
-    main(
-        state.ex,
-        state.meta
-    )
+    main(state.ex, state.meta, data_home=data_home, current_experiment=current_experiment)
