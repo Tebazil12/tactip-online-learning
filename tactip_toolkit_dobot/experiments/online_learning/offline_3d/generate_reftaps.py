@@ -83,7 +83,7 @@ def main(ex, meta, original_ref=True, grid_graphs_on=True):
     print(f"angles = {angles}")
     print(f"disps = {real_disp}")
 
-    for k in range(-1, 1 + 1):  # how many indexs to go either side of where 0 is
+    for k in range(-2, 2 + 1):  # how many indexs to go either side of where 0 is
         for j in ["h", "a", "d"]:
             if j == "h":
                 i = k * heights_step

@@ -998,7 +998,8 @@ def main(
         lines.append(np.array(best_frames))
 
         # calc dissims for each line
-        dissims.append(dp.calc_dissims(np.array(best_frames), ref_tap, method="cosine"))
+        # dissims.append(dp.calc_dissims(np.array(best_frames), ref_tap, method="cosine"))
+        dissims.append(dp.calc_dissims(np.array(best_frames), ref_tap, method="euclidean"))
 
         common.save_data(locations, meta, name="post_processing/all_locations.json")
         common.save_data(lines, meta, name="post_processing/all_lines.json")

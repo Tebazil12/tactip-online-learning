@@ -122,7 +122,7 @@ class Plane:
             ),
             axis=1,
         )
-        print(f"x is shape: {np.shape(self.x)}")
+        # print(f"x is shape: {np.shape(self.x)}")
 
     def make_x_no_mu(self):
         self.x_no_mu = np.concatenate((self.disps, self.heights), axis=1)
@@ -176,8 +176,8 @@ def extract_line_at(local, data, meta, dissims=None):
 
     height_index = np.where(heights == local[0])[0][0]
     # print(f"height index {height_index}")
-    print(f"local {local} local 1 {local[1]}")
-    print(f"angles = {angles}")
+    # print(f"local {local} local 1 {local[1]}")
+    # print(f"angles = {angles}")
     angle_index = np.where(angles == local[1])[0][0]
     # print(f"angle index {angle_index}")
 
@@ -192,7 +192,7 @@ def extract_line_at(local, data, meta, dissims=None):
     the_line.make_all_heights(local[0])
     if dissims is not None:
         the_line.dissims = np.array([dissims[index]]).T
-    print(f"the line: {the_line.__dict__}")
+    # print(f"the line: {the_line.__dict__}")
 
     the_line.make_x()
     the_line.real_height = local[0]
@@ -341,7 +341,7 @@ def at_plane_extract(
         #     f"baseline y is shape {np.shape(base_line.y)}, disp is {np.shape(base_line.disps)}"
         # )
 
-        print(f"baseline {base_line.__dict__}")
+        # print(f"baseline {base_line.__dict__}")
 
         return base_line
 
@@ -426,14 +426,14 @@ def at_plane_extract(
         #     f"baseline y is shape {np.shape(base_line.y)}, disp is {np.shape(base_line.disps)}"
         # )
 
-        print(f"baseline {result_plane.__dict__}")
+        # print(f"baseline {result_plane.__dict__}")
 
         return result_plane
 
 
 def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
     [adjusted_disps] = extract_line_at(local, optm_disps, meta).disps.T
-    print(f"sjusted disps= {adjusted_disps}")
+    # print(f"sjusted disps= {adjusted_disps}")
     [[offset_index_disp]] = np.where(adjusted_disps == 0)
     # offset_index_disp = 4
 
@@ -456,7 +456,7 @@ def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
         cross_disp=offset_index_disp,
     )
 
-    print(f"new taps plane {new_taps_plane.__dict__}\n of shapes y {new_taps_plane.y.shape} x {new_taps_plane.x.shape} disp {new_taps_plane.disps.shape}")
+    # print(f"new taps plane {new_taps_plane.__dict__}\n of shapes y {new_taps_plane.y.shape} x {new_taps_plane.x.shape} disp {new_taps_plane.disps.shape}")
 
     # Adjust displacement of plane to edge loc #horrible hack for offline
     disp_mm_offset = new_taps_plane.disps[-1]  # should be found online in a better way!
@@ -474,7 +474,7 @@ def get_calibrated_plane(local, meta, lines, optm_disps, ref_tap, num_disps):
 
     # print(height_y)
     # print(height_x)
-    print(f"new taps plane {new_taps_plane.__dict__}\n of shapes y {new_taps_plane.y.shape} x {new_taps_plane.x.shape} disp {new_taps_plane.disps.shape}")
+    # print(f"new taps plane {new_taps_plane.__dict__}\n of shapes y {new_taps_plane.y.shape} x {new_taps_plane.x.shape} disp {new_taps_plane.disps.shape}")
 
     # Adjust heights based on minima
     # calc dissims for plane
