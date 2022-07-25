@@ -118,6 +118,7 @@ def plot_minimas_graph(heights, disps, angles, meta, show_fig=True, alt_ref=None
     if alt_ref is None:
         full_path_png = os.path.join(meta["home_dir"], part_path, "min_drift.png")
         full_path_svg = os.path.join(meta["home_dir"], part_path, "min_drift.svg")
+        # full_path_jpg = os.path.join(meta["home_dir"], part_path, "min_drift.jpg")
     else:
         alt_ref_img = alt_ref.replace("ref_tap_", "min_drift_")
         full_path_png = os.path.join(
@@ -126,9 +127,13 @@ def plot_minimas_graph(heights, disps, angles, meta, show_fig=True, alt_ref=None
         full_path_svg = os.path.join(
             meta["home_dir"], part_path, alt_ref_img.replace(".json", ".svg")
         )
+        # full_path_jpg = os.path.join(
+        #     meta["home_dir"], part_path, alt_ref_img.replace(".json", ".jpg")
+        # )
 
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
     plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+    # plt.savefig(full_path_jpg, bbox_inches="tight", pad_inches=0)
 
     if show_fig:
         plt.show()
@@ -136,7 +141,7 @@ def plot_minimas_graph(heights, disps, angles, meta, show_fig=True, alt_ref=None
     plt.close()
 
 
-def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_experiment=None):
+def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_experiment=None, show_fig=True):
 
     # load data
     path = data_home + current_experiment
@@ -156,9 +161,9 @@ def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_ex
         )
         pass
 
-    optm_disps = np.array(
-        common.load_data(path + "post_processing/corrected_disps_basic.json")
-    )
+    # optm_disps = np.array(
+    #     common.load_data(path + "post_processing/corrected_disps_basic.json")
+    # )
 
     heights = meta["height_range"]
     num_heights = len(heights)
@@ -270,7 +275,7 @@ def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_ex
         heights_at_mins.append(height_at_min)
         disps_at_mins.append(disp_at_min)
 
-    plot_minimas_graph(heights_at_mins, disps_at_mins, angles, meta, alt_ref=alt_ref)
+    plot_minimas_graph(heights_at_mins, disps_at_mins, angles, meta, alt_ref=alt_ref, show_fig=show_fig)
 
 
 if __name__ == "__main__":

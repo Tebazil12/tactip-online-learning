@@ -23,16 +23,16 @@ from tactip_toolkit_dobot.experiments.online_learning.contour_following_2d impor
     parse_exp_name,
 )
 
-from tactip_toolkit_dobot.experiments.online_learning.contour_following_3d import (
-    plot_dissim_grid,
-)
+# from tactip_toolkit_dobot.experiments.online_learning.contour_following_3d import (
+#     plot_dissim_grid,
+# )
 
-from tactip_toolkit_dobot.experiments.online_learning.offline_3d.offline_train_3d import (
-    Plane,
-    get_calibrated_plane,
-    at_plane_extract,
-    extract_point_at,
-)
+# from tactip_toolkit_dobot.experiments.online_learning.offline_3d.offline_train_3d import (
+#     Plane,
+#     get_calibrated_plane,
+#     at_plane_extract,
+#     extract_point_at,
+# )
 
 import tactip_toolkit_dobot.experiments.online_learning.offline_3d.graph_dataset as graph_dataset
 

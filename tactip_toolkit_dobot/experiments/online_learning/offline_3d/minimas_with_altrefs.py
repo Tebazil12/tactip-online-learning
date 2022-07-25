@@ -15,26 +15,16 @@ from scipy import interpolate
 from PIL import Image
 
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_processing as dp
-import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gplvm as gplvm
+# import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gplvm as gplvm
 import tactip_toolkit_dobot.experiments.min_example.common as common
 from tactip_toolkit_dobot.experiments.online_learning.contour_following_2d import (
     Experiment,
-    make_meta,
-    plot_gplvm,
+    # make_meta,
+    # plot_gplvm,
     State,
-    parse_exp_name,
+    # parse_exp_name,
 )
 
-from tactip_toolkit_dobot.experiments.online_learning.contour_following_3d import (
-    plot_dissim_grid,
-)
-
-from tactip_toolkit_dobot.experiments.online_learning.offline_3d.offline_train_3d import (
-    Plane,
-    get_calibrated_plane,
-    at_plane_extract,
-    extract_point_at,
-)
 
 import tactip_toolkit_dobot.experiments.online_learning.offline_3d.offline_dissimgrids as offline_dissimgrids
 
@@ -74,6 +64,7 @@ def main(ex, meta, make_graphs=True, combine_graphs=True):
                         grid_graphs_on=False,
                         data_home=data_home,
                         current_experiment=current_experiment,
+                        show_fig=False
                     )
     if combine_graphs:
         # create summary image for each of height, angle and disp
@@ -113,6 +104,8 @@ def main(ex, meta, make_graphs=True, combine_graphs=True):
             )
         )
         concatenated.save(data_home + current_experiment + "post_processing/alt_ref_taps/" + "summary_h.png")
+        # concatenated.save(data_home + current_experiment + "post_processing/alt_ref_taps/" + "summary_h.jpg")
+        # concatenated.save(data_home + current_experiment + "post_processing/alt_ref_taps/" + "summary_h.svg")
 
         concatenated = Image.fromarray(
             np.concatenate(

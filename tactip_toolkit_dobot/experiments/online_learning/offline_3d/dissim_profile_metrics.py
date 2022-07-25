@@ -63,7 +63,7 @@ def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_ex
     num_heights = len(heights)
     angles = meta["angle_range"]
     num_angles = len(angles)
-    real_disp = meta["line_range"]
+    # real_disp = real_disp
     num_disps = len(real_disp)
 
     # Find index location of disp minima
@@ -86,6 +86,7 @@ def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_ex
         # ready_plane = get_calibrated_plane(
         #     local, meta, lines, optm_disps, ref_tap, num_disps
         # )
+        print("New Plane")
 
         ready_plane = at_plane_extract(
             local,
@@ -116,27 +117,78 @@ def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_ex
 
         # print(f"ready plane {ready_plane.dissims}")
         # plt.plot(ready_plane.disps,ready_plane.dissims)
-
+        diffs_p = []
         for i in range(int(len(ready_plane.dissims)/num_disps)):
+            print("New Profile")
             # print(i)
             current_disps = ready_plane.disps[num_disps*i:num_disps*(i+1)]
             current_dissims = ready_plane.dissims[num_disps*i:num_disps*(i+1)]
             colour = [1- (i/num_heights),0,i/num_heights]
+            f1 = plt.figure(1)
             plt.plot(current_disps, current_dissims, c=colour)
+            plt.xlabel("Displacement (mm)")
+            plt.ylabel("Dissimilarity")
+            plt.title("All disp v. dissim profiles across all heights and angles")
 
+            f3 = plt.figure(3)
             dissim_average = np.mean(current_dissims)
-            print(dissim_average)
-            plt.plot([current_disps[0],current_disps[-1]], [dissim_average,dissim_average], c=colour)
+            if local[1] == 0:
+                # if i % 2 == 0 :
+                plt.plot(current_disps, current_dissims, c=colour, label=str(heights[i]))
+                plt.plot([current_disps[0],current_disps[-1]], [dissim_average,dissim_average],':', c=colour)
+                plt.legend(title="height (mm)", loc=4)
+                # else:
+                #     plt.plot(current_disps, current_dissims,':', c=colour)
+                #     plt.plot([current_disps[0],current_disps[-1]], [dissim_average,dissim_average], ':', c=colour)
+
+                plt.xlabel("Displacement (mm)")
+                plt.ylabel("Dissimilarity")
+                plt.title("All disp v. dissim profiles across all heights (angle set to 0)")
+
+            print(f"mean: {dissim_average}")
 
             index = np.argmin(current_dissims)
             dissim_at_min = current_dissims[index]
             disp_at_min = current_disps[index]
 
-            dissim_diff = dissim_average - dissim_at_min
+            dissim_diff = dissim_average - dissim_at_min[0]
 
-            print(dissim_diff)
-        plt.show()
+            print(f"diff: {dissim_diff}")
 
+            diff_percent = np.round((dissim_diff / dissim_average) * 100)
+            print(f"diff as a % {diff_percent}")
+            diffs_p.append(diff_percent)
+
+        # plt.show()
+        f2 = plt.figure(2)
+        index_ang = (np.where(np.array(angles) == int(local[1]))[0][0])
+        val =index_ang / num_angles
+        colour2 = [0, 1-val, val]
+        plt.title("Size of trough relative to mean")
+
+        print(colour2)
+        if index_ang % 2 ==0:
+            plt.plot(heights, diffs_p,':', label=str(int(local[1]))+' deg', c=colour2)
+        else:
+            plt.plot(heights, diffs_p, label=str(int(local[1]))+' deg', c=colour2)
+        plt.legend()
+        plt.xlabel("Height (mm)")
+        plt.ylabel("Difference between dissim trough and mean dissim as % of mean")
+
+
+    plt.figure(1)
+    full_path_png = os.path.join(path, "post_processing/all_lines.png")
+    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+
+    plt.figure(3)
+    full_path_png = os.path.join(path, "post_processing/all_lines_mean.png")
+    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+
+    plt.figure(2)
+    full_path_png = os.path.join(path, "post_processing/mean_percents.png")
+    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+
+    plt.show()
     #     if True:
     #         # find where in height/displacement the minima dissim is
     #         # currently using simple method, not interpolating in any way
