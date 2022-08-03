@@ -1519,7 +1519,7 @@ def main(ex, model, meta, plane_method="", do_homing=False):
 
                     # move predicted distance
                     tap_2_location = ex.displace_along_line(
-                        new_location, disp_tap_1, new_orient
+                        new_location, -disp_tap_1, new_orient
                     )
 
                     tap_2_height = new_height - pred_height_1
