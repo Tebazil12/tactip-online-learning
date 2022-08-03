@@ -19,7 +19,9 @@ from tactip_toolkit_dobot.experiments.online_learning.offline_3d.offline_train_3
 
 
 def main(ex, meta):
-    for num in ["000","005","006"]:
+    heights = common.load_data(data_home + current_experiment + "all_edge_heights_final.json")
+
+    for num in ["000","002","003","004","005"]:
         stuff = common.load_data(data_home + current_experiment + "plane_" + num +".json")
 
         plane = Plane()
@@ -31,6 +33,8 @@ def main(ex, meta):
         plane.heights = stuff["heights"]
         plane.phis = stuff["phis"]
         plane.x_no_mu = stuff["x_no_mu"]
+
+        plane.real_height = heights[int(num)]
 
         plot_dissim_grid(plane, meta, step_num_str=num, show_fig=False)
 
@@ -64,7 +68,11 @@ if __name__ == "__main__":
     # current_experiment = "contour_following_3d_2021y-08m-18d_14h25m12s/"
     # current_experiment = "contour_following_3d_2021y-08m-16d_15h44m12s/"
 
-    current_experiment = "contour_following_3d_2021y-11m-08d_16h33m58s/"
+    # current_experiment = "contour_following_3d_2021y-11m-08d_16h33m58s/"
+
+    # current_experiment = "contour_following_3d_2022y-07m-29d_11h50m44s/"
+    current_experiment = "contour_following_3d_2022y-07m-29d_14h29m56s/"
+
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 

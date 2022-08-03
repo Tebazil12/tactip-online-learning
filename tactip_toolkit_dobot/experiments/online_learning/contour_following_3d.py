@@ -27,7 +27,7 @@ import time
 import json
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from matplotlib.patches import Wedge
+from matplotlib.patches import Wedge, Rectangle
 from mpl_toolkits.mplot3d import Axes3D
 
 import atexit
@@ -556,19 +556,21 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         max_steps = 20
 
     elif stimuli_name == "105mm-circle":
-        stimuli_height = -190 + 2
+        stimuli_height = -180 -1  # -190 + 2
         # x_y_offset = [57.5, -57.5]
-        x_y_offset = [7, -77.5]
+        x_y_offset = [0, 15, 0]
         max_steps = 25
         ref_location = np.array([0,0,0])
         ref_plat_height = stimuli_height
 
     elif stimuli_name == "flower":
-        stimuli_height = -190 + 2 +10 -2
+        stimuli_height = -180 -2
         x_y_offset = [-6, 15, 0]
         max_steps =  30
-        ref_plat_height = -190 +1+1
-        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([0,0,0])
 
     elif stimuli_name == "squishy-brick":
         stimuli_height = -190 - 1
@@ -806,9 +808,9 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
         "STEP_LENGTH": 2,#5,  # nb, opposite direction to matlab experiments
-        "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
+        # "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
         # "line_range": np.arange(-1, 2, 1).tolist(),  # in mm
-        "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
+        # "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
         # "height_range": np.array(np.arange(-1, 1.5001, 1)).tolist(),  # in mm
         "collect_ref_tap": True,
         "ref_location": ref_location.tolist(),  # [x,y,sensor angle in rads]
@@ -898,6 +900,24 @@ def plot_all_movements(ex, meta, show_figs=True):
         # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
         w2 = Wedge((x_offset, y_offset), radius, 90, -90, fc="tab:brown", alpha=0.5)
         ax.add_artist(w2)
+    elif meta["stimuli_name"] == "105mm-circle":
+        # print large circle location
+        radius = 107.5 /2
+        x_offset =   radius
+        y_offset = 0
+        # --- https://uk.mathworks.com/matlabcentral/answers/3058-plotting-circles
+        ang = np.linspace(np.pi / 2, -np.pi / 2, 100)
+        x = x_offset + radius * -np.cos(ang)
+        y = y_offset + radius * np.sin(ang)
+        plt.plot(x, y, "tab:brown", linewidth=line_width)
+        # y=y*.8
+        # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
+
+        # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
+        w2 = Wedge((x_offset, y_offset), radius, 90, -90, fc="tab:brown", alpha=0.5)
+        ax.add_artist(w2)
+
+
     elif meta["stimuli_name"] == "flower":
         img = plt.imread("/home/lizzie/Pictures/stimulus-flower.png")
         img_cropped = img[:, 0 : int(img.shape[0] / 2), :]
@@ -946,13 +966,13 @@ def plot_all_movements(ex, meta, show_figs=True):
     if ex.edge_locations is not None:
         # print predicted edge locations
         all_edge_np = np.array(ex.edge_locations)
-        pos_xs = all_edge_np[:, 0]
-        pos_ys = all_edge_np[:, 1]
+        pos_xs_e = all_edge_np[:, 0]
+        pos_ys_e = all_edge_np[:, 1]
         # pos_ys = pos_ys/0.8
-        n = range(len(pos_xs))
+        n = range(len(pos_xs_e))
         plt.plot(
-            pos_xs,
-            pos_ys,
+            pos_xs_e,
+            pos_ys_e,
             color="#15b01a",
             marker="+",
             markersize=marker_size + 1,
@@ -1001,9 +1021,12 @@ def plot_all_movements(ex, meta, show_figs=True):
     ax.set_axisbelow(True)
 
     # ax.set(auto=True)
-    xmin, xmax, ymin, ymax = plt.axis()
-    print(xmax)
-    plt.axis([xmin, xmax + 2, ymin, ymax])
+    # xmin, xmax, ymin, ymax = plt.axis()
+    # print(xmax)
+    # plt.axis([xmin, xmax + 2, ymin, ymax])
+    plt.axis([min(pos_xs)-1, max(pos_xs)+1, min(pos_ys)-1, max(pos_ys)+1])
+
+
 
     #
     # # Turn on the minor TICKS, which are required for the minor GRID
@@ -1031,6 +1054,7 @@ def plot_all_movements(ex, meta, show_figs=True):
     if show_figs:
         plt.show()
     plt.clf()
+    plt.close()
 
 def plot_all_movements_3d(ex, meta, show_figs=True):
     # print(ex.all_tap_positions)
@@ -1054,6 +1078,24 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
         # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
         w2 = Wedge((x_offset, y_offset), radius, 90, -90, fc="tab:brown", alpha=0.5)
         ax.add_artist(w2)
+    elif meta["stimuli_name"] == "105mm-circle":
+        # print large circle location
+        radius = 50
+        x_offset =  -radius
+        y_offset = 0
+        # --- https://uk.mathworks.com/matlabcentral/answers/3058-plotting-circles
+        ang = np.linspace(np.pi / 2, -np.pi / 2, 100)
+        x = x_offset + radius * -np.cos(ang)
+        y = y_offset + radius * np.sin(ang)
+        # plt.plot(x, y, "tab:brown", linewidth=line_width)
+        # y=y*.8
+        # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
+
+        # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
+        # w2 = Wedge((x_offset, y_offset), radius, 90, -90, fc="tab:brown", alpha=0.5)
+        w2= Rectangle((x_offset, y_offset), radius*2, -10, fc="tab:brown", alpha=0.5)
+        ax.add_artist(w2)
+
     elif meta["stimuli_name"] == "flower":
         img = plt.imread("/home/lizzie/Pictures/stimulus-flower.png")
         img_cropped = img[:, 0 : int(img.shape[0] / 2), :]
@@ -1088,7 +1130,7 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
         ax.annotate(
             int(x[0]), (x[1], x[2]), fontsize=1, ha="center", va="center", color="grey"
         )
-        for x in np.array([n, pos_xs, pos_ys]).T
+        for x in np.array([n, pos_ys, heights]).T
     ]
 
     # # print data collection lines
@@ -1107,14 +1149,14 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
     if ex.edge_locations is not None:
         # print predicted edge locations
         all_edge_np = np.array(ex.edge_locations)
-        pos_xs = all_edge_np[:, 0]
-        pos_ys = all_edge_np[:, 1]
-        heights = ex.edge_height
+        pos_xs2 = all_edge_np[:, 0]
+        pos_ys2 = all_edge_np[:, 1]
+        heights2 = ex.edge_height
         # pos_ys = pos_ys/0.8
-        n = range(len(pos_xs))
+        n = range(len(pos_xs2))
         plt.plot(
-            pos_ys,
-            heights,
+            pos_ys2,
+            heights2,
             color="#15b01a",
             marker="+",
             markersize=marker_size + 1,
@@ -1138,8 +1180,8 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
     plt.tick_params(labelsize=5)
 
     # axis labels
-    plt.xlabel("x displacement (mm)", fontsize=5, va="top")
-    plt.ylabel("y displacement (mm)", fontsize=5, va="top")
+    plt.xlabel("y displacement (mm)", fontsize=5, va="top")
+    plt.ylabel("height (mm)", fontsize=5, va="top")
 
     # add identifier labels
     part_path, _ = os.path.split(meta["meta_file"])
@@ -1163,9 +1205,10 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
     ax.set_axisbelow(True)
 
     # ax.set(auto=True)
-    xmin, xmax, ymin, ymax = plt.axis()
-    print(xmax)
-    plt.axis([xmin, xmax + 2, ymin, ymax])
+    # xmin, xmax, ymin, ymax = plt.axis()
+    # print(xmax)
+    # plt.axis([xmin, xmax + 2, ymin, ymax])
+    plt.axis([min(pos_ys) -1, max(pos_ys) +1, min(heights) -1, max(heights)+1])
 
     #
     # # Turn on the minor TICKS, which are required for the minor GRID
@@ -1193,6 +1236,7 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
     if show_figs:
         plt.show()
     plt.clf()
+    plt.close()
 
 
 def plot_gplvm(model, meta, show_fig=True):
@@ -1307,12 +1351,14 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True
         # min_num = 0
         # max_num = 75
         # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo", vmin=min_num,vmax=max_num)
+        # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="viridis_r")
         plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo")
-        # plt.contourf(disps_meshed, heights_meshed, plane.dissims, 100, cmap="turbo")
-        plt.colorbar()
+        # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="hot_r")
+        plt.colorbar(shrink=0.3, aspect=20*0.3, label="dissimilarity", ticks=[0,10,20,30,40,50])
 
-        # plt.scatter(plane.disps, plane.heights, edgecolors='k', facecolors='none'  )
-        plt.scatter(plane.disps, plane.heights, c=colour, cmap="turbo", edgecolors='k')
+        plt.scatter(plane.disps, plane.heights, s=5, marker='+', edgecolors='k', facecolors='k', linewidths=.5  )
+        # plt.scatter(plane.disps, plane.heights, c=colour, cmap="viridis_r", edgecolors='k')
+        # plt.scatter(plane.disps, plane.heights, c=colour, cmap="hot_r", edgecolors='k')
 
     else:
 
@@ -1322,22 +1368,30 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True
 
     plt.xlabel("Displacment (mm)")
     plt.ylabel("Height (mm)")
+    plt.title("Dissimilarity Field at varying Proximity to Edge")
 
+    # # show height of start point
+    # plt.plot([min(plane.disps),max(plane.disps)],[-plane.real_height,-plane.real_height], "w--")
 
-
-    # show where 0,0 is clearly
+    # show where predicted 0,0 is clearly
     plt.plot([min(plane.disps),max(plane.disps)],[0,0], "k:")
     plt.plot([0,0],[min(plane.heights),max(plane.heights)], "k:")
+
+
+
     #
     # plt.show()
     # plt.clf()
+
+    # plt.axis('equal')
+    plt.gca().set_aspect('equal', adjustable='box')
 
     ax = plt.gca()
 
     plt.gcf().text(
         1,
         1.01,
-        "angle = " + str(step_num_str)[1:],
+        "plane = " + str(step_num_str)[1:],
         transform=ax.transAxes,
         fontsize=10,
         alpha=0.2,
@@ -1401,12 +1455,12 @@ def save_final_status():
         myfile.write("\n")
 
 
-def main(ex, model, meta):
+def main(ex, model, meta, plane_method="", do_homing=False):
 
     # np.set_printoptions(precision=2, suppress=True)
 
     with common.make_robot() as ex.robot, common.make_sensor(meta) as ex.sensor:
-        common.init_robot(ex.robot, meta, do_homing=False)
+        common.init_robot(ex.robot, meta, do_homing=do_homing)
         common.go_home(ex.robot, meta) # explicit becuase init doesnt always work!
 
         ex.collect_neutral_tap(meta)
@@ -1428,6 +1482,8 @@ def main(ex, model, meta):
         collect_more_data = True  # first loop should always collect data
 
         n_lines_in_model = 0
+
+        preds_dict = 0
 
         for current_step in range(0, meta["MAX_STEPS"]):
             print(f"------------ Main Loop {current_step}-----------------")
@@ -1508,10 +1564,34 @@ def main(ex, model, meta):
                         edge_location = tap_2_location
                         edge_height =  tap_2_height
 
-            if collect_more_data is True:
+                preds_dict = {
+                    "disp_tap_1":disp_tap_1,
+                    "disp_tap_2":disp_tap_2,
+                    "pred_height_1":pred_height_1,
+                    "pred_height_2":pred_height_2,
+                    "mu_tap_1":mu_tap_1,
+                    "mu_tap_2":mu_tap_2,
+                    "collect_more_data": collect_more_data,
+                }
 
-                plane, edge_location, edge_height = ex.collect_grid(new_location, new_orient, new_height, ref_tap, meta)
-                # plane, edge_location, edge_height = ex.collect_cross(new_location, new_orient, new_height, ref_tap, meta)
+
+            if collect_more_data is True:
+                # In all cases, all the data collected is used for dissim
+                # calculations as well as adding to GP-LVM - there is no
+                # seperate collection for dissim measure.
+
+                if plane_method == "full_grid":
+                    # collect an entire full grid of data (all height and all
+                    # displacements in the specified ranges)
+                    plane, edge_location, edge_height = ex.collect_grid(new_location, new_orient, new_height, ref_tap, meta)
+                elif plane_method == "cross":
+                    # cross is collect data along a single height, then along
+                    # a single disp (the height of which is based on min dissim
+                    # of height profile)
+                    plane, edge_location, edge_height = ex.collect_cross(new_location, new_orient, new_height, ref_tap, meta)
+                else:
+                    raise NameError(f"Plane collection method is not recognised: {plane_method}")
+
                 print(f"plane is {plane} and has {plane.__dict__}")
 
                 plot_dissim_grid(plane, meta) #TODO currently will break if not full grid
@@ -1583,6 +1663,8 @@ def main(ex, model, meta):
                 ex.edge_height, meta, name="all_edge_heights_" + step_n_str + ".json"
             )
 
+            common.save_data(preds_dict, meta, name="predictions_" + step_n_str + ".json")
+
             if plane is not None:
                 plot_dissim_grid(plane, meta, step_n_str) #TODO will break if not full grid
                 common.save_data(
@@ -1590,6 +1672,16 @@ def main(ex, model, meta):
                 )
             plane = None
             collect_more_data = False  # last thing in loop, reset for next loop
+
+            # set to None so can be saved without throwing nonexist error
+            disp_tap_1 = None
+            disp_tap_2 = None
+            pred_height_1 = None
+            pred_height_2 = None
+            mu_tap_1 = None
+            mu_tap_2 = None
+
+
 
         common.go_home(ex.robot, meta)
 
@@ -1613,10 +1705,25 @@ class State:
         self.model = model  # init when first line of data collected
         self.success = success
         self.ex = Experiment()
+
+        extra_dict = {"plane_method": "full_grid",
+                      "line_range": np.arange(-5, 5.0001, 2).tolist(),  # in mm
+                        # "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
+                      # "line_range": np.arange(-1, 2, 1).tolist(),  # in mm
+                      "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
+                      # "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
+                    # "height_range": np.array(np.arange(-1, 1.5001, 1)).tolist(),  # in mm
+        }
+
         if meta is None:
-            self.meta = make_meta(stimuli_name="flower-tilted")
+            self.meta = make_meta(stimuli_name="105mm-circle", extra_dict=extra_dict)
         else:
             self.meta = meta
+
+        if "line_range" not in self.meta:
+            raise NameError("Line range not defined in meta")
+        if "height_range" not in self.meta:
+            raise NameError("Height range not defined in meta")
 
 
 if __name__ == "__main__":
@@ -1627,4 +1734,4 @@ if __name__ == "__main__":
     atexit.register(save_final_status)
     atexit.register(state.ex.save_final_data)
 
-    main(state.ex, state.model, state.meta)
+    main(state.ex, state.model, state.meta, plane_method=state.meta["plane_method"], do_homing=False)

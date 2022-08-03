@@ -285,11 +285,14 @@ if __name__ == "__main__":
     )
     # current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
     # current_experiment = "collect_dataset_3d_21y-11m-19d_12h24m42s/"
-    # current_experiment = "collect_dataset_3d_21y-11m-22d_16h10m54s/"
+    current_experiment = "collect_dataset_3d_21y-11m-22d_16h10m54s/"
     #
     # current_experiment = "collect_dataset_3d_21y-12m-07d_16h00m01s/"
     # current_experiment = "collect_dataset_3d_21y-12m-07d_15h24m32s/"
-    current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
+    # current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
+
+
+    # current_experiment = "contour_following_3d_2022y-07m-29d_11h50m44s/"
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
@@ -311,4 +314,4 @@ if __name__ == "__main__":
 
     # main(state.ex, state.meta,train_or_test="train", train_folder="model_two_grid/")
     # main(state.ex, state.meta,train_or_test="test_line_angles",train_folder="model_two_grid/")
-    main(state.ex, state.meta, data_home=data_home, current_experiment=current_experiment)
+    main(state.ex, state.meta, data_home=data_home, current_experiment=current_experiment, grid_graphs_on=True)

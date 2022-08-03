@@ -1119,6 +1119,7 @@ if __name__ == "__main__":
     # current_experiment = "collect_dataset_3d_21y-12m-07d_15h24m32s/"
     current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
 
+
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
     print(state.meta["stimuli_name"])
