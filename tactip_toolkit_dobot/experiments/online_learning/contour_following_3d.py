@@ -564,7 +564,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_plat_height = stimuli_height
 
     elif stimuli_name == "flower":
-        stimuli_height = -180 -2
+        stimuli_height = -180 -3
         x_y_offset = [-6, 15, 0]
         max_steps =  30
         # ref_plat_height = -190 +1+1
@@ -716,7 +716,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_location = np.array([0,0,0])
 
     elif stimuli_name == "saddle-high":
-        stimuli_height = -170 +2-1
+        stimuli_height = -170 +2-1 -2
         x_y_offset = [0 , 15, 0]
         max_steps = 35
         # ref_plat_height = -190 +1+1
@@ -725,7 +725,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_location = np.array([2,0,0])
 
     elif stimuli_name == "saddle-low":
-        stimuli_height = -170 +2-1 - 20 -2
+        stimuli_height = -170 +2-1 - 20 -2 # NB low saddle is outside limits unless raised!
         x_y_offset = [0 , 15, 0]
         max_steps = 35
         # ref_plat_height = -190 +1+1
@@ -736,6 +736,42 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
     elif stimuli_name == "flower-tilted":
         stimuli_height = -170 +2-1 -7
         x_y_offset = [5 , 15, 0]
+        max_steps = 35
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([2,0,0])
+
+    elif stimuli_name == "cap-mid":
+        stimuli_height = -170 +2-1 -2 -2
+        x_y_offset = [45 , 15, 0]
+        max_steps = 35
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([2,0,0])
+
+    elif stimuli_name == "balance-banana":
+        stimuli_height = -170 +2-1 -2 -2 + 20 -2
+        x_y_offset = [37 , 0, 0]
+        max_steps = 50
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([2,0,0])
+
+    elif stimuli_name == "balance-melon":
+        stimuli_height = -170 +2-1 -2 -2 + 20 +3
+        x_y_offset = [37 , 15, 0]
+        max_steps = 30
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([2,0,0])
+
+    elif stimuli_name == "balance-lid":
+        stimuli_height = -170 +2-1 -2 -2 + 20 +3 -5 -1
+        x_y_offset = [20 , 15, 0]
         max_steps = 35
         # ref_plat_height = -190 +1+1
         # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
@@ -918,14 +954,24 @@ def plot_all_movements(ex, meta, show_figs=True):
         ax.add_artist(w2)
 
 
+    # elif meta["stimuli_name"] == "flower":
+    #     img = plt.imread("/home/lizzie/Pictures/stimulus-flower.png")
+    #     img_cropped = img[:, 0 : int(img.shape[0] / 2), :]
+    #     f_size = 126
+    #     f_y_offset = -5.2
+    #     ax.imshow(
+    #         img_cropped,
+    #         extent=[-f_size / 2, 0, 0 + f_y_offset, f_size + f_y_offset],
+    #         alpha=0.5,
+    #     )
     elif meta["stimuli_name"] == "flower":
-        img = plt.imread("/home/lizzie/Pictures/stimulus-flower.png")
-        img_cropped = img[:, 0 : int(img.shape[0] / 2), :]
+        img = plt.imread("/home/lizzie/Pictures/stimulus-flower2.png")
+        img_cropped = img[ :, :,  0 : int(img.shape[0] / 2)]
         f_size = 126
-        f_y_offset = -5.2
+        f_y_offset = 0#-5.2
         ax.imshow(
             img_cropped,
-            extent=[-f_size / 2, 0, 0 + f_y_offset, f_size + f_y_offset],
+            extent=[0 , f_size, -f_size/2 + f_y_offset, f_size/2 + f_y_offset],#(left, right, bottom, top)
             alpha=0.5,
         )
 
@@ -1707,7 +1753,7 @@ class State:
         self.ex = Experiment()
 
         extra_dict = {"plane_method": "full_grid",
-                      "line_range": np.arange(-5, 5.0001, 2).tolist(),  # in mm
+                      "line_range": np.arange(-5, 5.0001, 1).tolist(),  # in mm
                         # "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
                       # "line_range": np.arange(-1, 2, 1).tolist(),  # in mm
                       "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
@@ -1716,7 +1762,7 @@ class State:
         }
 
         if meta is None:
-            self.meta = make_meta(stimuli_name="105mm-circle", extra_dict=extra_dict)
+            self.meta = make_meta(stimuli_name="balance-lid", extra_dict=extra_dict)
         else:
             self.meta = meta
 

@@ -547,11 +547,13 @@ if __name__ == "__main__":
     # current_experiment = "contour_following_3d_2022y-07m-29d_14h29m56s/"
 
     # current_experiment = "contour_following_3d_2022y-08m-02d_14h03m55s/"
-    current_experiment = "contour_following_3d_2022y-08m-03d_16h57m30s/"
+    # current_experiment = "contour_following_3d_2022y-08m-03d_16h57m30s/"
+    current_experiment = "contour_following_3d_2022y-08m-04d_11h42m48s/"
+
 
     state = online.State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
     print(state.meta["stimuli_name"])
 
     state.ex = online.Experiment()
-    main(state.ex,state.meta, data_home, current_experiment)
+    main(state.ex,state.meta, data_home, current_experiment, show_figs=True)
