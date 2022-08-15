@@ -134,18 +134,19 @@ if __name__ == "__main__":
         "height_range": np.array(np.arange(-1, 2.5001, 0.5)).tolist(),
         # range(-45, 46, 5)
         # "angle_range": np.array(range(-45, 46, 5)).tolist(),
-        "angle_range": np.array(range(-15, 16, 5)).tolist(),
+        # "angle_range": np.array(range(-15, 16, 5)).tolist(),
+        "angle_range": np.array(range(0, 1, 5)).tolist(),
         # "line_range": np.arange(-10, 11, 1).tolist(),
         "line_range": np.arange(-10, 11, 2).tolist(),
         "ref_location": [0, 0, 0],
-        "comments": "bug should be fixed now"
+        "comments": "retaking datasets"
     }
 
     state = State(
         meta=make_meta(
             file_name="collect_dataset_3d.py",
-            # stimuli_name="105mm-circle",
-            stimuli_name="tilt-05deg-up-offline",
+            stimuli_name="105mm-circle",
+            # stimuli_name="tilt-05deg-up-offline",
             extra_dict=extra_dict,
         )
     )

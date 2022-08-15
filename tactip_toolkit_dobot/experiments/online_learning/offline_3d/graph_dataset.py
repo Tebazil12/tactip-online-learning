@@ -1117,8 +1117,9 @@ if __name__ == "__main__":
 
     # current_experiment = "collect_dataset_3d_21y-12m-07d_16h00m01s/"
     # current_experiment = "collect_dataset_3d_21y-12m-07d_15h24m32s/"
-    current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
+    # current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
 
+    current_experiment = "collect_dataset_3d_22y-08m-09d_10h18m30s/"
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 

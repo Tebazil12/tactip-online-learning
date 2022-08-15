@@ -722,7 +722,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ref_plat_height = -190 +1+1
         # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
         ref_plat_height = stimuli_height
-        ref_location = np.array([2,0,0])
+        ref_location = np.array([0,0,0])
 
     elif stimuli_name == "saddle-low":
         stimuli_height = -170 +2-1 - 20 -2 # NB low saddle is outside limits unless raised!
@@ -731,7 +731,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ref_plat_height = -190 +1+1
         # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
         ref_plat_height = stimuli_height
-        ref_location = np.array([2,0,0])
+        ref_location = np.array([0,0,0])
 
     elif stimuli_name == "flower-tilted":
         stimuli_height = -170 +2-1 -7
@@ -740,7 +740,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ref_plat_height = -190 +1+1
         # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
         ref_plat_height = stimuli_height
-        ref_location = np.array([2,0,0])
+        ref_location = np.array([0,0,0])
 
     elif stimuli_name == "cap-mid":
         stimuli_height = -170 +2-1 -2 -2
@@ -749,7 +749,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ref_plat_height = -190 +1+1
         # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
         ref_plat_height = stimuli_height
-        ref_location = np.array([2,0,0])
+        ref_location = np.array([0,0,0])
 
     elif stimuli_name == "balance-banana":
         stimuli_height = -170 +2-1 -2 -2 + 20 -2
@@ -758,7 +758,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ref_plat_height = -190 +1+1
         # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
         ref_plat_height = stimuli_height
-        ref_location = np.array([2,0,0])
+        ref_location = np.array([0,0,0])
 
     elif stimuli_name == "balance-melon":
         stimuli_height = -170 +2-1 -2 -2 + 20 +3
@@ -767,7 +767,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ref_plat_height = -190 +1+1
         # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
         ref_plat_height = stimuli_height
-        ref_location = np.array([2,0,0])
+        ref_location = np.array([0,0,0])
 
     elif stimuli_name == "balance-lid":
         stimuli_height = -170 +2-1 -2 -2 + 20 +3 -5 -1
@@ -776,7 +776,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ref_plat_height = -190 +1+1
         # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
         ref_plat_height = stimuli_height
-        ref_location = np.array([2,0,0])
+        ref_location = np.array([0,0,0])
 
 
     else:
@@ -1375,7 +1375,7 @@ def plot_gplvm(model, meta, show_fig=True):
 def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True):
     plt.clf()
     colour = plane.dissims/np.max(plane.dissims)
-
+    plt.rcParams.update({'font.size': 7})
     if filled:
         # plt.show()
         # print(f"shape of disps {plane.disps.tolist()} heights {plane.heights.T.shape} dissims {plane.dissims.T.shape}")
@@ -1398,13 +1398,13 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True
         # max_num = 75
         # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo", vmin=min_num,vmax=max_num)
         # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="viridis_r")
-        plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo")
+        plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 1000, cmap="turbo")
         # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="hot_r")
-        plt.colorbar(shrink=0.3, aspect=20*0.3, label="dissimilarity", ticks=[0,10,20,30,40,50])
+        plt.colorbar(shrink=0.3, aspect=20*0.3, label="dissimilarity", ticks=[0,10,20,30,40,50, 60])
 
-        plt.scatter(plane.disps, plane.heights, s=5, marker='+', edgecolors='k', facecolors='k', linewidths=.5  )
-        # plt.scatter(plane.disps, plane.heights, c=colour, cmap="viridis_r", edgecolors='k')
-        # plt.scatter(plane.disps, plane.heights, c=colour, cmap="hot_r", edgecolors='k')
+        # plt.scatter(plane.disps, plane.heights, s=5, marker='+', edgecolors='k', facecolors='k', linewidths=.5  )
+        # # plt.scatter(plane.disps, plane.heights, c=colour, cmap="viridis_r", edgecolors='k')
+        # # plt.scatter(plane.disps, plane.heights, c=colour, cmap="hot_r", edgecolors='k')
 
     else:
 
@@ -1416,12 +1416,15 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True
     plt.ylabel("Height (mm)")
     plt.title("Dissimilarity Field at varying Proximity to Edge")
 
+    plt.xticks(meta["line_range"], labels=meta["line_range"])
+    plt.yticks(meta["height_range"][::2], labels=meta["height_range"][::2])
+
     # # show height of start point
     # plt.plot([min(plane.disps),max(plane.disps)],[-plane.real_height,-plane.real_height], "w--")
 
     # show where predicted 0,0 is clearly
-    plt.plot([min(plane.disps),max(plane.disps)],[0,0], "k:")
-    plt.plot([0,0],[min(plane.heights),max(plane.heights)], "k:")
+    plt.plot([min(plane.disps),max(plane.disps)],[0,0], "k:",linewidth=.5)
+    plt.plot([0,0],[min(plane.heights),max(plane.heights)], "k:",linewidth=.5)
 
 
 
@@ -1434,15 +1437,15 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True
 
     ax = plt.gca()
 
-    plt.gcf().text(
-        1,
-        1.01,
-        "plane = " + str(step_num_str)[1:],
-        transform=ax.transAxes,
-        fontsize=10,
-        alpha=0.2,
-        ha="right",
-    )
+    # plt.gcf().text(
+    #     1,
+    #     1.01,
+    #     "plane = " + str(step_num_str)[1:],
+    #     transform=ax.transAxes,
+    #     fontsize=10,
+    #     alpha=0.2,
+    #     ha="right",
+    # )
 
     # save graphs automatically
     part_path, _ = os.path.split(meta["meta_file"])
@@ -1640,7 +1643,7 @@ def main(ex, model, meta, plane_method="", do_homing=False):
 
                 print(f"plane is {plane} and has {plane.__dict__}")
 
-                plot_dissim_grid(plane, meta) #TODO currently will break if not full grid
+                # plot_dissim_grid(plane, meta) #TODO currently will break if not full grid
 
                 if model is None:
                     print("Model is None, mu will be 1")
@@ -1712,7 +1715,7 @@ def main(ex, model, meta, plane_method="", do_homing=False):
             common.save_data(preds_dict, meta, name="predictions_" + step_n_str + ".json")
 
             if plane is not None:
-                plot_dissim_grid(plane, meta, step_n_str) #TODO will break if not full grid
+                # plot_dissim_grid(plane, meta, step_n_str) #TODO will break if not full grid
                 common.save_data(
                     plane.__dict__, meta, name="plane_" + step_n_str + ".json"
                 )
@@ -1752,7 +1755,7 @@ class State:
         self.success = success
         self.ex = Experiment()
 
-        extra_dict = {"plane_method": "full_grid",
+        extra_dict = {"plane_method": "cross",
                       "line_range": np.arange(-5, 5.0001, 1).tolist(),  # in mm
                         # "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
                       # "line_range": np.arange(-1, 2, 1).tolist(),  # in mm
@@ -1762,7 +1765,7 @@ class State:
         }
 
         if meta is None:
-            self.meta = make_meta(stimuli_name="balance-lid", extra_dict=extra_dict)
+            self.meta = make_meta(stimuli_name="cap-mid", extra_dict=extra_dict)
         else:
             self.meta = meta
 

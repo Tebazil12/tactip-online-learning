@@ -82,6 +82,7 @@ if __name__ == "__main__":
         "collect_dataset_3d_21y-12m-07d_16h00m01s/",
         "collect_dataset_3d_21y-12m-07d_15h24m32s/",
         "collect_dataset_3d_21y-12m-07d_12h33m47s/",
+        "collect_dataset_3d_22y-08m-09d_10h18m30s/",
     ]
 
     to_tabulate = []
