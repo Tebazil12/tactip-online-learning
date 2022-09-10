@@ -337,7 +337,7 @@ class Experiment:
 
         # find min in profile
         corrected_disps, offset = dp.align_radius(
-            np.array(meta["line_range"]), dissim_profile, gp_extrap=True
+            np.array(meta["line_range"]), dissim_profile, gp_extrap=False
         )
 
         print(offset)
@@ -550,13 +550,13 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # stimuli_name ="70mm-circle"
 
     if stimuli_name == "70mm-circle":
-        stimuli_height = -190
+        stimuli_height = 53+ -190
         x_y_offset = [35, -35]
         # x_y_offset = [0, 0]
         max_steps = 20
 
     elif stimuli_name == "105mm-circle":
-        stimuli_height = -180 -1  # -190 + 2
+        stimuli_height = -180 -1 +53 # -190 + 2
         # x_y_offset = [57.5, -57.5]
         x_y_offset = [0, 15, 0]
         max_steps = 25
@@ -564,159 +564,168 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_plat_height = stimuli_height
 
     elif stimuli_name == "flower":
-        stimuli_height = -180 -3
+        stimuli_height = 53+ -180 -3
         x_y_offset = [-6, 15, 0]
-        max_steps =  30
+        max_steps =  35
         # ref_plat_height = -190 +1+1
         # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
         ref_plat_height = stimuli_height
         ref_location = np.array([0,0,0])
 
     elif stimuli_name == "squishy-brick":
-        stimuli_height = -190 - 1
+        stimuli_height = 53+ -190 - 1
         x_y_offset = [35, -35 - 10 - 10]
         max_steps = 30
 
+    elif stimuli_name == "high-squishy-brick":
+        stimuli_height = 53+ -170 +2
+        x_y_offset = [27 , 15, 0]
+        max_steps = 30
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([0,0,0])
+
     elif stimuli_name == "squishy-saddle":
-        stimuli_height = -190 + 10 + 30 - 4
+        stimuli_height = 53+ -190 + 10 + 30 - 4
         x_y_offset = [35, -35 - 10 - 10]
         max_steps = 30
 
     elif stimuli_name == "tilt-0deg":
-        stimuli_height = -190
-        x_y_offset = [-10, 0, 0]
-        max_steps = 30
-        ref_plat_height = -190
-        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        stimuli_height = -143
+        x_y_offset = [-10, -10, 0]
+        max_steps = 20
+        ref_plat_height = stimuli_height
+        ref_location =np.array([0,0,0])# (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-05deg-up":
-        stimuli_height = -190 + 17 - 4 -10 - 2 -2
-        x_y_offset = [-10, 0,0]
-        max_steps = 30
-        ref_plat_height = -190
-        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        stimuli_height = -142
+        x_y_offset = [-10, -10, 0]
+        max_steps = 20
+        ref_plat_height = stimuli_height
+        ref_location =np.array([0,0,0])# (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-05deg-up-offline":
-        stimuli_height = -190 + 17 - 4 -10 - 2 -2 + 4
+        stimuli_height = 53+ -190 + 17 - 4 -10 - 2 -2 + 4
         x_y_offset = [-10, 0,0]
-        max_steps = 30
+        max_steps = 20
         ref_plat_height = -190
         ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-10deg-up":
-        stimuli_height = -190 + 17 - 4 -10 - 2 -2
-        x_y_offset = [-10, 0,0]
-        max_steps = 30
-        ref_plat_height = -190
-        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        stimuli_height = -141
+        x_y_offset = [-10, -10, 0]
+        max_steps = 20
+        ref_plat_height = stimuli_height
+        ref_location =np.array([0,0,0])# (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-15deg-up":
-        stimuli_height = -190 + 17 - 4 -10 - 2 -2
-        x_y_offset = [-10, 0,0]
-        max_steps = 30
-        ref_plat_height = -190
-        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        stimuli_height = -140
+        x_y_offset = [-10, -10, 0]
+        max_steps = 20
+        ref_plat_height = stimuli_height
+        ref_location =np.array([0,0,0])# (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-20deg-up":
-        stimuli_height = -190 + 17 - 4 -10 - 2
-        x_y_offset = [-10, 0,0]
-        max_steps = 30
-        ref_plat_height = -190
-        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        stimuli_height = -139 +1
+        x_y_offset = [-10+1, -10, 0]
+        max_steps = 20
+        ref_plat_height = stimuli_height
+        ref_location =np.array([0,0,0])# (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-25deg-up":
-        stimuli_height = -190 + 17 - 4 -10
-        x_y_offset = [-10, 0,0]
-        max_steps = 30
-        ref_plat_height = -190
-        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        stimuli_height = -139 +1 +2+1
+        x_y_offset = [-10+1, -10, 0]
+        max_steps = 20
+        ref_plat_height = stimuli_height
+        ref_location =np.array([0,0,0])# (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-30deg-up":
-        stimuli_height = -190 + 17 - 4 -10
+        stimuli_height = 53+ -190 + 17 - 4 -10
         x_y_offset = [-10, 0,0]
-        max_steps = 25
+        max_steps = 20
         ref_plat_height = -190
         ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-35deg-up":
-        stimuli_height = -190 + 17 - 4 -10 +3
+        stimuli_height = 53+ -190 + 17 - 4 -10 +3
         x_y_offset = [-10, 0,0]
-        max_steps = 25
+        max_steps = 20
         ref_plat_height = -190
         ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-40deg-up":
-        stimuli_height = -190 + 17 - 4 -10 +5
+        stimuli_height = 53+ -190 + 17 - 4 -10 +5
         x_y_offset = [-10, 0,0]
-        max_steps = 25
+        max_steps = 20
         ref_plat_height = -190
         ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-45deg-up":
-        stimuli_height = -190 + 17 - 4 -10 +5 +4
+        stimuli_height = 53+ -190 + 17 - 4 -10 +5 +4
         x_y_offset = [-10, 0,0]
         max_steps = 20
         ref_plat_height = -190
         ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-10deg-down":
-        stimuli_height = -190 + 17 - 4
-        x_y_offset = [-10, 0, 0]
-        max_steps = 30
-        ref_plat_height = -190
-        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        stimuli_height = 53+ -190 + 17 - 4 -8 +2+1
+        x_y_offset = [-10+2, -10, 0]
+        max_steps = 20
+        ref_plat_height = stimuli_height
+        ref_location =np.array([0,0,0])# (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-05deg-down":
-        stimuli_height = -190 + 17 - 4 -8 +2
-        x_y_offset = [-10, 0, 0]
-        max_steps = 30
-        ref_plat_height = -190
-        ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        stimuli_height = 53+ -190 + 17 - 4 -8 +2-6
+        x_y_offset = [-10+2, -10, 0]
+        max_steps = 20
+        ref_plat_height = stimuli_height
+        ref_location =np.array([0,0,0])# (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-15deg-down":
-        stimuli_height = -190 + 17 - 4 + 6
+        stimuli_height = 53+ -190 + 17 - 4 + 6
         x_y_offset = [-10, 0,0]
-        max_steps = 30
+        max_steps = 20
         ref_plat_height = -190
         ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-20deg-down":
-        stimuli_height = -190 + 17 - 4 + 13 -1
+        stimuli_height = 53+ -190 + 17 - 4 + 13 -1
         x_y_offset = [-10, 0,0]
-        max_steps = 30
+        max_steps = 20
         ref_plat_height = -190
         ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-25deg-down":
-        stimuli_height = -190 + 17 - 4 + 13 + 10 -2
+        stimuli_height = 53+-190 + 17 - 4 + 13 + 10 -2
         x_y_offset = [-10, 0,0]
-        max_steps = 30
+        max_steps = 20
         ref_plat_height = -190 -1
         ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "tilt-30deg-down":
-        stimuli_height = -190 + 17 - 4 + 13 + 10 -2 +10 -13 -4
+        stimuli_height = 53+ -190 + 17 - 4 + 13 + 10 -2 +10 -13 -4
         x_y_offset = [-11, 0,0]
-        max_steps = 30
+        max_steps = 20
         ref_plat_height = -190
         ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
 
     elif stimuli_name == "slide-minipeak":
-        stimuli_height = -170 +20 - 15 +2 +2
+        stimuli_height = 53+ -170 +20 - 15 +2 +2
         x_y_offset = [25 , 18, 0]
         max_steps = 25
         ref_plat_height = stimuli_height -1
         ref_location = np.array([0,0,0])
 
     elif stimuli_name == "slide-dip":
-        stimuli_height = -170 +20 - 15 +2 - 13
+        stimuli_height = 53+ -170 +20 - 15 +2 - 13
         x_y_offset = [26+1, 18-60+12, 0]
         max_steps = 40
         ref_plat_height = stimuli_height -1
         ref_location = np.array([0,0,0])
 
     elif stimuli_name == "saddle-high":
-        stimuli_height = -170 +2-1 -2
+        stimuli_height = 53+ -170 +2-1 -2
         x_y_offset = [0 , 15, 0]
         max_steps = 35
         # ref_plat_height = -190 +1+1
@@ -725,7 +734,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_location = np.array([0,0,0])
 
     elif stimuli_name == "saddle-low":
-        stimuli_height = -170 +2-1 - 20 -2 # NB low saddle is outside limits unless raised!
+        stimuli_height = 53+ -170 +2-1 - 20 -2 # NB low saddle is outside limits unless raised!
         x_y_offset = [0 , 15, 0]
         max_steps = 35
         # ref_plat_height = -190 +1+1
@@ -734,7 +743,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_location = np.array([0,0,0])
 
     elif stimuli_name == "flower-tilted":
-        stimuli_height = -170 +2-1 -7
+        stimuli_height = 53+ -170 +2-1 -7
         x_y_offset = [5 , 15, 0]
         max_steps = 35
         # ref_plat_height = -190 +1+1
@@ -743,7 +752,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_location = np.array([0,0,0])
 
     elif stimuli_name == "cap-mid":
-        stimuli_height = -170 +2-1 -2 -2
+        stimuli_height = 53+ -170 +2-1 -2 -2
         x_y_offset = [45 , 15, 0]
         max_steps = 35
         # ref_plat_height = -190 +1+1
@@ -751,8 +760,17 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_plat_height = stimuli_height
         ref_location = np.array([0,0,0])
 
+    elif stimuli_name == "cap-twisted":
+        stimuli_height = 53+ -170 +2-1 -2 -2 -5 -1 -1.5
+        x_y_offset = [45-10+1 , 15, 0]
+        max_steps = 35
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([0,0,np.deg2rad(-35)])
+
     elif stimuli_name == "balance-banana":
-        stimuli_height = -170 +2-1 -2 -2 + 20 -2
+        stimuli_height = 53+ -170 +2-1 -2 -2 + 20 -2
         x_y_offset = [37 , 0, 0]
         max_steps = 50
         # ref_plat_height = -190 +1+1
@@ -760,8 +778,26 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_plat_height = stimuli_height
         ref_location = np.array([0,0,0])
 
+    elif stimuli_name == "strapped-banana":
+        stimuli_height = 53+ -170 +2-1 -2 -2 + 20 -2 -1
+        x_y_offset = [33 , 0, 0]
+        max_steps = 50
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([0,0,0])
+
+    elif stimuli_name == "strapped-banana2":
+        stimuli_height = 53+ -170 +2-1 -2 -2 + 20 -2 -1
+        x_y_offset = [33 , 0, 0]
+        max_steps = 50
+        # ref_plat_height = -190 +1+1
+        # ref_location = (np.array([18-1, -111, 0]) + np.array([-14, 0, 0])) - x_y_offset
+        ref_plat_height = stimuli_height
+        ref_location = np.array([0,0,0])
+
     elif stimuli_name == "balance-melon":
-        stimuli_height = -170 +2-1 -2 -2 + 20 +3
+        stimuli_height = 53+ -170 +2-1 -2 -2 + 20 +3
         x_y_offset = [37 , 15, 0]
         max_steps = 30
         # ref_plat_height = -190 +1+1
@@ -770,7 +806,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_location = np.array([0,0,0])
 
     elif stimuli_name == "balance-lid":
-        stimuli_height = -170 +2-1 -2 -2 + 20 +3 -5 -1
+        stimuli_height = 53+ -170 +2-1 -2 -2 + 20 +3 -5 -1
         x_y_offset = [20 , 15, 0]
         max_steps = 35
         # ref_plat_height = -190 +1+1
@@ -778,6 +814,78 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_plat_height = stimuli_height
         ref_location = np.array([0,0,0])
 
+    elif stimuli_name == "wavy-line-thick":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7-1# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6, 15-30, 0]
+        max_steps = 60
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+    elif stimuli_name == "wavy-line-thin":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7-1# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48, 15-30, 0]
+        max_steps = 60 -10
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+    elif stimuli_name == "wavy-line-tape":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7 -0.5# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48 -20, 15-30, 0]
+        max_steps = 60 -10
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+    elif stimuli_name == "wavy-line-tape-side":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7 -0.5 + 5+1# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48 -20, 15-30, 0]
+        max_steps = 60 -10
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+    elif stimuli_name == "wavy-line-thin-3d":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7-1 +2# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48, 15-30 -3, 0]
+        max_steps = 60 -10
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+    elif stimuli_name == "wavy-edge-3d":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7+2# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48-57-1, (15-30)-3, 0]
+        max_steps = 60 -10
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+    elif stimuli_name == "wavy-raised-3d":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7+2+2# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48-57-1+25, 15-30 -3, 0]
+        max_steps = 60 -10
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+
+    elif stimuli_name == "banana-screwed":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7 -0.5 + 5+1 +35-12# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48 -5-10, 15-30, 0]
+        max_steps = 60
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+    elif stimuli_name == "banana-screwed-reverse":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7 -0.5 + 5+1 +35-12 -1# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48 -5-2, 15-30, 0]
+        max_steps = 60
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
 
     else:
         raise NameError(f"Stimuli name {stimuli_name} not recognised")
@@ -798,7 +906,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ~~~~~~~~~ Robot movements ~~~~~~~~~#
         "robot_tcp": [0, 0, 150, 0, 0, 0],  # in mm, will change between sensors
         "base_frame": [0, 0, 0, 0, 0, 0],  # see dobot manual for location
-        "home_pose": [170, 0, -120, 0, 0, 0],  # choose a safe "resting" pose
+        "home_pose": [170, 0, -120+53, 0, 0, 0],  # choose a safe "resting" pose
         "stimuli_name": stimuli_name,
         "stimuli_height": stimuli_height,  # location of stimuli relative to base frame
         "work_frame": [
@@ -854,7 +962,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         "tol": 1,  # tolerance for displacement of second tap (0+_tol)
         "tol_height": 0.5,  # tolerance for height of second tap (0+_tol)
         # ~~~~~~~~~ Run specific comments ~~~~~~~~~#
-        "comments": "3d trials",  # so you can identify runs later
+        "comments": "3d trials - new wave",  # so you can identify runs later
     }
 
     if extra_dict is not None:
@@ -875,12 +983,12 @@ def explore(robot_type, ex):
     pass
 
 
-def find_first_orient():
+def find_first_orient(meta):
     # do 3 taps to find new_orient
 
     # find best frames
     # set new_location too
-    return 0, [0, 0], 0  # TODO implement real!
+    return meta["ref_location"][2] , [0, 0], 0  # TODO implement real!
     # return 0, [0, 0]  # TODO implement real!
 
 
@@ -888,7 +996,7 @@ def next_sensor_placement(ex, meta):
     """ New_orient needs to be in radians. """
 
     if ex.edge_locations is None:
-        new_orient, new_location, new_height = find_first_orient()  # TODO
+        new_orient, new_location, new_height = find_first_orient(meta)  # TODO
     else:
         if len(ex.edge_locations) == 1:
             # use previous angle
@@ -975,45 +1083,113 @@ def plot_all_movements(ex, meta, show_figs=True):
             alpha=0.5,
         )
 
+    elif meta["stimuli_name"] == "banana-screwed":
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/banana-top-2.jpg")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        # desired_width = 150
+        # desired_height = int(img_height / (img_width/desired_width))
+        desired_height = 150
+        desired_width = int(img_width / (img_height/desired_height))
+
+        desired_y_offset = -78
+        desired_x_offset = -78
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width,desired_height + desired_y_offset, 0 + desired_y_offset],
+            alpha=0.6,
+        )
+
+    elif meta["stimuli_name"] == "wavy-line-thin":
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/wave-2d.png")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        # desired_width = 150 *0.02639
+        # desired_height = int(img_height / (img_width/desired_width))
+        desired_height = 150 * (5/15.7)
+        desired_width = int(img_width / (img_height/desired_height))
+
+        desired_y_offset = -23.5
+        desired_x_offset = -50-7+1
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width,desired_height + desired_y_offset, 0 + desired_y_offset],
+            alpha=0.3,
+        )
+
+    elif meta["stimuli_name"] == "wavy-edge-3d":
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/wave-3d-top.png")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        # desired_width = 150 *0.02639
+        # desired_height = int(img_height / (img_width/desired_width))
+        desired_height = 150 * 1.7
+        desired_width = int((img_width / (img_height/desired_height)))
+
+        desired_y_offset = -83-.5
+        desired_x_offset = -60 +3
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width,desired_height + desired_y_offset, 0 + desired_y_offset],
+            alpha=0.6,
+        )
+
     elif meta["stimuli_name"].split("-")[0] == "tilt":
-        plt.plot([0, 0, 100],[0, 80, 80])
+        # plt.plot([0, 80, 80], [0, 0, 100])
+        ax.fill([-10,100, 100, -10], [0, 0, 100, 100], "grey", alpha=0.6)
 
-    # print all tap locations
-    all_tap_positions_np = np.array(ex.all_tap_positions)
-    pos_xs = all_tap_positions_np[2:, 0]
-    pos_ys = all_tap_positions_np[2:, 1]
-    # pos_ys = pos_ys/0.8
-    n = range(len(pos_xs))
-    plt.plot(
-        pos_xs, pos_ys, "k", marker="o", markersize=marker_size, linewidth=line_width
-    )
-    # plt.scatter(pos_xs, pos_ys, color="k", s=marker_size)
-
-    [
-        ax.annotate(
-            int(x[0]), (x[1], x[2]), fontsize=1, ha="center", va="center", color="grey"
-        )
-        for x in np.array([n, pos_xs, pos_ys]).T
-    ]
-
-    # print data collection lines
-    for line in ex.line_locations:
-        line_locations_np = np.array(line)
+    if False:
+        # print all tap locations
+        all_tap_positions_np = np.array(ex.all_tap_positions)
+        pos_xs = all_tap_positions_np[2:, 0]
+        pos_ys = all_tap_positions_np[2:, 1]
+        # pos_ys = pos_ys/0.8
+        n = range(len(pos_xs))
         plt.plot(
-            line_locations_np[:, 0],
-            line_locations_np[:, 1],
-            "r",
-            marker="o",
-            markersize=marker_size,
-            linewidth=line_width,
+            pos_ys, pos_xs, "k", marker="o", markersize=marker_size, linewidth=line_width
         )
-        # plt.scatter(line_locations_np[:, 0], line_locations_np[:, 1], color="g",s=marker_size)
+        # plt.scatter(pos_xs, pos_ys, color="k", s=marker_size)
+
+        [
+            ax.annotate(
+                int(x[0]), (x[1], x[2]), fontsize=1, ha="center", va="center", color="grey"
+            )
+            for x in np.array([n, pos_ys, pos_xs]).T
+        ]
+
+        # print data collection lines
+        for line in ex.line_locations:
+            line_locations_np = np.array(line)
+            plt.plot(
+                line_locations_np[:, 1],
+                line_locations_np[:, 0],
+                "r",
+                marker="o",
+                markersize=marker_size,
+                linewidth=line_width,
+            )
+            # plt.scatter(line_locations_np[:, 0], line_locations_np[:, 1], color="g",s=marker_size)
 
     if ex.edge_locations is not None:
         # print predicted edge locations
         all_edge_np = np.array(ex.edge_locations)
-        pos_xs_e = all_edge_np[:, 0]
-        pos_ys_e = all_edge_np[:, 1]
+        pos_ys_e = all_edge_np[:, 0]
+        pos_xs_e = all_edge_np[:, 1]
         # pos_ys = pos_ys/0.8
         n = range(len(pos_xs_e))
         plt.plot(
@@ -1042,8 +1218,8 @@ def plot_all_movements(ex, meta, show_figs=True):
     plt.tick_params(labelsize=5)
 
     # axis labels
-    plt.xlabel("x displacement (mm)", fontsize=5, va="top")
-    plt.ylabel("y displacement (mm)", fontsize=5, va="top")
+    plt.xlabel("y displacement (mm)", fontsize=5, va="top")
+    plt.ylabel("x displacement (mm)", fontsize=5, va="top")
 
     # add identifier labels
     part_path, _ = os.path.split(meta["meta_file"])
@@ -1070,7 +1246,13 @@ def plot_all_movements(ex, meta, show_figs=True):
     # xmin, xmax, ymin, ymax = plt.axis()
     # print(xmax)
     # plt.axis([xmin, xmax + 2, ymin, ymax])
-    plt.axis([min(pos_xs)-1, max(pos_xs)+1, min(pos_ys)-1, max(pos_ys)+1])
+
+    if meta["stimuli_name"] == "banana-screwed":
+        plt.axis([min(pos_xs_e)-10, max(pos_xs_e)+10,  max(pos_ys_e)+20, min(pos_ys_e)-20])
+    elif meta["stimuli_name"] == "wavy-line-thin":
+        plt.axis([min(pos_xs_e)-10, max(pos_xs_e)+10,  max(pos_ys_e)+10, min(pos_ys_e)-10])
+    else:
+        plt.axis([ min(pos_xs_e)-1, max(pos_xs_e)+1, max(pos_ys_e)+1, min(pos_ys_e)-1])
 
 
 
@@ -1153,6 +1335,50 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
             alpha=0.5,
         )
 
+    elif meta["stimuli_name"] == "banana-screwed":
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/banana-side-2.jpg")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        desired_width = 300
+        desired_height = int(img_height / (img_width/desired_width))
+        desired_y_offset = -52 - 10 -30-1
+        desired_x_offset = -10 -70 -40 +5 +5 -1.5
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width, 0 + desired_y_offset, desired_height + desired_y_offset],
+            alpha=0.6,
+        )
+
+    elif meta["stimuli_name"] == "wavy-edge-3d":
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/wave-side-reversed.png")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        # desired_width = 150 *0.02639
+        # desired_height = int(img_height / (img_width/desired_width))
+        desired_height = 150 * 1.7 *(5/14)
+        desired_width = int((img_width / (img_height/desired_height)))
+
+        desired_y_offset = -83-.5 +46.5 - 5
+        desired_x_offset = -60+6+10-2 +3
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width, 0 + desired_y_offset, desired_height + desired_y_offset],
+            alpha=0.6,
+        )
+
+    else:
+        ax.fill([-10,100, 100, -10], [0, 0, -100, -100], "grey", alpha=0.6)
+
     if meta["stimuli_name"] == "tilt-05deg-down":
         plt.plot([0,100],[0, -8.7])
     elif meta["stimuli_name"] == "tilt-10deg-down":
@@ -1160,24 +1386,25 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
     elif meta["stimuli_name"] == "tilt-20deg-down":
         plt.plot([0,100],[0, -36.4])
 
-    # print all tap locations
-    all_tap_positions_np = np.array(ex.all_tap_positions)
-    pos_xs = all_tap_positions_np[2:, 0] # remove ref and neutral taps
-    pos_ys = all_tap_positions_np[2:, 1]
-    heights = all_tap_positions_np[2:, 3]
-    # pos_ys = pos_ys/0.8
-    n = range(len(pos_xs))
-    plt.plot(
-         pos_ys, heights, "k", marker="o", markersize=marker_size, linewidth=line_width
-    )
-    # plt.scatter(pos_xs, pos_ys, color="k", s=marker_size)
-
-    [
-        ax.annotate(
-            int(x[0]), (x[1], x[2]), fontsize=1, ha="center", va="center", color="grey"
+    if False:
+        # print all tap locations
+        all_tap_positions_np = np.array(ex.all_tap_positions)
+        pos_xs = all_tap_positions_np[2:, 0] # remove ref and neutral taps
+        pos_ys = all_tap_positions_np[2:, 1]
+        heights = all_tap_positions_np[2:, 3]
+        # pos_ys = pos_ys/0.8
+        n = range(len(pos_xs))
+        plt.plot(
+             pos_ys, heights, "k", marker="o", markersize=marker_size, linewidth=line_width
         )
-        for x in np.array([n, pos_ys, heights]).T
-    ]
+        # plt.scatter(pos_xs, pos_ys, color="k", s=marker_size)
+
+        [
+            ax.annotate(
+                int(x[0]), (x[1], x[2]), fontsize=1, ha="center", va="center", color="grey"
+            )
+            for x in np.array([n, pos_ys, heights]).T
+        ]
 
     # # print data collection lines
     # for line in ex.line_locations:
@@ -1254,7 +1481,12 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
     # xmin, xmax, ymin, ymax = plt.axis()
     # print(xmax)
     # plt.axis([xmin, xmax + 2, ymin, ymax])
-    plt.axis([min(pos_ys) -1, max(pos_ys) +1, min(heights) -1, max(heights)+1])
+
+    if meta["stimuli_name"] == "banana-screwed":
+        plt.axis([min(pos_ys2) -10, max(pos_ys2) +10, min(heights2) -10, max(heights2)+10])
+    else:
+        plt.axis([min(pos_ys2) -1, max(pos_ys2) +1, min(heights2) -1, max(heights2)+1])
+        # plt.axis([min(pos_ys) -1, max(pos_ys) +1, min(heights) -1, max(heights)+1])
 
     #
     # # Turn on the minor TICKS, which are required for the minor GRID
@@ -1755,17 +1987,30 @@ class State:
         self.success = success
         self.ex = Experiment()
 
-        extra_dict = {"plane_method": "cross",
-                      "line_range": np.arange(-5, 5.0001, 1).tolist(),  # in mm
-                        # "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
-                      # "line_range": np.arange(-1, 2, 1).tolist(),  # in mm
-                      "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
-                      # "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
-                    # "height_range": np.array(np.arange(-1, 1.5001, 1)).tolist(),  # in mm
+        extra_dict = {
+            "plane_method": "full_grid",
+            # "plane_method": "cross",
+            # "line_range": np.arange(-5, 5.0001, 1).tolist(),  # in mm # default
+            # "line_range": np.arange(-4, 4.0001, 2).tolist(),  # in mm
+            "line_range": np.arange(-4, 4.0001, 1).tolist(),  # in mm
+            # "line_range": np.arange(-2, 2.0001, 0.5).tolist(),  # in mm
+            # "line_range": np.arange(-4, 4.0001, 4).tolist(),  # in mm
+            # "line_range": np.arange(-2, 2.0001, 4).tolist(),  # in mm # limit?
+
+            # "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
+            # "line_range": np.arange(-1, 2, 1).tolist(),  # in mm
+
+            "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm # default
+            # "height_range": np.array(np.arange(-1, 1.0001, 1)).tolist(),  # in mm
+            # "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),  # in mm
+            # "height_range": np.array(np.arange(-1, 1.0001, 2)).tolist(),  # in mm # limit?
+
+            # "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
+            # "height_range": np.array(np.arange(-1, 1.5001, 1)).tolist(),  # in mm
         }
 
         if meta is None:
-            self.meta = make_meta(stimuli_name="cap-mid", extra_dict=extra_dict)
+            self.meta = make_meta(stimuli_name="wavy-line-thin-3d", extra_dict=extra_dict)
         else:
             self.meta = meta
 
@@ -1783,4 +2028,4 @@ if __name__ == "__main__":
     atexit.register(save_final_status)
     atexit.register(state.ex.save_final_data)
 
-    main(state.ex, state.model, state.meta, plane_method=state.meta["plane_method"], do_homing=False)
+    main(state.ex, state.model, state.meta, plane_method=state.meta["plane_method"], do_homing=True)

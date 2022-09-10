@@ -530,6 +530,7 @@ if __name__ == "__main__":
     data_home = (
         "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
         # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2022/"
+        # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/"
     )
     # current_experiment = "contour_following_2d_01m-19d_10h47m37s/"
     # current_experiment = "contour_following_2d_01m-18d_17h41m48s/"
@@ -548,9 +549,17 @@ if __name__ == "__main__":
 
     # current_experiment = "contour_following_3d_2022y-08m-02d_14h03m55s/"
     # current_experiment = "contour_following_3d_2022y-08m-03d_16h57m30s/"
-    current_experiment = "contour_following_3d_2022y-08m-04d_11h42m48s/"
+    # current_experiment = "contour_following_3d_2022y-09m-05d_16h39m47s/"
 
-
+    # current_experiment = "contour_following_3d_2022y-09m-08d_10h25m19s/"
+    # current_experiment = "contour_following_3d_2022y-09m-08d_12h54m35s/"
+    # current_experiment = "contour_following_3d_2022y-09m-08d_12h47m46s/"
+    # current_experiment = "contour_following_3d_2022y-09m-08d_12h44m04s/"
+    # current_experiment = "contour_following_3d_2022y-09m-05d_15h23m19s/"
+    # current_experiment = "contour_following_3d_2022y-09m-09d_17h05m32s/"
+    # current_experiment = "contour_following_3d_2022y-09m-09d_15h49m55s/"
+    # current_experiment = "contour_following_3d_2022y-09m-10d_11h22m36s/"
+    current_experiment = "contour_following_3d_2022y-09m-10d_12h30m36s/"
     state = online.State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
     print(state.meta["stimuli_name"])
