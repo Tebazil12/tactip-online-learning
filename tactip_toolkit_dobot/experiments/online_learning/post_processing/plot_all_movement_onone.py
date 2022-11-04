@@ -11,24 +11,26 @@ import tactip_toolkit_dobot.experiments.online_learning.offline_setup.data_proce
 import tactip_toolkit_dobot.experiments.online_learning.offline_setup.gplvm as gplvm
 import tactip_toolkit_dobot.experiments.min_example.common as common
 from tactip_toolkit_dobot.experiments.online_learning.contour_following_2d import (
-    Experiment,
-    make_meta,
-    plot_gplvm,
-    State,
+#     Experiment,
+#     make_meta,
+#     plot_gplvm,
+#     State,
     parse_exp_name,
 )
 # import tactip_toolkit_dobot.experiments.online_learning.post_processing.plot_all_movements as plot_all_movements
-from tactip_toolkit_dobot.experiments.online_learning.contour_following_3d import (
-    Experiment,
-    make_meta,
-    # plot_all_movements,
-    # plot_all_movements_3d,
-    State
-)
+# from tactip_toolkit_dobot.experiments.online_learning.contour_following_3d import (
+#     Experiment,
+#     make_meta,
+#     # plot_all_movements,
+#     # plot_all_movements_3d,
+#     State
+# )
+
+import tactip_toolkit_dobot.experiments.online_learning.contour_following_3d as online
 
 
 def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
-    line_width = 0.5
+    line_width = 1
     marker_size = 1
     ax = plt.gca()
     # if meta["stimuli_name"] == "70mm-circle":
@@ -59,20 +61,23 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
     #     )
 
     if meta["stimuli_name"].split("-")[0] == "tilt":
-        # plt.plot([0, 0, 100],[0, 80, 80])
-        # plt.plot([0, 60],[0, 0], 'k:')
-
-        # x1 = (31.97--34.82)/0.765
+        # # plt.plot([0, 0, 100],[0, 80, 80])
+        # # plt.plot([0, 60],[0, 0], 'k:')
+        #
+        # # x1 = (31.97--34.82)/0.765
+        # # x1_smaller = x1* (60/x1)
+        # # y1 = (170.84-168.58) * (60/x1)
+        # #
+        # # plt.plot([0, x1_smaller],[0, y1], 'k:')
+        #
+        # x1 = (56.42--12.05)/0.765
         # x1_smaller = x1* (60/x1)
-        # y1 = (170.84-168.58) * (60/x1)
+        # y1 = (171.67-167.95) * (60/x1)
+        #
         #
         # plt.plot([0, x1_smaller],[0, y1], 'k:')
-
-        x1 = (56.42--12.05)/0.765
-        x1_smaller = x1* (60/x1)
-        y1 = (171.67-167.95) * (60/x1)
-
-
+        x1_smaller = 39
+        y1 =1
         plt.plot([0, x1_smaller],[0, y1], 'k:')
 
     # # print all tap locations
@@ -128,7 +133,7 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
             pos_ys,
             # color="#15b01a",
             color=[1-color_line, 0, color_line],
-            marker="+",
+            marker="",
             markersize=marker_size + 1,
             linewidth=line_width,
         )
@@ -139,6 +144,8 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
     plt.grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
     ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+
+    # plt.yticks([-4,-2,0.0,2,4])
 
     # Show the minor grid lines with very faint and almost transparent grey lines
     plt.minorticks_on()
@@ -151,7 +158,7 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
 
     # axis labels
     plt.xlabel("y displacement (mm)", fontsize=5, va="top")
-    plt.ylabel("x displacement (mm)", fontsize=5, va="top")
+    plt.ylabel("x displacement (mm)", fontsize=5, va="top",labelpad=10 )
 
     # add identifier labels
     part_path, _ = os.path.split(meta["meta_file"])
@@ -199,6 +206,8 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
     #                 right='off',  # turn off right ticks
     #                 bottom='off') # turn off bottom ticks
 
+    plt.axis([ -2, 43, 5,-5])
+
     if save_figs:
         # save graphs automatically
         part_path, _ = os.path.split(meta["meta_file"])
@@ -241,9 +250,9 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
         print("moving on")
 
     if tilt_angle <26:
-        x_distance = 60
+        x_distance = 40
     elif tilt_angle <41:
-        x_distance = 50
+        x_distance = 40
     else:
         x_distance = 40
 
@@ -287,10 +296,10 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
     d = np.abs(np.cross(p2-p1, p3-p1)) / np.linalg.norm(p2-p1)
     print(f"##### distance = {d} #####")
     averages = np.mean(np.abs(d))
-    print(f"#### mean = {np.around(averages,1)} ####")
+    print(f"#### 3d mean = {np.around(averages,1)} ####")
 
     ax.annotate(
-        str(tilt_angle)+"$\degree$", (x_distance+1.75, y_distance), fontsize=5, ha="center", va="center", color="black"
+        str(tilt_angle)+"$\degree$", (x_distance+1.5, y_distance), fontsize=10, ha="center", va="center", color="black"
     )
 
 
@@ -324,7 +333,7 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
             heights,
             # color="#15b01a",
             color=[1-color_line, 0, color_line],
-            marker="+",
+            marker="",
             markersize=marker_size + .5,
             linewidth=line_width,
             # label=f"{tilt_angle:>3}"
@@ -393,6 +402,8 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
     #                 right='off',  # turn off right ticks
     #                 bottom='off') # turn off bottom ticks
 
+    plt.axis([ -2, 43, -10,20-3])
+
     if save_figs:
         # save graphs automatically
         part_path, _ = os.path.split(meta["meta_file"])
@@ -413,83 +424,156 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
 
 if __name__ == "__main__":
 
-    data_home = (
-        "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2022/"
-    )
+    both_averages = []
+    total_taps_in_gplvm =[]
+    taps_per_plane= []
+    num_of_planes = []
 
-    averages_array =[]
+    for save_as_name in ["all_movements_final", "all_movements_final_3d"]:
+        save_as_sub_name = ""
 
-    for subdir, dirs, files in os.walk(data_home):
-        print(subdir)
-        if subdir.split('/')[-1] != "post_processing" and subdir.split('/')[-1] != "":
-            print(subdir.split('/')[-1])
-            current_experiment = subdir.split('/')[-1] + "/"
-            print(current_experiment)
+        data_home = (
+            "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/"
+        )
 
-            # try:
+        base_x_location= -16
+        averages_array =[]
 
-            state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
+        for subdir, dirs, files in os.walk(data_home):
+            # print(subdir)
+            if subdir.split('/')[-1] != "post_processing" and subdir.split('/')[-1] != "":
+                # print(subdir.split('/')[-1])
+                current_experiment = subdir.split('/')[-1] + "/"
+                print(current_experiment)
 
-            print(state.meta["stimuli_name"])
+                # try:
 
-            state.ex = Experiment()
+                state = online.State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
-            ex = state.ex
-            meta = state.meta
-            show_figs=False
+                print(state.meta["stimuli_name"])
 
-            ex.all_tap_positions = common.load_data(data_home + current_experiment + "all_positions_final.json")
-            ex.all_tap_positions = np.array(ex.all_tap_positions)
+                state.ex = online.Experiment()
 
-            ex.line_locations = common.load_data(data_home + current_experiment + "location_line_001.json")
-            ex.line_locations = np.array([ex.line_locations])
+                ex = state.ex
+                meta = state.meta
+                show_figs=False
 
-            print(ex.line_locations)
-            print(type(ex.line_locations))
-            print(np.shape(ex.line_locations))
+                ex.all_tap_positions = common.load_data(data_home + current_experiment + "all_positions_final.json")
+                ex.all_tap_positions = np.array(ex.all_tap_positions) + np.array([meta['work_frame_offset'][0] - base_x_location, 0,0,0])
+                # print(ex.all_tap_positions)
 
-            ex.edge_locations = common.load_data(data_home + current_experiment + "all_edge_locs_final.json")
-            ex.edge_locations = np.array(ex.edge_locations)
+                ex.line_locations = common.load_data(data_home + current_experiment + "location_line_001.json")
+                ex.line_locations = np.array([ex.line_locations]) + np.array([meta['work_frame_offset'][0] - base_x_location,0])
 
-            ex.edge_height = common.load_data(data_home + current_experiment + "all_edge_heights_final.json")
-            ex.edge_height = np.array(ex.edge_height)
+                # print("line locations:")
+                # print(f"lines: {ex.line_locations}")
+                # print(f"type : {type(ex.line_locations)}")
+                # print(f"shape: {np.shape(ex.line_locations)}")
 
-            # stimuli = meta["stimuli_name"]
-            # print("hee")
-            # print(stimuli.split("-"))
-            if meta["stimuli_name"].split('-')[0] == "tilt":
-                averages_array.append(plot_all_movements(ex,meta, show_figs, save_figs=False))
-                # averages_array.append(plot_all_movements_3d(ex,meta, show_figs, save_figs=False))
-            # except:
-            #     print("Plot all failed, moving on")
+                ex.edge_locations = common.load_data(data_home + current_experiment + "all_edge_locs_final.json")
+                if meta["stimuli_name"].split('-')[0] == "wavy" and meta["stimuli_name"].split('-')[-1] == "3d":
+                    ex.edge_locations = np.array(ex.edge_locations) + np.array([meta['work_frame_offset'][0] - base_x_location, 0])
+                else:
+                    ex.edge_locations = np.array(ex.edge_locations)# + np.array([meta['work_frame_offset'][0] - base_x_location, 0])
 
-    print(averages_array)
-    print("sorted:")
-    print(sorted(averages_array, key=lambda x: x[0]))
 
-    xmin, xmax, ymin, ymax = plt.axis()
-    # print(xmax)
-    # plt.axis([xmin+2, xmax + 1, ymin +2, ymax -1])
-    plt.axis([xmin+2, xmax-2 ,  ymax+1, ymin-1 ])
 
-    # plt.legend(loc="upper left",fontsize=5)
+                ex.edge_height = common.load_data(data_home + current_experiment + "all_edge_heights_final.json")
+                ex.edge_height = np.array(ex.edge_height)
 
-    # ax=plt.gca()
-    # # handles, labels = ax.get_legend_handles_labels()
-    # # # sort both labels and handles by labels
-    # # labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
-    # # ax.legend(handles, labels)
-    #
-    # handles,labels = ax.get_legend_handles_labels()
-    # sorted_legends= [x for _,x in sorted(zip(labels,labels),reverse=True)]
-    # #sort the labels based on the list k
-    # #reverse=True sorts it in descending order
-    # sorted_handles=[x for _,x in sorted(zip(labels,handles),reverse=True)]
-    # #to sort the colored handles
-    # ax.legend(sorted_handles,sorted_legends,loc="upper left",fontsize=5)
-    #display the legend on the side of your plot.
+                # stimuli = meta["stimuli_name"]
+                # print("hee")
+                # print(stimuli.split("-"))
 
-    full_path_png = os.path.join(data_home, "all_movements_final.png")
-    full_path_svg = os.path.join(data_home, "all_movements_final.svg")
-    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
-    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+                # if meta["stimuli_name"].split('-')[0] == "wavy" and meta["stimuli_name"].split('-')[-1] == "3d":
+                #     save_as_sub_name = "wavy-3d"
+                #     if save_as_name == "all_movements_final":
+                #         averages_array.append(online.plot_all_movements(ex,meta, show_figs, save_figs=False))
+                #     else:
+                #         averages_array.append(online.plot_all_movements_3d(ex,meta, show_figs, save_figs=False))
+                if meta["stimuli_name"].split('-')[0] == "tilt":
+                    save_as_sub_name = "tilt"
+                    if save_as_name == "all_movements_final":
+                        if meta["plane_method"] != "cross":
+                            averages_array.append(plot_all_movements(ex,meta, show_figs, save_figs=False))
+
+                            gplvm = common.load_data(data_home + current_experiment + "gplvm_final.json")
+                            print(f"len gplvm x {len(gplvm['x'])}")
+                            total_taps_in_gplvm.append((averages_array[-1][0],len(gplvm['x']) ))
+
+                            if meta["plane_method"] == "cross":
+                                num_taps = len(meta["line_range"]) + len(meta["height_range"])
+                                taps_per_plane.append((averages_array[-1][0], num_taps))
+
+                                num_planes = total_taps_in_gplvm[-1][1] / taps_per_plane[-1][1]
+                                num_of_planes.append((averages_array[-1][0], num_planes))
+
+                            elif meta["plane_method"] == "full_grid":
+                                num_taps = len(meta["line_range"]) * len(meta["height_range"])
+                                taps_per_plane.append((averages_array[-1][0], num_taps))
+
+                                num_planes = total_taps_in_gplvm[-1][1] / taps_per_plane[-1][1]
+                                num_of_planes.append((averages_array[-1][0], num_planes))
+
+                    else:
+                        if meta["plane_method"] != "cross":
+                            averages_array.append(plot_all_movements_3d(ex,meta, show_figs, save_figs=False))
+
+                # except:
+                #     print("Plot all failed, moving on")
+
+        if False:
+            print(f"averages array: {averages_array}")
+            print("sorted:")
+            print(sorted(averages_array, key=lambda x: x[0]))
+
+            xmin, xmax, ymin, ymax = plt.axis()
+            # print(xmax)
+            # plt.axis([xmin+2, xmax + 1, ymin +2, ymax -1])
+            plt.axis([xmin+2, xmax-2 ,  ymax+1, ymin-1 ])
+            both_averages.append(sorted(averages_array, key=lambda x: x[0]))
+
+        # plt.legend(loc="upper left",fontsize=5)
+
+        # ax=plt.gca()
+        # # handles, labels = ax.get_legend_handles_labels()
+        # # # sort both labels and handles by labels
+        # # labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
+        # # ax.legend(handles, labels)
+        #
+        # handles,labels = ax.get_legend_handles_labels()
+        # sorted_legends= [x for _,x in sorted(zip(labels,labels),reverse=True)]
+        # #sort the labels based on the list k
+        # #reverse=True sorts it in descending order
+        # sorted_handles=[x for _,x in sorted(zip(labels,handles),reverse=True)]
+        # #to sort the colored handles
+        # ax.legend(sorted_handles,sorted_legends,loc="upper left",fontsize=5)
+        #display the legend on the side of your plot.
+
+        full_path_png = os.path.join(data_home, save_as_sub_name + save_as_name + ".png")
+        full_path_svg = os.path.join(data_home, save_as_sub_name + save_as_name + ".svg")
+        plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+        plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+
+        plt.close()
+
+
+    print(f"both averages: {both_averages}")
+    print(f"total_taps in gplvm {sorted(total_taps_in_gplvm, key=lambda x: x[0])}")
+    print(f"taps per plane {sorted(taps_per_plane, key=lambda x: x[0])}")
+    print(f"no of planes {sorted(num_of_planes, key=lambda x: x[0])}")
+
+    # both_averages = []
+    # total_taps_in_gplvm =[]
+    # taps_per_plane= []
+    # num_of_planes = []
+
+
+    list_3d = []
+    for i, item in enumerate(both_averages[0]):
+
+        average_3d = np.mean([both_averages[0][i][1], both_averages[1][i][1]])
+        list_3d.append((both_averages[0][i][0],average_3d))
+    print(list_3d)
+
+

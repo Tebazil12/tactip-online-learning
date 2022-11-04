@@ -549,7 +549,7 @@ if __name__ == "__main__":
 
     # current_experiment = "contour_following_3d_2022y-08m-02d_14h03m55s/"
     # current_experiment = "contour_following_3d_2022y-08m-03d_16h57m30s/"
-    # current_experiment = "contour_following_3d_2022y-09m-05d_16h39m47s/"
+    current_experiment = "contour_following_3d_2022y-09m-05d_16h39m47s/"
 
     # current_experiment = "contour_following_3d_2022y-09m-08d_10h25m19s/"
     # current_experiment = "contour_following_3d_2022y-09m-08d_12h54m35s/"
@@ -559,7 +559,12 @@ if __name__ == "__main__":
     # current_experiment = "contour_following_3d_2022y-09m-09d_17h05m32s/"
     # current_experiment = "contour_following_3d_2022y-09m-09d_15h49m55s/"
     # current_experiment = "contour_following_3d_2022y-09m-10d_11h22m36s/"
-    current_experiment = "contour_following_3d_2022y-09m-10d_12h30m36s/"
+    # current_experiment = "contour_following_3d_2022y-09m-10d_12h30m36s/"
+    # current_experiment = "contour_following_3d_2022y-09m-10d_16h29m37s/"
+    # current_experiment = "contour_following_3d_2022y-08m-08d_15h05m19s/"
+    # current_experiment = "contour_following_3d_2022y-08m-05d_14h58m18s/"
+    # current_experiment = "contour_following_3d_2022y-09m-13d_14h38m49s/"
+
     state = online.State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
     print(state.meta["stimuli_name"])

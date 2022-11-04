@@ -865,7 +865,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
     elif stimuli_name == "wavy-raised-3d":
         stimuli_height = -180 -1 +53 - 30 -30 - 7+2+2# -190 + 2
         # x_y_offset = [57.5, -57.5]
-        x_y_offset = [-6+48-57-1+25, 15-30 -3, 0]
+        x_y_offset = [-6+48-57-1+25+0.5, 15-30 -3, 0]
         max_steps = 60 -10
         ref_location = np.array([0,0,0])
         ref_plat_height = stimuli_height
@@ -884,6 +884,14 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # x_y_offset = [57.5, -57.5]
         x_y_offset = [-6+48 -5-2, 15-30, 0]
         max_steps = 60
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+    elif stimuli_name == "lid-screwed":
+        stimuli_height = -193 + 30 -1-1
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48-57, (15-30) - 50 +2+2, 0]
+        max_steps = 60 -10
         ref_location = np.array([0,0,0])
         ref_plat_height = stimuli_height
 
@@ -951,7 +959,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # ~~~~~~~~~ Contour following vars ~~~~~~~~~#
         "robot_type": "arm",  # or "quad"
         "MAX_STEPS": max_steps,
-        "STEP_LENGTH": 2,#5,  # nb, opposite direction to matlab experiments
+        "STEP_LENGTH": 2, #5,  # nb, opposite direction to matlab experiments
         # "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
         # "line_range": np.arange(-1, 2, 1).tolist(),  # in mm
         # "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm
@@ -1024,8 +1032,8 @@ def next_sensor_placement(ex, meta):
     return new_orient, new_location, new_height
 
 
-def plot_all_movements(ex, meta, show_figs=True):
-    line_width = 0.5
+def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
+    line_width = 1.5
     marker_size = 1
     ax = plt.gca()
     if meta["stimuli_name"] == "70mm-circle":
@@ -1105,6 +1113,50 @@ def plot_all_movements(ex, meta, show_figs=True):
             alpha=0.6,
         )
 
+    elif meta["stimuli_name"] == "cap-mid":
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/cap-above.jpg")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        # desired_width = 150 *0.02639
+        # desired_height = int(img_height / (img_width/desired_width))
+        desired_height = 150 * (5/15.7) * (125/35) * (125/127)
+        desired_width = int(img_width / (img_height/desired_height))
+
+        desired_y_offset = -23.5 - 55 +10 -1
+        desired_x_offset = -50-7+1 - 15+1
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width,desired_height + desired_y_offset, 0 + desired_y_offset],
+            alpha=0.8,
+        )
+
+    elif meta["stimuli_name"] == "balance-lid" or meta["stimuli_name"] == "lid-screwed":
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/lid-above.jpg")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        # desired_width = 150 *0.02639
+        # desired_height = int(img_height / (img_width/desired_width))
+        desired_height = 150
+        desired_width = int(img_width / (img_height/desired_height))
+
+        desired_y_offset = -23.5 - 55 +10 -1 +30 +7-2-1
+        desired_x_offset = -50-7+1 - 15+1 -4.5 +5
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width,desired_height + desired_y_offset, 0 + desired_y_offset],
+            alpha=1,
+        )
+
     elif meta["stimuli_name"] == "wavy-line-thin":
         img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/wave-2d.png")
         img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
@@ -1138,11 +1190,11 @@ def plot_all_movements(ex, meta, show_figs=True):
 
         # desired_width = 150 *0.02639
         # desired_height = int(img_height / (img_width/desired_width))
-        desired_height = 150 * 1.7
+        desired_height = 150 * 1.7 *(60/64.7) * (100/202) * (100/(34.5+65)) *1.2
         desired_width = int((img_width / (img_height/desired_height)))
 
-        desired_y_offset = -83-.5
-        desired_x_offset = -60 +3
+        desired_y_offset = -83-.5 +6 + 44 -1.5
+        desired_x_offset = -60 +3 +7 +11 +5
         ax.imshow(
             img_cropped,
             extent=[desired_x_offset + 0, desired_x_offset + desired_width,desired_height + desired_y_offset, 0 + desired_y_offset],
@@ -1189,17 +1241,43 @@ def plot_all_movements(ex, meta, show_figs=True):
         # print predicted edge locations
         all_edge_np = np.array(ex.edge_locations)
         pos_ys_e = all_edge_np[:, 0]
+
+
         pos_xs_e = all_edge_np[:, 1]
+        # if meta["stimuli_name"] == "balance-lid":
+        #     pos_xs_e = pos_xs_e * 0.84
+
         # pos_ys = pos_ys/0.8
         n = range(len(pos_xs_e))
-        plt.plot(
-            pos_xs_e,
-            pos_ys_e,
-            color="#15b01a",
-            marker="+",
-            markersize=marker_size + 1,
-            linewidth=line_width,
-        )
+        if meta["stimuli_name"] == "wavy-edge-3d":
+            line_style='solid'
+        elif meta["stimuli_name"] == "wavy-raised-3d":
+            line_style=(0,(5,1))
+        elif meta["stimuli_name"] == "wavy-line-thin-3d":
+            line_style=(0,(1,1))
+        else:
+            line_style='solid'
+        if meta["plane_method"] == "cross":
+            pass
+            # plt.plot(
+            # pos_xs_e,
+            # pos_ys_e,
+            # color='#FFAA00', #"#711CFC",
+            # marker="",
+            # markersize=marker_size + 1,
+            # linewidth=line_width,
+            # linestyle=line_style,
+            # )
+        else:
+            plt.plot(
+                pos_xs_e,
+                pos_ys_e,
+                color= '#30E641',#"#15b01a",
+                marker="",
+                markersize=marker_size + 1,
+                linewidth=line_width,
+                linestyle=line_style,
+            )
     # plt.scatter(pos_xs, pos_ys, color="r",marker='+',s=marker_size)
     plt.gca().set_aspect("equal")
 
@@ -1247,10 +1325,19 @@ def plot_all_movements(ex, meta, show_figs=True):
     # print(xmax)
     # plt.axis([xmin, xmax + 2, ymin, ymax])
 
+
     if meta["stimuli_name"] == "banana-screwed":
         plt.axis([min(pos_xs_e)-10, max(pos_xs_e)+10,  max(pos_ys_e)+20, min(pos_ys_e)-20])
     elif meta["stimuli_name"] == "wavy-line-thin":
         plt.axis([min(pos_xs_e)-10, max(pos_xs_e)+10,  max(pos_ys_e)+10, min(pos_ys_e)-10])
+    elif meta["stimuli_name"].split('-')[0] == "wavy" and meta["stimuli_name"].split('-')[-1] == "3d":
+        plt.axis([ -10, 100, 80-5-2,-10+5-2])
+    elif meta["stimuli_name"].split('-')[0] == "tilt":
+        plt.axis([ -2, 40, 5,-5])
+    elif meta["stimuli_name"] == "cap-mid":
+        plt.axis([ -5, 65, 10,-15])
+    elif meta["stimuli_name"] == "lid-screwed":
+        plt.axis([ -5, 45, 45+2,-5+2])
     else:
         plt.axis([ min(pos_xs_e)-1, max(pos_xs_e)+1, max(pos_ys_e)+1, min(pos_ys_e)-1])
 
@@ -1272,22 +1359,25 @@ def plot_all_movements(ex, meta, show_figs=True):
     #                 right='off',  # turn off right ticks
     #                 bottom='off') # turn off bottom ticks
 
-    # save graphs automatically
-    part_path, _ = os.path.split(meta["meta_file"])
-    full_path_png = os.path.join(meta["home_dir"], part_path, "all_movements_final.png")
-    full_path_svg = os.path.join(meta["home_dir"], part_path, "all_movements_final.svg")
-    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
-    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+    if save_figs:
+        # save graphs automatically
+        part_path, _ = os.path.split(meta["meta_file"])
+        full_path_png = os.path.join(meta["home_dir"], part_path, "all_movements_final.png")
+        full_path_svg = os.path.join(meta["home_dir"], part_path, "all_movements_final.svg")
+        plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+        plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
     if show_figs:
         plt.show()
-    plt.clf()
-    plt.close()
 
-def plot_all_movements_3d(ex, meta, show_figs=True):
+    if show_figs or save_figs:
+        plt.clf()
+        plt.close()
+
+def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
     # print(ex.all_tap_positions)
 
-    line_width = 0.5
+    line_width = 1.5
     marker_size = 1
     ax = plt.gca()
     if meta["stimuli_name"] == "70mm-circle":
@@ -1365,26 +1455,82 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
 
         # desired_width = 150 *0.02639
         # desired_height = int(img_height / (img_width/desired_width))
-        desired_height = 150 * 1.7 *(5/14)
+        desired_height = 150 * 1.7 *(5/14) * (120 / (103+18.25) ) * (120/(162+24.6))
         desired_width = int((img_width / (img_height/desired_height)))
 
-        desired_y_offset = -83-.5 +46.5 - 5
-        desired_x_offset = -60+6+10-2 +3
+        desired_y_offset = -83-.5 +46.5 - 5 +21 -5
+        desired_x_offset = -60+6+10-2 +3 - 2.5 +1 +3.4 -3 +1.6+15
         ax.imshow(
             img_cropped,
             extent=[desired_x_offset + 0, desired_x_offset + desired_width, 0 + desired_y_offset, desired_height + desired_y_offset],
             alpha=0.6,
         )
 
+    elif meta["stimuli_name"] == "cap-mid":
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/cap-side.jpg")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        # desired_width = 150 *0.02639
+        # desired_height = int(img_height / (img_width/desired_width))
+        desired_height = 150 * 1.7 *(5/14) * (120 / (103+18.25) ) * (120/(162+24.6)) *(125/94.7)
+        desired_width = int((img_width / (img_height/desired_height)))
+
+        desired_y_offset = -83-.5 +46.5 - 5 +21 -5 -15 -3
+        desired_x_offset = -60+6+10-2 +3 - 2.5 +1 +3.4 -3 +1.6+15 -40 -12 +1.5
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width, 0 + desired_y_offset, desired_height + desired_y_offset],
+            alpha=0.8,
+        )
+
+    elif meta["stimuli_name"] == "lid-screwed":
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/lid-side.jpg")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        # desired_width = 150 *0.02639
+        # desired_height = int(img_height / (img_width/desired_width))
+        desired_height = 150 * (76/179)
+        desired_width = int((img_width / (img_height/desired_height)))
+
+        desired_y_offset = -44.5
+        desired_x_offset = -52+3
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width, 0 + desired_y_offset, desired_height + desired_y_offset],
+            alpha=1,
+        )
+
+    elif  meta["stimuli_name"].split('-')[0] == "tilt":
+        pass
+
     else:
         ax.fill([-10,100, 100, -10], [0, 0, -100, -100], "grey", alpha=0.6)
 
     if meta["stimuli_name"] == "tilt-05deg-down":
-        plt.plot([0,100],[0, -8.7])
+        plt.plot([0,100],[0, -8.7], ":k")
     elif meta["stimuli_name"] == "tilt-10deg-down":
-        plt.plot([0,100],[0, -17.6])
+        plt.plot([0,100],[0, -17.6], ":k")
     elif meta["stimuli_name"] == "tilt-20deg-down":
-        plt.plot([0,100],[0, -36.4])
+        plt.plot([0,100],[0, -36.4], ":k")
+    elif meta["stimuli_name"] == "tilt-05deg-up":
+        plt.plot([0,100],[0, 8.7], ":k")
+    elif meta["stimuli_name"] == "tilt-10deg-up":
+        plt.plot([0,100],[0, 17.6], ":k")
+    elif meta["stimuli_name"] == "tilt-20deg-up":
+        plt.plot([0,100],[0, 36.4], ":k")
+    elif meta["stimuli_name"] == "tilt-0deg":
+        plt.plot([0,100],[0, 0], ":k")
+
 
     if False:
         # print all tap locations
@@ -1427,14 +1573,39 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
         heights2 = ex.edge_height
         # pos_ys = pos_ys/0.8
         n = range(len(pos_xs2))
-        plt.plot(
-            pos_ys2,
-            heights2,
-            color="#15b01a",
-            marker="+",
-            markersize=marker_size + 1,
-            linewidth=line_width,
-        )
+
+        if meta["stimuli_name"] == "wavy-edge-3d":
+            line_style='solid'
+        elif meta["stimuli_name"] == "wavy-raised-3d":
+            line_style=(0,(5,1))
+            heights2 = heights2 +2
+        elif meta["stimuli_name"] == "wavy-line-thin-3d":
+            line_style=(0,(1,1))
+        else:
+            line_style='solid'
+
+        if meta["plane_method"] == "cross":
+            pass
+            # plt.plot(
+            #     pos_ys2,
+            #     heights2,
+            #     color='#FFAA00',#"#15b01a",
+            #     marker="",
+            #     markersize=marker_size + 1,
+            #     linewidth=line_width,
+            #     linestyle=line_style,
+            # )
+        else:
+            plt.plot(
+                pos_ys2,
+                heights2,
+                color='#30E641',#"#15b01a",
+                marker="",
+                markersize=marker_size + 1,
+                linewidth=line_width,
+                linestyle=line_style,
+            )
+
     # plt.scatter(pos_xs, pos_ys, color="r",marker='+',s=marker_size)
     plt.gca().set_aspect("equal")
 
@@ -1484,6 +1655,14 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
 
     if meta["stimuli_name"] == "banana-screwed":
         plt.axis([min(pos_ys2) -10, max(pos_ys2) +10, min(heights2) -10, max(heights2)+10])
+    elif meta["stimuli_name"].split('-')[0] == "wavy" and meta["stimuli_name"].split('-')[-1] == "3d":
+        plt.axis([ -10, 100, -5+3,15+3])
+    elif meta["stimuli_name"].split('-')[0] == "tilt":
+        plt.axis([ -2, 40, -10,20])
+    elif meta["stimuli_name"] == "cap-mid":
+        plt.axis([-5, 65, -15,5])
+    elif meta["stimuli_name"] == "lid-screwed":
+        plt.axis([ -5, 45, -12, 2])
     else:
         plt.axis([min(pos_ys2) -1, max(pos_ys2) +1, min(heights2) -1, max(heights2)+1])
         # plt.axis([min(pos_ys) -1, max(pos_ys) +1, min(heights) -1, max(heights)+1])
@@ -1504,17 +1683,20 @@ def plot_all_movements_3d(ex, meta, show_figs=True):
     #                 right='off',  # turn off right ticks
     #                 bottom='off') # turn off bottom ticks
 
-    # save graphs automatically
-    part_path, _ = os.path.split(meta["meta_file"])
-    full_path_png = os.path.join(meta["home_dir"], part_path, "all_movements_3d_final.png")
-    full_path_svg = os.path.join(meta["home_dir"], part_path, "all_movements_3d_final.svg")
-    plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
-    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
+    if save_figs:
+        # save graphs automatically
+        part_path, _ = os.path.split(meta["meta_file"])
+        full_path_png = os.path.join(meta["home_dir"], part_path, "all_movements_3d_final.png")
+        full_path_svg = os.path.join(meta["home_dir"], part_path, "all_movements_3d_final.svg")
+        plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+        plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
     if show_figs:
         plt.show()
-    plt.clf()
-    plt.close()
+
+    if show_figs or save_figs:
+        plt.clf()
+        plt.close()
 
 
 def plot_gplvm(model, meta, show_fig=True):
@@ -1990,9 +2172,9 @@ class State:
         extra_dict = {
             "plane_method": "full_grid",
             # "plane_method": "cross",
-            # "line_range": np.arange(-5, 5.0001, 1).tolist(),  # in mm # default
+            "line_range": np.arange(-5, 5.0001, 1).tolist(),  # in mm # default
             # "line_range": np.arange(-4, 4.0001, 2).tolist(),  # in mm
-            "line_range": np.arange(-4, 4.0001, 1).tolist(),  # in mm
+            # "line_range": np.arange(-4, 4.0001, 1).tolist(),  # in mm
             # "line_range": np.arange(-2, 2.0001, 0.5).tolist(),  # in mm
             # "line_range": np.arange(-4, 4.0001, 4).tolist(),  # in mm
             # "line_range": np.arange(-2, 2.0001, 4).tolist(),  # in mm # limit?
@@ -2010,7 +2192,7 @@ class State:
         }
 
         if meta is None:
-            self.meta = make_meta(stimuli_name="wavy-line-thin-3d", extra_dict=extra_dict)
+            self.meta = make_meta(stimuli_name="wavy-edge-3d", extra_dict=extra_dict)
         else:
             self.meta = meta
 
@@ -2028,4 +2210,4 @@ if __name__ == "__main__":
     atexit.register(save_final_status)
     atexit.register(state.ex.save_final_data)
 
-    main(state.ex, state.model, state.meta, plane_method=state.meta["plane_method"], do_homing=True)
+    main(state.ex, state.model, state.meta, plane_method=state.meta["plane_method"], do_homing=False)
