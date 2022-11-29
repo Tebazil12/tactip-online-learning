@@ -91,7 +91,9 @@ if __name__ == "__main__":
     #     "collect_dataset_3d_22y-08m-09d_10h18m30s/",
     # ]
 
-    to_tabulate = []
+    to_tabulate_full = []
+    to_tabulate_part_cross = []
+    to_tabulate_part_grid = []
 
     for i in datasets:
         try:
@@ -105,12 +107,69 @@ if __name__ == "__main__":
             edge_data = common.load_data(data_home + current_experiment + "all_edge_locs_final.json")
             # print(len(edge_data))
 
-            if True:#
+            # if True:#
             # if len(edge_data) == meta["MAX_STEPS"]: # if successful experiment
+            if current_experiment.split('-')[2].split("_")[0] == "16d":
+
+                if meta["plane_method"] == "cross":
+                    taps_per_plane = len(meta["line_range"]) + len(meta["height_range"])
+
+                    headers_part_cross = [
+                        "stimuli_name",
+                        "num_of_planes",
+                        "taps_per_plane",
+                        "total_taps_in_gplvm",
 
 
-                headers = [
-                    "name",
+                        "line_range & step",
+                        "height_range & step",
+                        "dataset name",
+                    ]
+
+                    metrics_part_cross = [
+                        meta["stimuli_name"],
+                        len(gplvm['x']) / taps_per_plane,
+                        taps_per_plane,
+                        len(gplvm['x']),
+
+
+                        f"{meta['line_range'][0]} to {meta['line_range'][-1]}, {meta['line_range'][1] - meta['line_range'][0]} ",
+                        f"{meta['height_range'][0]} to {meta['height_range'][-1]}, {meta['height_range'][1] - meta['height_range'][0]} ",
+                        i,
+                    ]
+                elif meta["plane_method"] == "full_grid":
+                    taps_per_plane = len(meta["line_range"]) * len(meta["height_range"])
+
+                    headers_part_grid = [
+                        "stimuli_name",
+                        "num_of_planes",
+                        "taps_per_plane",
+                        "total_taps_in_gplvm",
+
+
+                        "line_range & step",
+                        "height_range & step",
+                        # "dataset name",
+                    ]
+
+                    metrics_part_grid = [
+                        meta["stimuli_name"] ,#+ ' {tiny ' + i +"}",
+                        len(gplvm['x']) / taps_per_plane,
+                        taps_per_plane,
+                        len(gplvm['x']),
+
+
+                        f"{meta['line_range'][0]} to {meta['line_range'][-1]}, {meta['line_range'][1] - meta['line_range'][0]} ",
+                        f"{meta['height_range'][0]} to {meta['height_range'][-1]}, {meta['height_range'][1] - meta['height_range'][0]} ",
+                        # i,
+                    ]
+                else:
+                    asdf
+
+
+
+                headers_full = [
+                    "dataset name",
                     "stimuli_name",
                     "stimuli_height",
                     "ref_plat_height",
@@ -126,7 +185,7 @@ if __name__ == "__main__":
                     "height_tol"
                 ]
 
-                metrics = [
+                metrics_full = [
                     i,
                     meta["stimuli_name"],
                     meta["stimuli_height"],
@@ -138,13 +197,24 @@ if __name__ == "__main__":
                     meta["STEP_LENGTH"],
                     meta["plane_method"],
                     len(gplvm['x']),
-                    len(meta["line_range"]) * len(meta["height_range"]),
-                    len(gplvm['x']) / (len(meta["line_range"]) * len(meta["height_range"])),
+                    taps_per_plane,
+                    len(gplvm['x']) / taps_per_plane,
                     meta["tol"],
                     meta["tol_height"]
 
                 ]
-                to_tabulate.append(metrics)
+
+                # Stimuli &
+                # No. of Training phases &
+                # No. of taps per Training phase &
+                # Total no. of taps in model &
+                # Lateral Range and Resolution (mm) &
+                # Vertical Range and Resolution (mm)\\
+
+
+                to_tabulate_full.append(metrics_full)
+                to_tabulate_part_cross.append(metrics_part_cross)
+                to_tabulate_part_grid.append(metrics_part_grid)
         except:
             "failed, oh well"
         #     data = [
@@ -154,6 +224,16 @@ if __name__ == "__main__":
         #     [4, "Team Secret", 10, 20],
         # ]
 
-    to_tabulate_sorted = sorted(to_tabulate, key=lambda x: x[1], reverse=True)
+    np.set_printoptions(precision=1)
 
-    print(tabulate(to_tabulate_sorted, headers=headers))
+    # to_tabulate_sorted = sorted(to_tabulate_full, key=lambda x: x[1], reverse=True)
+    to_tabulate_sorted_full = sorted(to_tabulate_full, key=lambda x: x[0], reverse=True)
+
+    to_tabulate_sorted_part_cross = sorted(to_tabulate_part_cross, key=lambda x: (x[0], -x[3]))
+    to_tabulate_sorted_part_grid = sorted(to_tabulate_part_grid, key=lambda x: (x[0], -x[3]))
+
+    # print(tabulate(to_tabulate_sorted_full, headers=headers_full, tablefmt="latex"))
+    print("full grid")
+    print(tabulate(to_tabulate_sorted_part_grid, headers=headers_part_grid, tablefmt="latex"))
+    print("cross")
+    print(tabulate(to_tabulate_sorted_part_cross, headers=headers_part_cross, tablefmt="latex"))
