@@ -327,6 +327,10 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
         n = range(len(pos_xs))
 
         color_line = (tilt_angle + 20) / 65
+        # if meta["plane_method"] == "cross":
+        #     line_style = ":"
+        # elif meta["plane_method"] == "full_grid":
+        #     line_style = "-"
 
         plt.plot(
             pos_ys,
@@ -336,6 +340,7 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
             marker="",
             markersize=marker_size + .5,
             linewidth=line_width,
+            # linestyle=line_style,
             # label=f"{tilt_angle:>3}"
             label=tilt_angle
         )
@@ -494,7 +499,7 @@ if __name__ == "__main__":
                 if meta["stimuli_name"].split('-')[0] == "tilt":
                     save_as_sub_name = "tilt"
                     if save_as_name == "all_movements_final":
-                        if meta["plane_method"] != "cross":
+                        if meta["plane_method"] == "cross":
                             averages_array.append(plot_all_movements(ex,meta, show_figs, save_figs=False))
 
                             gplvm = common.load_data(data_home + current_experiment + "gplvm_final.json")
@@ -516,13 +521,13 @@ if __name__ == "__main__":
                                 num_of_planes.append((averages_array[-1][0], num_planes))
 
                     else:
-                        if meta["plane_method"] != "cross":
+                        if  meta["plane_method"] == "cross":
                             averages_array.append(plot_all_movements_3d(ex,meta, show_figs, save_figs=False))
 
                 # except:
                 #     print("Plot all failed, moving on")
 
-        if False:
+        if True:
             print(f"averages array: {averages_array}")
             print("sorted:")
             print(sorted(averages_array, key=lambda x: x[0]))
@@ -569,11 +574,11 @@ if __name__ == "__main__":
     # num_of_planes = []
 
 
-    list_3d = []
-    for i, item in enumerate(both_averages[0]):
-
-        average_3d = np.mean([both_averages[0][i][1], both_averages[1][i][1]])
-        list_3d.append((both_averages[0][i][0],average_3d))
-    print(list_3d)
+    # list_3d = []
+    # for i, item in enumerate(both_averages[0]):
+    #
+    #     average_3d = np.mean([both_averages[0][i][1], both_averages[1][i][1]])
+    #     list_3d.append((both_averages[0][i][0],average_3d))
+    # print(list_3d)
 
 

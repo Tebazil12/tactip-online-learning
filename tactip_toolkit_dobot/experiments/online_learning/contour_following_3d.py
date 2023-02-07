@@ -815,17 +815,17 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_location = np.array([0,0,0])
 
     elif stimuli_name == "wavy-line-thick":
-        stimuli_height = -180 -1 +53 - 30 -30 - 7-1# -190 + 2
+        stimuli_height = -180 -1 +53 - 30 -30 - 7# -190 + 2
         # x_y_offset = [57.5, -57.5]
-        x_y_offset = [-6, 15-30, 0]
-        max_steps = 60
+        x_y_offset = [-6+1, 15-30, 0]
+        max_steps = 60-10
         ref_location = np.array([0,0,0])
         ref_plat_height = stimuli_height
 
     elif stimuli_name == "wavy-line-thin":
-        stimuli_height = -180 -1 +53 - 30 -30 - 7-1# -190 + 2
+        stimuli_height = -180 -1 +53 - 30 -30 - 7+1-0.5# -190 + 2
         # x_y_offset = [57.5, -57.5]
-        x_y_offset = [-6+48, 15-30, 0]
+        x_y_offset = [-6+48+1, 15-30, 0]
         max_steps = 60 -10
         ref_location = np.array([0,0,0])
         ref_plat_height = stimuli_height
@@ -872,9 +872,9 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
 
 
     elif stimuli_name == "banana-screwed":
-        stimuli_height = -180 -1 +53 - 30 -30 - 7 -0.5 + 5+1 +35-12# -190 + 2
+        stimuli_height = -180 -1 +53 - 30 -30 - 7 -0.5 + 5+1 +35-12+2# -190 + 2
         # x_y_offset = [57.5, -57.5]
-        x_y_offset = [-6+48 -5-10, 15-30, 0]
+        x_y_offset = [-6+48 -5-10-1, 15-30, 0]
         max_steps = 60
         ref_location = np.array([0,0,0])
         ref_plat_height = stimuli_height
@@ -892,6 +892,22 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         # x_y_offset = [57.5, -57.5]
         x_y_offset = [-6+48-57, (15-30) - 50 +2+2, 0]
         max_steps = 60 -10
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+    elif stimuli_name == "fork":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7 -0.5 + 5+1 +35-12+2-20-2-1-1# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48 -5-10-1-1-1-1, 15-30, 0]
+        max_steps = 60
+        ref_location = np.array([0,0,0])
+        ref_plat_height = stimuli_height
+
+    elif stimuli_name == "fork-2":
+        stimuli_height = -180 -1 +53 - 30 -30 - 7 -0.5 + 5+1 +35-12+2-20-2-1-2-2# -190 + 2
+        # x_y_offset = [57.5, -57.5]
+        x_y_offset = [-6+48 -5-10-1-1-10+1, 15-30, 0]
+        max_steps = 60
         ref_location = np.array([0,0,0])
         ref_plat_height = stimuli_height
 
@@ -1179,6 +1195,29 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
             alpha=0.3,
         )
 
+    elif meta["stimuli_name"] == "wavy-line-thick":
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/wave-2d.png")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        # desired_width = 150 *0.02639
+        # desired_height = int(img_height / (img_width/desired_width))
+        desired_height = 150 * (5/15.7)
+        desired_width = int(img_width / (img_height/desired_height))
+
+        desired_y_offset = -23.5
+        desired_x_offset = -50-7+1
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width,desired_height + desired_y_offset, 0 + desired_y_offset],
+            alpha=0.3,
+        )
+
+
     elif meta["stimuli_name"] == "wavy-edge-3d":
         img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/wave-3d-top.png")
         img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
@@ -1200,6 +1239,22 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
             extent=[desired_x_offset + 0, desired_x_offset + desired_width,desired_height + desired_y_offset, 0 + desired_y_offset],
             alpha=0.6,
         )
+    elif meta["stimuli_name"] == "saddle-high":
+        # print large circle location
+        radius = 107.5 /2
+        x_offset =   0
+        y_offset = radius + 2
+        # --- https://uk.mathworks.com/matlabcentral/answers/3058-plotting-circles
+        ang = np.linspace(np.pi , -np.pi , 100)
+        x = x_offset + radius * -np.cos(ang)
+        y = y_offset + radius * np.sin(ang)
+        plt.plot(x, y, "tab:brown", linewidth=line_width)
+        # y=y*.8
+        # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
+
+        # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
+        w2 = Wedge((x_offset, y_offset), radius, 180, -180, fc="tab:brown", alpha=0.5)
+        ax.add_artist(w2)
 
     elif meta["stimuli_name"].split("-")[0] == "tilt":
         # plt.plot([0, 80, 80], [0, 0, 100])
@@ -1258,16 +1313,16 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
         else:
             line_style='solid'
         if meta["plane_method"] == "cross":
-            pass
-            # plt.plot(
-            # pos_xs_e,
-            # pos_ys_e,
-            # color='#FFAA00', #"#711CFC",
-            # marker="",
-            # markersize=marker_size + 1,
-            # linewidth=line_width,
-            # linestyle=line_style,
-            # )
+            # pass
+            plt.plot(
+            pos_xs_e,
+            pos_ys_e,
+            color='#FFAA00', #"#711CFC",
+            marker="",
+            markersize=marker_size + 1,
+            linewidth=line_width,
+            linestyle=line_style,
+            )
         else:
             plt.plot(
                 pos_xs_e,
@@ -1510,6 +1565,29 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
             alpha=1,
         )
 
+    elif meta["stimuli_name"] == "saddle-high":
+
+        img = plt.imread("/home/lizzie/Pictures/Screenshot from 2022-12-06 15-24-58.png")
+        img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
+
+        print(f"image is size {img.shape}")
+
+        img_width = img.shape[1]
+        img_height = img.shape[0]
+
+        # desired_width = 150 *0.02639
+        # desired_height = int(img_height / (img_width/desired_width))
+        desired_height = 80
+        desired_width = int((img_width / (img_height/desired_height)))
+
+        desired_y_offset = -83-.5 +46.5 - 5 +21 -5 -32.3
+        desired_x_offset = -60+6+10-2 +3 - 2.5 +1 +3.4 -3 +1.6+15 -45
+        ax.imshow(
+            img_cropped,
+            extent=[desired_x_offset + 0, desired_x_offset + desired_width, 0 + desired_y_offset, desired_height + desired_y_offset],
+            alpha=0.6,
+        )
+
     elif  meta["stimuli_name"].split('-')[0] == "tilt":
         pass
 
@@ -1585,16 +1663,16 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
             line_style='solid'
 
         if meta["plane_method"] == "cross":
-            pass
-            # plt.plot(
-            #     pos_ys2,
-            #     heights2,
-            #     color='#FFAA00',#"#15b01a",
-            #     marker="",
-            #     markersize=marker_size + 1,
-            #     linewidth=line_width,
-            #     linestyle=line_style,
-            # )
+            # pass
+            plt.plot(
+                pos_ys2,
+                heights2,
+                color='#FFAA00',#"#15b01a",
+                marker="",
+                markersize=marker_size + 1,
+                linewidth=line_width,
+                linestyle=line_style,
+            )
         else:
             plt.plot(
                 pos_ys2,
@@ -2170,10 +2248,10 @@ class State:
         self.ex = Experiment()
 
         extra_dict = {
-            "plane_method": "full_grid",
-            # "plane_method": "cross",
-            "line_range": np.arange(-5, 5.0001, 1).tolist(),  # in mm # default
-            # "line_range": np.arange(-4, 4.0001, 2).tolist(),  # in mm
+            # "plane_method": "full_grid",
+            "plane_method": "cross",
+            # "line_range": np.arange(-5, 5.0001, 1).tolist(),  # in mm # default
+            "line_range": np.arange(-4, 4.0001, 2).tolist(),  # in mm
             # "line_range": np.arange(-4, 4.0001, 1).tolist(),  # in mm
             # "line_range": np.arange(-2, 2.0001, 0.5).tolist(),  # in mm
             # "line_range": np.arange(-4, 4.0001, 4).tolist(),  # in mm
@@ -2182,8 +2260,8 @@ class State:
             # "line_range": np.arange(-5, 6, 1).tolist(),  # in mm
             # "line_range": np.arange(-1, 2, 1).tolist(),  # in mm
 
-            "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm # default
-            # "height_range": np.array(np.arange(-1, 1.0001, 1)).tolist(),  # in mm
+            # "height_range": np.array(np.arange(-1, 1.5001, 0.5)).tolist(),  # in mm # default
+            "height_range": np.array(np.arange(-1, 1.0001, 1)).tolist(),  # in mm
             # "height_range": np.array(np.arange(-1, 1.0001, 0.5)).tolist(),  # in mm
             # "height_range": np.array(np.arange(-1, 1.0001, 2)).tolist(),  # in mm # limit?
 
@@ -2192,7 +2270,7 @@ class State:
         }
 
         if meta is None:
-            self.meta = make_meta(stimuli_name="wavy-edge-3d", extra_dict=extra_dict)
+            self.meta = make_meta(stimuli_name="wavy-line-thin", extra_dict=extra_dict)
         else:
             self.meta = meta
 
@@ -2210,4 +2288,4 @@ if __name__ == "__main__":
     atexit.register(save_final_status)
     atexit.register(state.ex.save_final_data)
 
-    main(state.ex, state.model, state.meta, plane_method=state.meta["plane_method"], do_homing=False)
+    main(state.ex, state.model, state.meta, plane_method=state.meta["plane_method"], do_homing=True)

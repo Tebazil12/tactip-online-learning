@@ -178,15 +178,21 @@ def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_ex
 
     plt.figure(1)
     full_path_png = os.path.join(path, "post_processing/all_lines.png")
+    full_path_svg = os.path.join(path, "post_processing/all_lines.svg")
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
     plt.figure(3)
     full_path_png = os.path.join(path, "post_processing/all_lines_mean.png")
+    full_path_svg = os.path.join(path, "post_processing/all_lines_mean.svg")
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
     plt.figure(2)
     full_path_png = os.path.join(path, "post_processing/mean_percents.png")
+    full_path_svg = os.path.join(path, "post_processing/mean_percents.svg")
     plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
+    plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
     plt.show()
     #     if True:

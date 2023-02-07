@@ -549,7 +549,7 @@ if __name__ == "__main__":
 
     # current_experiment = "contour_following_3d_2022y-08m-02d_14h03m55s/"
     # current_experiment = "contour_following_3d_2022y-08m-03d_16h57m30s/"
-    current_experiment = "contour_following_3d_2022y-09m-05d_16h39m47s/"
+    # current_experiment = "contour_following_3d_2022y-09m-05d_16h39m47s/"
 
     # current_experiment = "contour_following_3d_2022y-09m-08d_10h25m19s/"
     # current_experiment = "contour_following_3d_2022y-09m-08d_12h54m35s/"
@@ -564,6 +564,15 @@ if __name__ == "__main__":
     # current_experiment = "contour_following_3d_2022y-08m-08d_15h05m19s/"
     # current_experiment = "contour_following_3d_2022y-08m-05d_14h58m18s/"
     # current_experiment = "contour_following_3d_2022y-09m-13d_14h38m49s/"
+
+    # current_experiment = "contour_following_3d_2022y-08m-04d_15h44m53s/"
+
+
+    #current_experiment = "contour_following_3d_2022y-09m-05d_14h08m17s/"
+    # current_experiment = "contour_following_3d_2022y-08m-16d_14h06m41s/"
+    # current_experiment = "contour_following_3d_2022y-08m-16d_14h17m02s/"
+    current_experiment = "contour_following_3d_2022y-08m-08d_15h15m18s/"
+
 
     state = online.State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 

@@ -66,8 +66,8 @@ def main(ex, meta):
 if __name__ == "__main__":
 
     data_home = (
-        # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/"
-        "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
+        "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/"
+        # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
     )
 
 
@@ -107,9 +107,16 @@ if __name__ == "__main__":
             edge_data = common.load_data(data_home + current_experiment + "all_edge_locs_final.json")
             # print(len(edge_data))
 
-            # if True:#
+            if True:#
             # if len(edge_data) == meta["MAX_STEPS"]: # if successful experiment
-            if current_experiment.split('-')[2].split("_")[0] == "16d":
+
+            # if current_experiment.split('-')[2].split("_")[0] == "16d":
+                if meta["stimuli_name"] == "high-squishy-brick":
+                    meta["stimuli_name"] = "squishy brick"
+                elif meta["stimuli_name"] == "strapped-banana":
+                    meta["stimuli_name"] = "banana"
+                elif meta["stimuli_name"] == "105mm-circle":
+                    meta["stimuli_name"] = "circle (105mm)"
 
                 if meta["plane_method"] == "cross":
                     taps_per_plane = len(meta["line_range"]) + len(meta["height_range"])
@@ -123,11 +130,11 @@ if __name__ == "__main__":
 
                         "line_range & step",
                         "height_range & step",
-                        "dataset name",
+                        # "dataset name",
                     ]
 
                     metrics_part_cross = [
-                        meta["stimuli_name"],
+                        meta["stimuli_name"] ,#+ ' {tiny ' + i +"}",
                         len(gplvm['x']) / taps_per_plane,
                         taps_per_plane,
                         len(gplvm['x']),
@@ -135,8 +142,9 @@ if __name__ == "__main__":
 
                         f"{meta['line_range'][0]} to {meta['line_range'][-1]}, {meta['line_range'][1] - meta['line_range'][0]} ",
                         f"{meta['height_range'][0]} to {meta['height_range'][-1]}, {meta['height_range'][1] - meta['height_range'][0]} ",
-                        i,
+                        # i,
                     ]
+
                 elif meta["plane_method"] == "full_grid":
                     taps_per_plane = len(meta["line_range"]) * len(meta["height_range"])
 
@@ -212,6 +220,7 @@ if __name__ == "__main__":
                 # Vertical Range and Resolution (mm)\\
 
 
+
                 to_tabulate_full.append(metrics_full)
                 to_tabulate_part_cross.append(metrics_part_cross)
                 to_tabulate_part_grid.append(metrics_part_grid)
@@ -228,6 +237,18 @@ if __name__ == "__main__":
 
     # to_tabulate_sorted = sorted(to_tabulate_full, key=lambda x: x[1], reverse=True)
     to_tabulate_sorted_full = sorted(to_tabulate_full, key=lambda x: x[0], reverse=True)
+
+    tmp = set()
+    # a = [[1, 2, 3], [2, 4, 5], [1, 2, 3], [2, 4, 5]]
+    for i in to_tabulate_part_grid:
+        tmp.add(tuple(i))
+    to_tabulate_part_grid =list(tmp)
+
+    tmp = set()
+    # a = [[1, 2, 3], [2, 4, 5], [1, 2, 3], [2, 4, 5]]
+    for i in to_tabulate_part_cross:
+        tmp.add(tuple(i))
+    to_tabulate_part_cross =list(tmp)
 
     to_tabulate_sorted_part_cross = sorted(to_tabulate_part_cross, key=lambda x: (x[0], -x[3]))
     to_tabulate_sorted_part_grid = sorted(to_tabulate_part_grid, key=lambda x: (x[0], -x[3]))

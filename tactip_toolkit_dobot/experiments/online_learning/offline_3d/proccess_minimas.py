@@ -21,8 +21,11 @@ def main(ex, meta):
 
     data_np = np.array(data)
 
-    data_cleaned = data_np[ (data_np <= 9) & (data_np >= -9)]
+    print(data)
+    print(data_np)
 
+    data_cleaned = np.abs(data_np)#[ (data_np <= 9) & (data_np >= -9)]
+    print(data_cleaned)
 
     data_mean = np.mean(data_cleaned)
     data_std = np.std(data_cleaned)
@@ -32,8 +35,9 @@ def main(ex, meta):
     q3 = np.percentile(data_cleaned, 75, interpolation = 'midpoint')
     p5 = np.percentile(data_cleaned, 5, interpolation = 'midpoint')
     p95 = np.percentile(data_cleaned, 95, interpolation = 'midpoint')
+    max_of = np.max(data_cleaned)
 
-    print(f"stats --- mean: {np.round(data_mean,3)} st.dev.: {np.round(data_std,3)} Q1: {np.round(q1,3)} Q3: {np.round(q3,3)} P5: {np.round(p5,3)} P95: {np.round(p95,3)}")
+    print(f"stats --- mean: {np.round(data_mean,3)} st.dev.: {np.round(data_std,3)} Q1: {np.round(q1,3)} Q3: {np.round(q3,3)} P5: {np.round(p5,3)} P95: {np.round(p95,3)} max: {np.round(max_of,3)}")
 
 if __name__ == "__main__":
 
