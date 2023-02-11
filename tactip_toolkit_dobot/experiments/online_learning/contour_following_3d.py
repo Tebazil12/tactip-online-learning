@@ -1174,7 +1174,7 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
         )
 
     elif meta["stimuli_name"] == "wavy-line-thin":
-        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/wave-2d.png")
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/wave-2d-2.png")
         img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
 
         print(f"image is size {img.shape}")
@@ -1184,11 +1184,11 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
 
         # desired_width = 150 *0.02639
         # desired_height = int(img_height / (img_width/desired_width))
-        desired_height = 150 * (5/15.7)
-        desired_width = int(img_width / (img_height/desired_height))
+        desired_height = 148.2
+        desired_width = img_width / (img_height/desired_height)
 
-        desired_y_offset = -23.5
-        desired_x_offset = -50-7+1
+        desired_y_offset = -23.5 -67.3
+        desired_x_offset = -50-7+1 -30+4.5-0.1+2-5
         ax.imshow(
             img_cropped,
             extent=[desired_x_offset + 0, desired_x_offset + desired_width,desired_height + desired_y_offset, 0 + desired_y_offset],
@@ -1196,7 +1196,7 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
         )
 
     elif meta["stimuli_name"] == "wavy-line-thick":
-        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/wave-2d.png")
+        img = plt.imread("/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/wave-2d-2.png")
         img_cropped = img#[:, 0 : int(img.shape[0] / 2), :]
 
         print(f"image is size {img.shape}")
@@ -1206,11 +1206,11 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
 
         # desired_width = 150 *0.02639
         # desired_height = int(img_height / (img_width/desired_width))
-        desired_height = 150 * (5/15.7)
-        desired_width = int(img_width / (img_height/desired_height))
+        desired_height = 148.2
+        desired_width = img_width / (img_height/desired_height)
 
-        desired_y_offset = -23.5
-        desired_x_offset = -50-7+1
+        desired_y_offset = -23.5 -67.3 +47.5
+        desired_x_offset = -50-7+1 -30+4.5-0.1+2-5
         ax.imshow(
             img_cropped,
             extent=[desired_x_offset + 0, desired_x_offset + desired_width,desired_height + desired_y_offset, 0 + desired_y_offset],
@@ -1348,11 +1348,12 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
     ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
     # set axis font size
-    plt.tick_params(labelsize=5)
+    font_size = 8
+    plt.tick_params(labelsize=font_size)
 
     # axis labels
-    plt.xlabel("y displacement (mm)", fontsize=5, va="top")
-    plt.ylabel("x displacement (mm)", fontsize=5, va="top")
+    plt.xlabel("y displacement (mm)", fontsize=font_size, va="top")
+    plt.ylabel("x displacement (mm)", fontsize=font_size, va="top")
 
     # add identifier labels
     part_path, _ = os.path.split(meta["meta_file"])
@@ -1383,8 +1384,8 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
 
     if meta["stimuli_name"] == "banana-screwed":
         plt.axis([min(pos_xs_e)-10, max(pos_xs_e)+10,  max(pos_ys_e)+20, min(pos_ys_e)-20])
-    elif meta["stimuli_name"] == "wavy-line-thin":
-        plt.axis([min(pos_xs_e)-10, max(pos_xs_e)+10,  max(pos_ys_e)+10, min(pos_ys_e)-10])
+    elif meta["stimuli_name"] == "wavy-line-thin" or meta["stimuli_name"] == "wavy-line-thick" :
+        plt.axis([-10, 100,  max(pos_ys_e)+10, min(pos_ys_e)-10])
     elif meta["stimuli_name"].split('-')[0] == "wavy" and meta["stimuli_name"].split('-')[-1] == "3d":
         plt.axis([ -10, 100, 80-5-2,-10+5-2])
     elif meta["stimuli_name"].split('-')[0] == "tilt":
@@ -1414,11 +1415,13 @@ def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
     #                 right='off',  # turn off right ticks
     #                 bottom='off') # turn off bottom ticks
 
+    print( f"here {plt.rcParamsDefault['figure.figsize']}")
+
     if save_figs:
         # save graphs automatically
         part_path, _ = os.path.split(meta["meta_file"])
-        full_path_png = os.path.join(meta["home_dir"], part_path, "all_movements_final.png")
-        full_path_svg = os.path.join(meta["home_dir"], part_path, "all_movements_final.svg")
+        full_path_png = os.path.join(meta["home_dir"], part_path, "all_movements_final-" + meta["stimuli_name"]+ "-" + meta["plane_method"] + ".png")
+        full_path_svg = os.path.join(meta["home_dir"], part_path, "all_movements_final-" + meta["stimuli_name"]+ "-" + meta["plane_method"] + ".svg")
         plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
         plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
@@ -1699,11 +1702,11 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
     ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
     # set axis font size
-    plt.tick_params(labelsize=5)
+    plt.tick_params(labelsize=8)
 
     # axis labels
-    plt.xlabel("y displacement (mm)", fontsize=5, va="top")
-    plt.ylabel("height (mm)", fontsize=5, va="top")
+    plt.xlabel("y displacement (mm)", fontsize=8, va="top")
+    plt.ylabel("height (mm)", fontsize=8, va="top")
 
     # add identifier labels
     part_path, _ = os.path.split(meta["meta_file"])
@@ -1735,6 +1738,8 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
         plt.axis([min(pos_ys2) -10, max(pos_ys2) +10, min(heights2) -10, max(heights2)+10])
     elif meta["stimuli_name"].split('-')[0] == "wavy" and meta["stimuli_name"].split('-')[-1] == "3d":
         plt.axis([ -10, 100, -5+3,15+3])
+    elif meta["stimuli_name"] == "wavy-line-thin" or meta["stimuli_name"] == "wavy-line-thick" :
+        plt.axis([ -10, 100, -5, 5])
     elif meta["stimuli_name"].split('-')[0] == "tilt":
         plt.axis([ -2, 40, -10,20])
     elif meta["stimuli_name"] == "cap-mid":
@@ -1764,8 +1769,8 @@ def plot_all_movements_3d(ex, meta, show_figs=True, save_figs=True):
     if save_figs:
         # save graphs automatically
         part_path, _ = os.path.split(meta["meta_file"])
-        full_path_png = os.path.join(meta["home_dir"], part_path, "all_movements_3d_final.png")
-        full_path_svg = os.path.join(meta["home_dir"], part_path, "all_movements_3d_final.svg")
+        full_path_png = os.path.join(meta["home_dir"], part_path, "all_movements_3d_final-" + meta["stimuli_name"]+ "-" + meta["plane_method"] + ".png")
+        full_path_svg = os.path.join(meta["home_dir"], part_path, "all_movements_3d_final-" + meta["stimuli_name"]+ "-" + meta["plane_method"] + ".svg")
         plt.savefig(full_path_png, bbox_inches="tight", pad_inches=0, dpi=1000)
         plt.savefig(full_path_svg, bbox_inches="tight", pad_inches=0)
 
@@ -1864,7 +1869,7 @@ def plot_gplvm(model, meta, show_fig=True):
         plt.show()
         plt.clf()
 
-def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True):
+def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True, shared_scale=False):
     plt.clf()
     colour = plane.dissims/np.max(plane.dissims)
     plt.rcParams.update({'font.size': 7})
@@ -1886,15 +1891,23 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True
         # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="CMRmap")
         # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="nipy_spectral")
 
-        # min_num = 0
-        # max_num = 75
-        # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo", vmin=min_num,vmax=max_num)
-        # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="viridis_r")
-        plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 1000, cmap="turbo")
-        # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="hot_r")
-        plt.colorbar(shrink=0.3, aspect=20*0.3, label="dissimilarity", ticks=[0,10,20,30,40,50, 60])
+        if shared_scale:
+            #TODO horrible hacky magic numbers...
+            min_num = 2#5
+            max_num = 40#45
+            # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="turbo", vmin=min_num,vmax=max_num)
+            # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="viridis_r")
+            plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 1000, cmap="turbo",vmin=min_num,vmax=max_num,  levels=np.linspace(min_num,max_num,100))
+            # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="hot_r")
+            plt.colorbar(shrink=0.3, aspect=20*0.3, label="dissimilarity", ticks=np.linspace(min_num,max_num,5))
 
-        # plt.scatter(plane.disps, plane.heights, s=5, marker='+', edgecolors='k', facecolors='k', linewidths=.5  )
+
+        else:
+            plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 1000, cmap="turbo")
+            # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="hot_r")
+            plt.colorbar(shrink=0.3, aspect=20*0.3, label="dissimilarity", ticks=np.round(np.linspace(min(plane.dissims),max(plane.dissims),11),0))
+
+        plt.scatter(plane.disps, plane.heights, s=5, marker='+', edgecolors='k', facecolors='k', linewidths=.5  )
         # # plt.scatter(plane.disps, plane.heights, c=colour, cmap="viridis_r", edgecolors='k')
         # # plt.scatter(plane.disps, plane.heights, c=colour, cmap="hot_r", edgecolors='k')
 

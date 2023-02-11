@@ -568,11 +568,14 @@ if __name__ == "__main__":
     # current_experiment = "contour_following_3d_2022y-08m-04d_15h44m53s/"
 
 
-    #current_experiment = "contour_following_3d_2022y-09m-05d_14h08m17s/"
+    # current_experiment = "contour_following_3d_2022y-09m-05d_14h08m17s/"
     # current_experiment = "contour_following_3d_2022y-08m-16d_14h06m41s/"
     # current_experiment = "contour_following_3d_2022y-08m-16d_14h17m02s/"
-    current_experiment = "contour_following_3d_2022y-08m-08d_15h15m18s/"
-
+    # current_experiment = "contour_following_3d_2022y-08m-08d_15h15m18s/"
+    # current_experiment = "contour_following_3d_2023y-02m-01d_15h20m26s/"
+    # current_experiment = "contour_following_3d_2023y-02m-01d_15h03m56s/"
+    # current_experiment = "contour_following_3d_2023y-02m-01d_15h10m31s/"
+    current_experiment = "contour_following_3d_2023y-02m-01d_15h26m36s/"
 
     state = online.State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
