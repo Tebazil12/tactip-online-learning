@@ -48,7 +48,7 @@ def plot_all_movements_basic_test(ex, meta, show_figs=True, save_figs=True):
     fig, ax = plt.subplots(
         2, 1, sharex=True, gridspec_kw={"height_ratios": [plot_0_size, plot_1_size]}
     )
-    fig.subplots_adjust(hspace=0.01)
+    fig.subplots_adjust(hspace=0.1)
 
     ax[0].plot(
         pos_xs_e,
@@ -117,41 +117,39 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     robots_ys = all_edge_np[:, 1]
     robots_heights = ex.edge_height
 
-    # plot_0_size = (max(pos_ys_e)+10) - (min(pos_ys_e)-10)
-    # plot_1_size = (max(heights2)+10) - (min(heights2)-10)
-    plot_0_size = (max(robots_xs)) - (min(robots_xs))
-    plot_1_size = (max(robots_heights)) - (min(robots_heights))
-
+    # get sizes for plots and fig
+    plot_0_height = (max(robots_xs)) - (min(robots_xs))
+    plot_1_height = (max(robots_heights)) - (min(robots_heights))
     plot_width = (max(robots_ys)) - (min(robots_ys))
 
-    if plot_0_size < 5:
-        plot_0_size = 5
-    if plot_1_size < 5:
-        plot_1_size = 5
+    # set min size
+    if plot_0_height < 5:
+        plot_0_height = 5
+    if plot_1_height < 5:
+        plot_1_height = 5
 
     print(f"here {plt.rcParamsDefault['figure.figsize']}")
+
+    # set figure size to be good ratio of plot
     plt.rcParams["figure.figsize"] = (
         (plot_width + 20) / 15,
-        ((plot_0_size + plot_1_size) + 20) / 15,
+        ((plot_0_height + plot_1_height) + 20) / 15,
     )
     print(f"here2 {plt.rcParams['figure.figsize']}")
 
-    # fig = plt.figure()
-    # fig, ax = plt.subplots(2,sharex=True)
-    # fig.subplots_adjust(hspace=0)
+    # make subplots
     fig, ax = plt.subplots(
-        2, 1, sharex=True, gridspec_kw={"height_ratios": [plot_0_size, plot_1_size]}
+        2, 1, sharex=True, gridspec_kw={"height_ratios": [plot_0_height, plot_1_height]}
     )
-    fig.subplots_adjust(hspace=0.01)
+    fig.subplots_adjust(hspace=0.06)
 
     ax[1].set_xlim([-10, 100])
     ax[0].set_xlim([-10, 100])
 
     line_width = 1.5
     marker_size = 1
-    # ax = plt.gca()
-    # ax = fig.add_axes([0,0,1,1])
 
+    # images for birds eye view
     if meta["stimuli_name"] == "70mm-circle":
         # print small circle location
         radius = 35
@@ -452,10 +450,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     if ex.edge_locations is not None:
         # print predicted edge locations
 
-        # if meta["stimuli_name"] == "balance-lid":
-        #     pos_xs_e = pos_xs_e * 0.84
-
-        # pos_ys = pos_ys/0.8
         n = range(len(robots_ys))
         if meta["stimuli_name"] == "wavy-edge-3d":
             line_style = "solid"
@@ -465,39 +459,35 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             line_style = (0, (1, 1))
         else:
             line_style = "solid"
+
+
         if meta["plane_method"] == "cross":
-            # pass
-            ax[0].plot(
-                robots_ys,
-                robots_xs,
-                color="#FFAA00",  # "#711CFC",
-                marker="",
-                markersize=marker_size + 1,
-                linewidth=line_width,
-                linestyle=line_style,
-            )
+            line_colour = "#FFAA00"
         else:
-            ax[0].plot(
-                robots_ys,
-                robots_xs,
-                color="#30E641",  # "#15b01a",
-                marker="",
-                markersize=marker_size + 1,
-                linewidth=line_width,
-                linestyle=line_style,
-            )
-    # plt.scatter(pos_xs, pos_ys, color="r",marker='+',s=marker_size)
+            line_colour = "#30E641"
+
+        ax[0].plot(
+            robots_ys,
+            robots_xs,
+            color=line_colour,
+            marker="",
+            markersize=marker_size + 1,
+            linewidth=line_width,
+            linestyle=line_style,
+        )
+
+
     ax[0].set_aspect("equal", adjustable="datalim")
 
     # Show the major grid lines with dark grey lines
     ax[0].grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
-    ax[0].xaxis.set_major_locator(ticker.MultipleLocator(10))
+    ax[0].xaxis.set_major_locator(plt.NullLocator())
     ax[0].yaxis.set_major_locator(ticker.MultipleLocator(10))
 
     # Show the minor grid lines with very faint and almost transparent grey lines
-    ax[0].minorticks_on()
+    # ax[0].minorticks_on()
     ax[0].grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
-    ax[0].xaxis.set_minor_locator(ticker.MultipleLocator(1))
+    ax[0].xaxis.set_minor_locator(plt.NullLocator())
     ax[0].yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
     # set axis font size
@@ -505,8 +495,8 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     ax[0].tick_params(labelsize=font_size)
 
     # axis labels
-    plt.xlabel("y displacement (mm)", fontsize=font_size, va="top")
-    plt.ylabel("x displacement (mm)", fontsize=font_size, va="top")
+    ax[0].set_xlabel("y displacement (mm)", fontsize=font_size, va="top")
+    ax[0].set_ylabel("x displacement (mm)", fontsize=font_size, va="top")
 
     # add identifier labels
     part_path, _ = os.path.split(meta["meta_file"])
@@ -533,11 +523,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     )
     #     # Don't allow the axis to be on top of your data
     ax[0].set_axisbelow(True)
-
-    # ax[0].set(auto=True)
-    # xmin, xmax, ymin, ymax = plt.axis()
-    # print(xmax)
-    # plt.axis([xmin, xmax + 2, ymin, ymax])
 
     if meta["stimuli_name"] == "banana-screwed":
         plt.axis(
@@ -579,14 +564,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         )
 
     ##### 3d stuff #####
-    #
-    #
-    # fig = plt.figure()
-    #
-    # line_width = 1.5
-    # marker_size = 1
-    # ax = plt.gca()
-    # ax = fig.add_axes([0,0,1,1])
+
     if meta["stimuli_name"] == "70mm-circle":
         # print small circle location
         radius = 35
@@ -792,6 +770,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     else:
         ax[1].fill([-10, 100, 100, -10], [0, 0, -100, -100], "grey", alpha=0.6)
 
+
     if meta["stimuli_name"] == "tilt-05deg-down":
         ax[1].plot([0, 100], [0, -8.7], ":k")
     elif meta["stimuli_name"] == "tilt-10deg-down":
@@ -840,9 +819,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     if ex.edge_locations is not None:
         # print predicted edge locations
 
-        # pos_ys = pos_ys/0.8
-        n = range(len(robots_xs))
-
         if meta["stimuli_name"] == "wavy-edge-3d":
             line_style = "solid"
         elif meta["stimuli_name"] == "wavy-raised-3d":
@@ -853,29 +829,22 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         else:
             line_style = "solid"
 
-        if meta["plane_method"] == "cross":
-            # pass
-            ax[1].plot(
-                robots_ys,
-                robots_heights,
-                color="#FFAA00",  # "#15b01a",
-                marker="",
-                markersize=marker_size + 1,
-                linewidth=line_width,
-                linestyle=line_style,
-            )
-        else:
-            ax[1].plot(
-                robots_ys,
-                robots_heights,
-                color="#30E641",  # "#15b01a",
-                marker="",
-                markersize=marker_size + 1,
-                linewidth=line_width,
-                linestyle=line_style,
-            )
 
-    # plt.scatter(pos_xs, pos_ys, color="r",marker='+',s=marker_size)
+        if meta["plane_method"] == "cross":
+            line_colour = "#FFAA00"
+        else:
+            line_colour="#30E641"
+
+        ax[1].plot(
+            robots_ys,
+            robots_heights,
+            color=line_colour,
+            marker="",
+            markersize=marker_size + 1,
+            linewidth=line_width,
+            linestyle=line_style,
+        )
+
     ax[1].set_aspect("equal", adjustable="datalim")
 
     # Show the major grid lines with dark grey lines
@@ -889,43 +858,15 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     ax[1].xaxis.set_minor_locator(ticker.MultipleLocator(1))
     ax[1].yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
-    # set axis font size
-    plt.tick_params(labelsize=8)
+    # # set axis font size
+    ax[1].tick_params(labelsize=8)
 
     # axis labels
-    plt.xlabel("y displacement (mm)", fontsize=8, va="top")
-    plt.ylabel("height (mm)", fontsize=8, va="top")
+    ax[1].set_xlabel("y displacement (mm)", fontsize=8, va="top")
+    ax[1].set_ylabel("height (mm)", fontsize=8, va="top")
 
-    # add identifier labels
-    part_path, _ = os.path.split(meta["meta_file"])
-
-    exp_name = part_path.split("/")
-    readable_name = online.parse_exp_name(exp_name[1])
-
-    plt.gcf().text(
-        0.01,
-        1.01,
-        meta["stimuli_name"],
-        transform=ax[1].transAxes,
-        fontsize=4,
-        alpha=0.2,
-    )
-    plt.gcf().text(
-        1,
-        1.01,
-        readable_name,
-        transform=ax[1].transAxes,
-        fontsize=4,
-        alpha=0.2,
-        ha="right",
-    )
     #     # Don't allow the axis to be on top of your data
     ax[1].set_axisbelow(True)
-
-    # ax.set(auto=True)
-    # xmin, xmax, ymin, ymax = plt.axis()
-    # print(xmax)
-    # plt.axis([xmin, xmax + 2, ymin, ymax])
 
     if meta["stimuli_name"] == "banana-screwed":
         ax[1].axis(
@@ -965,7 +906,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
                 max(robots_heights) + 1,
             ]
         )
-        # plt.axis([min(pos_ys) -1, max(pos_ys) +1, min(heights) -1, max(heights)+1])
 
     #### end 3d stuff ####
 
