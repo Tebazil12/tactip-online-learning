@@ -33,14 +33,16 @@ def plot_all_movements_basic_test(ex, meta, show_figs=True, save_figs=True):
 
     plot_width = (max(pos_xs_e)) - (min(pos_xs_e))
 
-
     print(pos_ys_e)
     print(heights2)
 
     print(f" size 0 {plot_0_size} soze 1 {plot_1_size}")
 
     print(f"here {plt.rcParamsDefault['figure.figsize']}")
-    plt.rcParams["figure.figsize"] = ((plot_width+20)/10,((plot_0_size+plot_1_size)+20)/10)
+    plt.rcParams["figure.figsize"] = (
+        (plot_width + 20) / 10,
+        ((plot_0_size + plot_1_size) + 20) / 10,
+    )
     print(f"here2 {plt.rcParams['figure.figsize']}")
 
     fig, ax = plt.subplots(
@@ -98,8 +100,8 @@ def plot_all_movements_basic_test(ex, meta, show_figs=True, save_figs=True):
 
     # ax[0].set_ylim([-10,50])
 
-    ax[1].set_xlim([-10,100])
-    ax[0].set_xlim([-10,100])
+    ax[1].set_xlim([-10, 100])
+    ax[0].set_xlim([-10, 100])
     #
     # ax[1].set_ylim([-5,5])
     #
@@ -108,23 +110,19 @@ def plot_all_movements_basic_test(ex, meta, show_figs=True, save_figs=True):
 
 def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
 
-
     # load data for edge locations
     all_edge_np = np.array(ex.edge_locations)
 
-    pos_ys_e = all_edge_np[:, 0]
-    pos_xs_e = all_edge_np[:, 1]
-
-    pos_xs2 = all_edge_np[:, 0]
-    pos_ys2 = all_edge_np[:, 1]
-    heights2 = ex.edge_height
+    robots_xs = all_edge_np[:, 0]
+    robots_ys = all_edge_np[:, 1]
+    robots_heights = ex.edge_height
 
     # plot_0_size = (max(pos_ys_e)+10) - (min(pos_ys_e)-10)
     # plot_1_size = (max(heights2)+10) - (min(heights2)-10)
-    plot_0_size = (max(pos_ys_e)) - (min(pos_ys_e))
-    plot_1_size = (max(heights2)) - (min(heights2))
+    plot_0_size = (max(robots_xs)) - (min(robots_xs))
+    plot_1_size = (max(robots_heights)) - (min(robots_heights))
 
-    plot_width = (max(pos_xs_e)) - (min(pos_xs_e))
+    plot_width = (max(robots_ys)) - (min(robots_ys))
 
     if plot_0_size < 5:
         plot_0_size = 5
@@ -132,7 +130,10 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         plot_1_size = 5
 
     print(f"here {plt.rcParamsDefault['figure.figsize']}")
-    plt.rcParams["figure.figsize"] = ((plot_width+20)/15,((plot_0_size+plot_1_size)+20)/15)
+    plt.rcParams["figure.figsize"] = (
+        (plot_width + 20) / 15,
+        ((plot_0_size + plot_1_size) + 20) / 15,
+    )
     print(f"here2 {plt.rcParams['figure.figsize']}")
 
     # fig = plt.figure()
@@ -145,8 +146,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
 
     ax[1].set_xlim([-10, 100])
     ax[0].set_xlim([-10, 100])
-
-
 
     line_width = 1.5
     marker_size = 1
@@ -457,7 +456,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         #     pos_xs_e = pos_xs_e * 0.84
 
         # pos_ys = pos_ys/0.8
-        n = range(len(pos_xs_e))
+        n = range(len(robots_ys))
         if meta["stimuli_name"] == "wavy-edge-3d":
             line_style = "solid"
         elif meta["stimuli_name"] == "wavy-raised-3d":
@@ -469,8 +468,8 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         if meta["plane_method"] == "cross":
             # pass
             ax[0].plot(
-                pos_xs_e,
-                pos_ys_e,
+                robots_ys,
+                robots_xs,
                 color="#FFAA00",  # "#711CFC",
                 marker="",
                 markersize=marker_size + 1,
@@ -479,8 +478,8 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             )
         else:
             ax[0].plot(
-                pos_xs_e,
-                pos_ys_e,
+                robots_ys,
+                robots_xs,
                 color="#30E641",  # "#15b01a",
                 marker="",
                 markersize=marker_size + 1,
@@ -543,10 +542,10 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     if meta["stimuli_name"] == "banana-screwed":
         plt.axis(
             [
-                min(pos_xs_e) - 10,
-                max(pos_xs_e) + 10,
-                max(pos_ys_e) + 20,
-                min(pos_ys_e) - 20,
+                min(robots_ys) - 10,
+                max(robots_ys) + 10,
+                max(robots_xs) + 20,
+                min(robots_xs) - 20,
             ]
         )
     elif (
@@ -571,12 +570,13 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         plt.axis([-5, 45, 45 + 2, -5 + 2])
     else:
         plt.axis(
-            [min(pos_xs_e) - 1, max(pos_xs_e) + 1, max(pos_ys_e) + 1, min(pos_ys_e) - 1]
+            [
+                min(robots_ys) - 1,
+                max(robots_ys) + 1,
+                max(robots_xs) + 1,
+                min(robots_xs) - 1,
+            ]
         )
-
-
-
-
 
     ##### 3d stuff #####
     #
@@ -837,30 +837,17 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             for x in np.array([n, pos_ys, heights]).T
         ]
 
-    # # print data collection lines
-    # for line in ex.line_locations:
-    #     line_locations_np = np.array(line)
-    #     plt.plot(
-    #         line_locations_np[:, 0],
-    #         line_locations_np[:, 1],
-    #         "r",
-    #         marker="o",
-    #         markersize=marker_size,
-    #         linewidth=line_width,
-    #     )
-    #     # plt.scatter(line_locations_np[:, 0], line_locations_np[:, 1], color="g",s=marker_size)
-
     if ex.edge_locations is not None:
         # print predicted edge locations
 
         # pos_ys = pos_ys/0.8
-        n = range(len(pos_xs2))
+        n = range(len(robots_xs))
 
         if meta["stimuli_name"] == "wavy-edge-3d":
             line_style = "solid"
         elif meta["stimuli_name"] == "wavy-raised-3d":
             line_style = (0, (5, 1))
-            heights2 = heights2 + 2
+            robots_heights = robots_heights + 2
         elif meta["stimuli_name"] == "wavy-line-thin-3d":
             line_style = (0, (1, 1))
         else:
@@ -869,8 +856,8 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         if meta["plane_method"] == "cross":
             # pass
             ax[1].plot(
-                pos_ys2,
-                heights2,
+                robots_ys,
+                robots_heights,
                 color="#FFAA00",  # "#15b01a",
                 marker="",
                 markersize=marker_size + 1,
@@ -879,8 +866,8 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             )
         else:
             ax[1].plot(
-                pos_ys2,
-                heights2,
+                robots_ys,
+                robots_heights,
                 color="#30E641",  # "#15b01a",
                 marker="",
                 markersize=marker_size + 1,
@@ -943,10 +930,10 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     if meta["stimuli_name"] == "banana-screwed":
         ax[1].axis(
             [
-                min(pos_ys2) - 10,
-                max(pos_ys2) + 10,
-                min(heights2) - 10,
-                max(heights2) + 10,
+                min(robots_ys) - 10,
+                max(robots_ys) + 10,
+                min(robots_heights) - 10,
+                max(robots_heights) + 10,
             ]
         )
     elif (
@@ -971,11 +958,14 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         ax[1].axis([-5, 45, -12, 2])
     else:
         ax[1].axis(
-            [min(pos_ys2) - 1, max(pos_ys2) + 1, min(heights2) - 1, max(heights2) + 1]
+            [
+                min(robots_ys) - 1,
+                max(robots_ys) + 1,
+                min(robots_heights) - 1,
+                max(robots_heights) + 1,
+            ]
         )
         # plt.axis([min(pos_ys) -1, max(pos_ys) +1, min(heights) -1, max(heights)+1])
-
-
 
     #### end 3d stuff ####
 
