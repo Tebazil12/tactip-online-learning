@@ -460,7 +460,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         else:
             line_style = "solid"
 
-
         if meta["plane_method"] == "cross":
             line_colour = "#FFAA00"
         else:
@@ -475,7 +474,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             linewidth=line_width,
             linestyle=line_style,
         )
-
 
     ax[0].set_aspect("equal", adjustable="datalim")
 
@@ -770,7 +768,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     else:
         ax[1].fill([-10, 100, 100, -10], [0, 0, -100, -100], "grey", alpha=0.6)
 
-
     if meta["stimuli_name"] == "tilt-05deg-down":
         ax[1].plot([0, 100], [0, -8.7], ":k")
     elif meta["stimuli_name"] == "tilt-10deg-down":
@@ -829,11 +826,10 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         else:
             line_style = "solid"
 
-
         if meta["plane_method"] == "cross":
             line_colour = "#FFAA00"
         else:
-            line_colour="#30E641"
+            line_colour = "#30E641"
 
         ax[1].plot(
             robots_ys,
