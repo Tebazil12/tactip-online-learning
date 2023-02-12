@@ -109,6 +109,8 @@ def plot_all_movements_basic_test(ex, meta, show_figs=True, save_figs=True):
 
 
 def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
+    plt.clf()
+    plt.close()
 
     # load data for edge locations
     all_edge_np = np.array(ex.edge_locations)
@@ -137,17 +139,58 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     )
     print(f"here2 {plt.rcParams['figure.figsize']}")
 
+
     # make subplots
     fig, ax = plt.subplots(
         2, 1, sharex=True, gridspec_kw={"height_ratios": [plot_0_height, plot_1_height]}
     )
     fig.subplots_adjust(hspace=0.06)
 
-    ax[1].set_xlim([-10, 100])
-    ax[0].set_xlim([-10, 100])
+
 
     line_width = 1.5
     marker_size = 1
+
+    if ex.edge_locations is not None:
+        # print predicted edge locations
+
+        n = range(len(robots_ys))
+        if meta["stimuli_name"] == "wavy-edge-3d":
+            line_style = "solid"
+        elif meta["stimuli_name"] == "wavy-raised-3d":
+            line_style = (0, (5, 1))
+        elif meta["stimuli_name"] == "wavy-line-thin-3d":
+            line_style = (0, (1, 1))
+        else:
+            line_style = "solid"
+
+        if meta["plane_method"] == "cross":
+            line_colour = "#FFAA00"
+        else:
+            line_colour = "#30E641"
+
+        ax[0].plot(
+            robots_ys,
+            robots_xs,
+            color=line_colour,
+            marker="",
+            markersize=marker_size + 1,
+            linewidth=line_width,
+            linestyle=line_style,
+        )
+
+        ax[1].plot(
+            robots_ys,
+            robots_heights,
+            color=line_colour,
+            marker="",
+            markersize=marker_size + 1,
+            linewidth=line_width,
+            linestyle=line_style,
+        )
+
+    ax[1].set_xlim([-10, 100])
+    ax[0].set_xlim([-10, 100])
 
     # images for birds eye view
     if meta["stimuli_name"] == "70mm-circle":
@@ -161,7 +204,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         y = y_offset + radius * np.sin(ang)
         ax[0].plot(x, y, "tab:brown", linewidth=line_width)
         # y=y*.8
-        # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
+        # ax[0].plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
 
         # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
         w2 = Wedge((x_offset, y_offset), radius, 90, -90, fc="tab:brown", alpha=0.5)
@@ -177,7 +220,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         y = y_offset + radius * np.sin(ang)
         ax[0].plot(x, y, "tab:brown", linewidth=line_width)
         # y=y*.8
-        # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
+        # ax[0].plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
 
         # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
         w2 = Wedge((x_offset, y_offset), radius, 90, -90, fc="tab:brown", alpha=0.5)
@@ -395,14 +438,14 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         y = y_offset + radius * np.sin(ang)
         ax[0].plot(x, y, "tab:brown", linewidth=line_width)
         # y=y*.8
-        # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
+        # ax[0].plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
 
         # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
         w2 = Wedge((x_offset, y_offset), radius, 180, -180, fc="tab:brown", alpha=0.5)
         ax[0].add_artist(w2)
 
     elif meta["stimuli_name"].split("-")[0] == "tilt":
-        # plt.plot([0, 80, 80], [0, 0, 100])
+        # ax[0].plot([0, 80, 80], [0, 0, 100])
         ax[0].fill([-10, 100, 100, -10], [0, 0, 100, 100], "grey", alpha=0.6)
 
     if False:
@@ -420,7 +463,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             markersize=marker_size,
             linewidth=line_width,
         )
-        # plt.scatter(pos_xs, pos_ys, color="k", s=marker_size)
+        # ax[0].scatter(pos_xs, pos_ys, color="k", s=marker_size)
 
         [
             ax[0].annotate(
@@ -445,121 +488,9 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
                 markersize=marker_size,
                 linewidth=line_width,
             )
-            # plt.scatter(line_locations_np[:, 0], line_locations_np[:, 1], color="g",s=marker_size)
+            # ax[0].scatter(line_locations_np[:, 0], line_locations_np[:, 1], color="g",s=marker_size)
 
-    if ex.edge_locations is not None:
-        # print predicted edge locations
 
-        n = range(len(robots_ys))
-        if meta["stimuli_name"] == "wavy-edge-3d":
-            line_style = "solid"
-        elif meta["stimuli_name"] == "wavy-raised-3d":
-            line_style = (0, (5, 1))
-        elif meta["stimuli_name"] == "wavy-line-thin-3d":
-            line_style = (0, (1, 1))
-        else:
-            line_style = "solid"
-
-        if meta["plane_method"] == "cross":
-            line_colour = "#FFAA00"
-        else:
-            line_colour = "#30E641"
-
-        ax[0].plot(
-            robots_ys,
-            robots_xs,
-            color=line_colour,
-            marker="",
-            markersize=marker_size + 1,
-            linewidth=line_width,
-            linestyle=line_style,
-        )
-
-    ax[0].set_aspect("equal", adjustable="datalim")
-
-    # Show the major grid lines with dark grey lines
-    ax[0].grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
-    ax[0].xaxis.set_major_locator(plt.NullLocator())
-    ax[0].yaxis.set_major_locator(ticker.MultipleLocator(10))
-
-    # Show the minor grid lines with very faint and almost transparent grey lines
-    # ax[0].minorticks_on()
-    ax[0].grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
-    ax[0].xaxis.set_minor_locator(plt.NullLocator())
-    ax[0].yaxis.set_minor_locator(ticker.MultipleLocator(1))
-
-    # set axis font size
-    font_size = 8
-    ax[0].tick_params(labelsize=font_size)
-
-    # axis labels
-    ax[0].set_xlabel("y displacement (mm)", fontsize=font_size, va="top")
-    ax[0].set_ylabel("x displacement (mm)", fontsize=font_size, va="top")
-
-    # add identifier labels
-    part_path, _ = os.path.split(meta["meta_file"])
-
-    exp_name = part_path.split("/")
-    readable_name = online.parse_exp_name(exp_name[1])
-
-    plt.gcf().text(
-        0.01,
-        1.01,
-        meta["stimuli_name"],
-        transform=ax[0].transAxes,
-        fontsize=4,
-        alpha=0.2,
-    )
-    plt.gcf().text(
-        1,
-        1.01,
-        readable_name,
-        transform=ax[0].transAxes,
-        fontsize=4,
-        alpha=0.2,
-        ha="right",
-    )
-    #     # Don't allow the axis to be on top of your data
-    ax[0].set_axisbelow(True)
-
-    if meta["stimuli_name"] == "banana-screwed":
-        plt.axis(
-            [
-                min(robots_ys) - 10,
-                max(robots_ys) + 10,
-                max(robots_xs) + 20,
-                min(robots_xs) - 20,
-            ]
-        )
-    elif (
-        meta["stimuli_name"] == "wavy-line-thin"
-        or meta["stimuli_name"] == "wavy-line-thick"
-    ):
-
-        # ax[0].axis([-10, 100,  max(pos_ys_e)+10, min(pos_ys_e)-10])
-        # ax[0].set_ylim([max(pos_ys_e)+10, min(pos_ys_e)-10])
-        pass
-
-    elif (
-        meta["stimuli_name"].split("-")[0] == "wavy"
-        and meta["stimuli_name"].split("-")[-1] == "3d"
-    ):
-        plt.axis([-10, 100, 80 - 5 - 2, -10 + 5 - 2])
-    elif meta["stimuli_name"].split("-")[0] == "tilt":
-        plt.axis([-2, 40, 5, -5])
-    elif meta["stimuli_name"] == "cap-mid":
-        plt.axis([-5, 65, 10, -15])
-    elif meta["stimuli_name"] == "lid-screwed":
-        plt.axis([-5, 45, 45 + 2, -5 + 2])
-    else:
-        plt.axis(
-            [
-                min(robots_ys) - 1,
-                max(robots_ys) + 1,
-                max(robots_xs) + 1,
-                min(robots_xs) - 1,
-            ]
-        )
 
     ##### 3d stuff #####
 
@@ -574,7 +505,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         y = y_offset + radius * np.sin(ang)
         ax[1].plot(x, y, "tab:brown", linewidth=line_width)
         # y=y*.8
-        # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
+        # ax[1].plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
 
         # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
         w2 = Wedge((x_offset, y_offset), radius, 90, -90, fc="tab:brown", alpha=0.5)
@@ -588,9 +519,9 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         ang = np.linspace(np.pi / 2, -np.pi / 2, 100)
         x = x_offset + radius * -np.cos(ang)
         y = y_offset + radius * np.sin(ang)
-        # plt.plot(x, y, "tab:brown", linewidth=line_width)
+        # ax[1].plot(x, y, "tab:brown", linewidth=line_width)
         # y=y*.8
-        # plt.plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
+        # ax[1].plot(x, y,'tab:brown',linewidth=line_width, linestyle='dashed')
 
         # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
         # w2 = Wedge((x_offset, y_offset), radius, 90, -90, fc="tab:brown", alpha=0.5)
@@ -799,7 +730,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             markersize=marker_size,
             linewidth=line_width,
         )
-        # plt.scatter(pos_xs, pos_ys, color="k", s=marker_size)
+        # ax[1].scatter(pos_xs, pos_ys, color="k", s=marker_size)
 
         [
             ax.annotate(
@@ -813,97 +744,153 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             for x in np.array([n, pos_ys, heights]).T
         ]
 
-    if ex.edge_locations is not None:
-        # print predicted edge locations
 
-        if meta["stimuli_name"] == "wavy-edge-3d":
-            line_style = "solid"
-        elif meta["stimuli_name"] == "wavy-raised-3d":
-            line_style = (0, (5, 1))
-            robots_heights = robots_heights + 2
-        elif meta["stimuli_name"] == "wavy-line-thin-3d":
-            line_style = (0, (1, 1))
-        else:
-            line_style = "solid"
 
-        if meta["plane_method"] == "cross":
-            line_colour = "#FFAA00"
-        else:
-            line_colour = "#30E641"
 
-        ax[1].plot(
-            robots_ys,
-            robots_heights,
-            color=line_colour,
-            marker="",
-            markersize=marker_size + 1,
-            linewidth=line_width,
-            linestyle=line_style,
-        )
+    # for each axis
+    for i in [0,1]:
+        ax[i].set_aspect("equal", adjustable="datalim")
 
-    ax[1].set_aspect("equal", adjustable="datalim")
+        # Show the major grid lines with dark grey lines
+        ax[i].grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
+        ax[i].xaxis.set_major_locator(ticker.MultipleLocator(10))
+        ax[i].yaxis.set_major_locator(ticker.MultipleLocator(10))
 
-    # Show the major grid lines with dark grey lines
-    ax[1].grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
-    ax[1].xaxis.set_major_locator(ticker.MultipleLocator(10))
-    ax[1].yaxis.set_major_locator(ticker.MultipleLocator(10))
+        # Show the minor grid lines with very faint and almost transparent grey lines
+        ax[i].minorticks_on()
+        ax[i].grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
+        ax[i].xaxis.set_minor_locator(ticker.MultipleLocator(1))
+        ax[i].yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
-    # Show the minor grid lines with very faint and almost transparent grey lines
-    ax[1].minorticks_on()
-    ax[1].grid(b=True, which="minor", color="#999999", linestyle="-", alpha=0.2)
-    ax[1].xaxis.set_minor_locator(ticker.MultipleLocator(1))
-    ax[1].yaxis.set_minor_locator(ticker.MultipleLocator(1))
+        # set axis font size
+        font_size = 8
+        ax[i].tick_params(labelsize=font_size)
 
-    # # set axis font size
-    ax[1].tick_params(labelsize=8)
+
+
+        if i == 0:
+            # add identifier labels
+            part_path, _ = os.path.split(meta["meta_file"])
+
+            exp_name = part_path.split("/")
+            readable_name = online.parse_exp_name(exp_name[1])
+
+            plt.gcf().text(
+                0.01,
+                1.01,
+                meta["stimuli_name"],
+                transform=ax[0].transAxes,
+                fontsize=4,
+                alpha=0.2,
+            )
+            plt.gcf().text(
+                1,
+                1.01,
+                readable_name,
+                transform=ax[0].transAxes,
+                fontsize=4,
+                alpha=0.2,
+                ha="right",
+            )
+        #     # Don't allow the axis to be on top of your data
+        ax[i].set_axisbelow(True)
 
     # axis labels
+    ax[0].set_xlabel("y displacement (mm)", fontsize=font_size, va="top")
+    ax[0].set_ylabel("x displacement (mm)", fontsize=font_size, va="top")
     ax[1].set_xlabel("y displacement (mm)", fontsize=8, va="top")
     ax[1].set_ylabel("height (mm)", fontsize=8, va="top")
 
-    #     # Don't allow the axis to be on top of your data
-    ax[1].set_axisbelow(True)
 
-    if meta["stimuli_name"] == "banana-screwed":
-        ax[1].axis(
-            [
-                min(robots_ys) - 10,
-                max(robots_ys) + 10,
-                min(robots_heights) - 10,
-                max(robots_heights) + 10,
-            ]
-        )
-    elif (
-        meta["stimuli_name"].split("-")[0] == "wavy"
-        and meta["stimuli_name"].split("-")[-1] == "3d"
-    ):
-        ax[1].axis([-10, 100, -5 + 3, 15 + 3])
-    elif (
-        meta["stimuli_name"] == "wavy-line-thin"
-        or meta["stimuli_name"] == "wavy-line-thick"
-    ):
-
-        # ax[1].axis([ -10, 100, -5, 5])
-        # ax[1].set_ylim([ -5, 5])
-        pass
-
-    elif meta["stimuli_name"].split("-")[0] == "tilt":
-        ax[1].axis([-2, 40, -10, 20])
-    elif meta["stimuli_name"] == "cap-mid":
-        ax[1].axis([-5, 65, -15, 5])
-    elif meta["stimuli_name"] == "lid-screwed":
-        ax[1].axis([-5, 45, -12, 2])
-    else:
-        ax[1].axis(
-            [
-                min(robots_ys) - 1,
-                max(robots_ys) + 1,
-                min(robots_heights) - 1,
-                max(robots_heights) + 1,
-            ]
-        )
+    #
+    # if meta["stimuli_name"] == "banana-screwed":
+    #     ax[0].axis(
+    #         [
+    #             min(robots_ys) - 10,
+    #             max(robots_ys) + 10,
+    #             max(robots_xs) + 20,
+    #             min(robots_xs) - 20,
+    #         ]
+    #     )
+    # elif (
+    #     meta["stimuli_name"] == "wavy-line-thin"
+    #     or meta["stimuli_name"] == "wavy-line-thick"
+    # ):
+    #
+    #     # ax[0].axis([-10, 100,  max(pos_ys_e)+10, min(pos_ys_e)-10])
+    #     # ax[0].set_ylim([max(pos_ys_e)+10, min(pos_ys_e)-10])
+    #     pass
+    #
+    # elif (
+    #     meta["stimuli_name"].split("-")[0] == "wavy"
+    #     and meta["stimuli_name"].split("-")[-1] == "3d"
+    # ):
+    #     ax[0].axis([-10, 100, 80 - 5 - 2, -10 + 5 - 2])
+    # elif meta["stimuli_name"].split("-")[0] == "tilt":
+    #     ax[0].axis([-2, 40, 5, -5])
+    # elif meta["stimuli_name"] == "cap-mid":
+    #     ax[0].axis([-5, 65, 10, -15])
+    # elif meta["stimuli_name"] == "lid-screwed":
+    #     ax[0].axis([-5, 45, 45 + 2, -5 + 2])
+    # else:
+    #     ax[0].axis(
+    #         [
+    #             min(robots_ys) - 1,
+    #             max(robots_ys) + 1,
+    #             max(robots_xs) + 1,
+    #             min(robots_xs) - 1,
+    #         ]
+    #     )
+    #
+    # # if ex.edge_locations is not None:
+    #
+    #
+    #
+    #
+    # if meta["stimuli_name"] == "banana-screwed":
+    #     ax[1].axis(
+    #         [
+    #             min(robots_ys) - 10,
+    #             max(robots_ys) + 10,
+    #             min(robots_heights) - 10,
+    #             max(robots_heights) + 10,
+    #         ]
+    #     )
+    # elif (
+    #     meta["stimuli_name"].split("-")[0] == "wavy"
+    #     and meta["stimuli_name"].split("-")[-1] == "3d"
+    # ):
+    #     ax[1].axis([-10, 100, -5 + 3, 15 + 3])
+    # elif (
+    #     meta["stimuli_name"] == "wavy-line-thin"
+    #     or meta["stimuli_name"] == "wavy-line-thick"
+    # ):
+    #
+    #     # ax[1].axis([ -10, 100, -5, 5])
+    #     # ax[1].set_ylim([ -5, 5])
+    #     pass
+    #
+    # elif meta["stimuli_name"].split("-")[0] == "tilt":
+    #     ax[1].axis([-2, 40, -10, 20])
+    # elif meta["stimuli_name"] == "cap-mid":
+    #     ax[1].axis([-5, 65, -15, 5])
+    # elif meta["stimuli_name"] == "lid-screwed":
+    #     ax[1].axis([-5, 45, -12, 2])
+    # else:
+    #     ax[1].axis(
+    #         [
+    #             min(robots_ys) - 1,
+    #             max(robots_ys) + 1,
+    #             min(robots_heights) - 1,
+    #             max(robots_heights) + 1,
+    #         ]
+    #     )
 
     #### end 3d stuff ####
+
+    ax[0].set_ylim([max(robots_xs), min(robots_xs)])
+    ax[1].set_ylim([min(robots_heights), max(robots_heights)])
+
 
     if save_figs:
         # save graphs automatically
