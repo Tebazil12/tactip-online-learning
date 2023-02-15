@@ -40,7 +40,8 @@ def plot_all_movements_basic_test(ex, meta, show_figs=True, save_figs=True):
 
     print(f"here {plt.rcParamsDefault['figure.figsize']}")
     plt.rcParams["figure.figsize"] = (
-        (plot_width + 20) / 10,
+        # (plot_width + 20) / 10,
+        5,
         ((plot_0_size + plot_1_size) + 20) / 10,
     )
     print(f"here2 {plt.rcParams['figure.figsize']}")
@@ -133,20 +134,23 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     print(f"here {plt.rcParamsDefault['figure.figsize']}")
 
     # set figure size to be good ratio of plot
+    real_width = 5
     plt.rcParams["figure.figsize"] = (
-        (plot_width + 20) / 15,
-        ((plot_0_height + plot_1_height) + 20) / 15,
+        real_width,
+        real_width
+        * ((((plot_0_height + plot_1_height) + 20) / 15) / ((plot_width + 20) / 15)),
     )
+    #     # (plot_width + 20) / 15,
+    #     5,
+    #     ((plot_0_height + plot_1_height) + 20) / 15,
+    # )
     print(f"here2 {plt.rcParams['figure.figsize']}")
-
 
     # make subplots
     fig, ax = plt.subplots(
         2, 1, sharex=True, gridspec_kw={"height_ratios": [plot_0_height, plot_1_height]}
     )
-    fig.subplots_adjust(hspace=0.06)
-
-
+    fig.subplots_adjust(hspace=0.12)
 
     line_width = 1.5
     marker_size = 1
@@ -490,8 +494,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             )
             # ax[0].scatter(line_locations_np[:, 0], line_locations_np[:, 1], color="g",s=marker_size)
 
-
-
     ##### 3d stuff #####
 
     if meta["stimuli_name"] == "70mm-circle":
@@ -744,11 +746,8 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             for x in np.array([n, pos_ys, heights]).T
         ]
 
-
-
-
     # for each axis
-    for i in [0,1]:
+    for i in [0, 1]:
         ax[i].set_aspect("equal", adjustable="datalim")
 
         # Show the major grid lines with dark grey lines
@@ -765,8 +764,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         # set axis font size
         font_size = 8
         ax[i].tick_params(labelsize=font_size)
-
-
 
         if i == 0:
             # add identifier labels
@@ -795,11 +792,19 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         #     # Don't allow the axis to be on top of your data
         ax[i].set_axisbelow(True)
 
+
+        # plot_size = plt.rcParams['figure.figsize']
+        # x, y = ax[i].yaxis.get_position()
+        # thingy = ax[i].xaxis.get_label()
+        # print(thingy.get_position())
+        # ax[i].yaxis.set_label_coords(thingy.get_position()[0], thingy.get_position()[1])
+
     # axis labels
-    ax[0].set_xlabel("y displacement (mm)", fontsize=font_size, va="top")
-    ax[0].set_ylabel("x displacement (mm)", fontsize=font_size, va="top")
-    ax[1].set_xlabel("y displacement (mm)", fontsize=8, va="top")
-    ax[1].set_ylabel("height (mm)", fontsize=8, va="top")
+    # ax[0].set_xlabel("y displacement (mm)", fontsize=font_size, va="top")
+    ax[0].set_ylabel("x displacement (mm)", fontsize=7, va="bottom")
+    ax[1].set_xlabel("y displacement (mm)", fontsize=7, va="top")
+    ax[1].set_ylabel("height (mm)", fontsize=7, va="bottom")
+
 
 
     #
@@ -890,7 +895,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
 
     ax[0].set_ylim([max(robots_xs), min(robots_xs)])
     ax[1].set_ylim([min(robots_heights), max(robots_heights)])
-
 
     if save_figs:
         # save graphs automatically

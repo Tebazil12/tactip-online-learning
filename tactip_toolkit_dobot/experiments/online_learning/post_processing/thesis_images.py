@@ -45,13 +45,21 @@ if __name__ == "__main__":
                 # print(file_name)
                 if file_name.split('_')[0] == 'all' and  file_name.split('_')[1] == 'movements':
                     # print(file_name)
-                    # print( file_name.split('.'))
-                    if  file_name.split('.')[1] == 'svg':
-                        print(file_name)
-                        src = data_home + current_experiment + file_name
-                        dst = thesis_dir + file_name
+                    # print( file_name.split('_'))
+                    try:
+                        if file_name.split('_')[3].split('-')[0] == 'both':
+                            if  file_name.split('.')[1] == 'svg':
+                                print(file_name)
+                                src = data_home + current_experiment + file_name
+                                dst = thesis_dir + file_name
 
-                        os.unlink(dst)
-                        os.symlink(src, dst)
+                                # os.unlink(dst)
+                                try:
+                                    os.symlink(src, dst)
+                                except Exception as e:
+                                    pass
 
-        print ("#####")
+                    except Exception as e:
+                        pass
+
+            print ("#####")
