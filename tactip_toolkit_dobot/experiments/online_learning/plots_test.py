@@ -193,8 +193,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             linestyle=line_style,
         )
 
-    ax[1].set_xlim([-10, 100])
-    ax[0].set_xlim([-10, 100])
+
 
     # images for birds eye view
     if meta["stimuli_name"] == "70mm-circle":
@@ -806,93 +805,62 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     ax[1].set_ylabel("height (mm)", fontsize=7, va="bottom")
 
 
+    ### x axis resizing ###
+    # ax[1].set_xlim([-10, 100])
+    # ax[0].set_xlim([-10, 100])
 
-    #
-    # if meta["stimuli_name"] == "banana-screwed":
-    #     ax[0].axis(
-    #         [
-    #             min(robots_ys) - 10,
-    #             max(robots_ys) + 10,
-    #             max(robots_xs) + 20,
-    #             min(robots_xs) - 20,
-    #         ]
-    #     )
-    # elif (
-    #     meta["stimuli_name"] == "wavy-line-thin"
-    #     or meta["stimuli_name"] == "wavy-line-thick"
-    # ):
-    #
-    #     # ax[0].axis([-10, 100,  max(pos_ys_e)+10, min(pos_ys_e)-10])
-    #     # ax[0].set_ylim([max(pos_ys_e)+10, min(pos_ys_e)-10])
-    #     pass
-    #
-    # elif (
-    #     meta["stimuli_name"].split("-")[0] == "wavy"
-    #     and meta["stimuli_name"].split("-")[-1] == "3d"
-    # ):
-    #     ax[0].axis([-10, 100, 80 - 5 - 2, -10 + 5 - 2])
-    # elif meta["stimuli_name"].split("-")[0] == "tilt":
-    #     ax[0].axis([-2, 40, 5, -5])
-    # elif meta["stimuli_name"] == "cap-mid":
-    #     ax[0].axis([-5, 65, 10, -15])
-    # elif meta["stimuli_name"] == "lid-screwed":
-    #     ax[0].axis([-5, 45, 45 + 2, -5 + 2])
-    # else:
-    #     ax[0].axis(
-    #         [
-    #             min(robots_ys) - 1,
-    #             max(robots_ys) + 1,
-    #             max(robots_xs) + 1,
-    #             min(robots_xs) - 1,
-    #         ]
-    #     )
-    #
-    # # if ex.edge_locations is not None:
-    #
-    #
-    #
-    #
-    # if meta["stimuli_name"] == "banana-screwed":
-    #     ax[1].axis(
-    #         [
-    #             min(robots_ys) - 10,
-    #             max(robots_ys) + 10,
-    #             min(robots_heights) - 10,
-    #             max(robots_heights) + 10,
-    #         ]
-    #     )
-    # elif (
-    #     meta["stimuli_name"].split("-")[0] == "wavy"
-    #     and meta["stimuli_name"].split("-")[-1] == "3d"
-    # ):
-    #     ax[1].axis([-10, 100, -5 + 3, 15 + 3])
-    # elif (
-    #     meta["stimuli_name"] == "wavy-line-thin"
-    #     or meta["stimuli_name"] == "wavy-line-thick"
-    # ):
-    #
-    #     # ax[1].axis([ -10, 100, -5, 5])
-    #     # ax[1].set_ylim([ -5, 5])
-    #     pass
-    #
-    # elif meta["stimuli_name"].split("-")[0] == "tilt":
-    #     ax[1].axis([-2, 40, -10, 20])
-    # elif meta["stimuli_name"] == "cap-mid":
-    #     ax[1].axis([-5, 65, -15, 5])
-    # elif meta["stimuli_name"] == "lid-screwed":
-    #     ax[1].axis([-5, 45, -12, 2])
-    # else:
-    #     ax[1].axis(
-    #         [
-    #             min(robots_ys) - 1,
-    #             max(robots_ys) + 1,
-    #             min(robots_heights) - 1,
-    #             max(robots_heights) + 1,
-    #         ]
-    #     )
 
-    #### end 3d stuff ####
+    if meta["stimuli_name"] == "banana-screwed":
+        ax[0].set_xlim(
+            [
+                min(robots_ys) - 10,
+                max(robots_ys) + 10,
+            ]
+        )
+        ax[1].set_xlim(
+            [
+                min(robots_ys) - 10,
+                max(robots_ys) + 10,
+            ]
+        )
+    elif (
+        meta["stimuli_name"] == "wavy-line-thin"
+        or meta["stimuli_name"] == "wavy-line-thick"
+    ):
+        ax[1].set_xlim([-10, 100])
+        ax[0].set_xlim([-10, 100])
 
+    elif (
+        meta["stimuli_name"].split("-")[0] == "wavy"
+        and meta["stimuli_name"].split("-")[-1] == "3d"
+    ):
+        ax[0].set_xlim([-10, 100])
+        ax[1].set_xlim([-10, 100])
+    elif meta["stimuli_name"].split("-")[0] == "tilt":
+        ax[0].set_xlim([-2, 40])
+        ax[1].set_xlim([-2, 40])
+    elif meta["stimuli_name"] == "cap-mid":
+        ax[0].set_xlim([-5, 65])
+        ax[1].set_xlim([-5, 65])
+    elif meta["stimuli_name"] == "lid-screwed":
+        ax[0].set_xlim([-5, 45])
+        ax[1].set_xlim([-5, 45])
+    else:
+        ax[0].set_xlim(
+            [
+                min(robots_ys) - 2,
+                max(robots_ys) + 2,
+            ]
+        )
+        ax[1].set_xlim(
+            [
+                min(robots_ys) - 2,
+                max(robots_ys) + 2,
+            ]
+        )
+
+
+    ### y axis sizing ###
     ax[0].set_ylim([max(robots_xs), min(robots_xs)])
     ax[1].set_ylim([min(robots_heights), max(robots_heights)])
 
