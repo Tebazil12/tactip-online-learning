@@ -26,8 +26,8 @@ def plot_all_movements_basic_test(ex, meta, show_figs=True, save_figs=True):
     plot_0_size = (max(pos_ys_e)) - (min(pos_ys_e))
     plot_1_size = (max(heights2)) - (min(heights2))
 
-    if plot_0_size < 5:
-        plot_0_size = 5
+    if plot_0_size < 10:
+        plot_0_size = 10
     if plot_1_size < 5:
         plot_1_size = 5
 
@@ -109,9 +109,11 @@ def plot_all_movements_basic_test(ex, meta, show_figs=True, save_figs=True):
     plt.show()
 
 
-def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
-    plt.clf()
-    plt.close()
+def plot_all_movements_both(
+    ex, meta, show_figs=True, save_figs=True, plot_size=None, fig_ax=None
+):
+    # plt.clf()
+    # plt.close()
 
     # load data for edge locations
     all_edge_np = np.array(ex.edge_locations)
@@ -121,36 +123,47 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     robots_heights = ex.edge_height
 
     # get sizes for plots and fig
-    plot_0_height = (max(robots_xs)) - (min(robots_xs))
-    plot_1_height = (max(robots_heights)) - (min(robots_heights))
-    plot_width = (max(robots_ys)) - (min(robots_ys))
+    if plot_size is None:
+        plot_0_height = (max(robots_xs)) - (min(robots_xs))
+        plot_1_height = (max(robots_heights)) - (min(robots_heights))
+        plot_width = (max(robots_ys)) - (min(robots_ys))
 
-    # set min size
-    if plot_0_height < 5:
-        plot_0_height = 5
-    if plot_1_height < 5:
-        plot_1_height = 5
+        # set min size
+        if plot_0_height < 15:
+            plot_0_height = 15
+        if plot_1_height < 15:
+            plot_1_height = 15
+    else:
+        plot_0_height = plot_size[0]
+        plot_1_height = plot_size[1]
+        plot_width = plot_size[2]
 
-    print(f"here {plt.rcParamsDefault['figure.figsize']}")
-
+    print(f"here (default) {plt.rcParamsDefault['figure.figsize']}")
+    print(f"here (set) {plt.rcParams['figure.figsize']}")
     # set figure size to be good ratio of plot
     real_width = 5
     plt.rcParams["figure.figsize"] = (
         real_width,
-        real_width
-        * ((((plot_0_height + plot_1_height) + 20) / 15) / ((plot_width + 20) / 15)),
+        real_width * ((plot_0_height + plot_1_height ) / (plot_width)),
+        # * ((((plot_0_height + plot_1_height) + 20) / 15) / ((plot_width + 20) / 15)),
     )
     #     # (plot_width + 20) / 15,
     #     5,
     #     ((plot_0_height + plot_1_height) + 20) / 15,
     # )
-    print(f"here2 {plt.rcParams['figure.figsize']}")
+    print(f"here (after setting) {plt.rcParams['figure.figsize']}")
 
     # make subplots
-    fig, ax = plt.subplots(
-        2, 1, sharex=True, gridspec_kw={"height_ratios": [plot_0_height, plot_1_height]}
-    )
-    fig.subplots_adjust(hspace=0.12)
+    if fig_ax is None:
+        fig, ax = plt.subplots(
+            2,
+            1,
+            sharex=True,
+            gridspec_kw={"height_ratios": [plot_0_height, plot_1_height]},
+        )
+    else:
+        fig, ax = fig_ax
+    fig.subplots_adjust(hspace=2 / (plot_0_height + plot_1_height))
 
     line_width = 1.5
     marker_size = 1
@@ -160,11 +173,13 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
 
         n = range(len(robots_ys))
         if meta["stimuli_name"] == "wavy-edge-3d":
-            line_style = "solid"
+            # line_style = "solid"
+            line_style = (0, (1, 1))
         elif meta["stimuli_name"] == "wavy-raised-3d":
             line_style = (0, (5, 1))
         elif meta["stimuli_name"] == "wavy-line-thin-3d":
-            line_style = (0, (1, 1))
+            # line_style = (0, (1, 1))
+            line_style = "solid"
         else:
             line_style = "solid"
 
@@ -172,6 +187,34 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             line_colour = "#FFAA00"
         else:
             line_colour = "#30E641"
+
+        if meta["stimuli_name"].split("-")[0] == "tilt":
+            tilt_angle = int(meta["stimuli_name"].split("-")[1].split("deg")[0])
+            try:
+                if meta["stimuli_name"].split("-")[2] == "down":
+                    tilt_angle = -tilt_angle
+
+            except:
+                print("moving on")
+
+            # if tilt_angle <26:
+            #     x_distance = 40
+            # elif tilt_angle <41:
+            #     x_distance = 40
+            # else:
+            x_distance = 40
+
+
+            y_distance = np.tan(np.deg2rad(tilt_angle)) * x_distance
+
+            plt.plot([0,x_distance],[0, y_distance], ':', linewidth=line_width, color=[0, 0, 0] )
+
+            ax[1].annotate(
+                str(tilt_angle)+"$\degree$", (x_distance+1.5, y_distance), fontsize=10, ha="center", va="center", color="black"
+            )
+            color_line = (tilt_angle + 20) / 65
+            line_colour = [1-color_line, 0, color_line]
+            label=tilt_angle
 
         ax[0].plot(
             robots_ys,
@@ -192,8 +235,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             linewidth=line_width,
             linestyle=line_style,
         )
-
-
 
     # images for birds eye view
     if meta["stimuli_name"] == "70mm-circle":
@@ -449,7 +490,10 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
 
     elif meta["stimuli_name"].split("-")[0] == "tilt":
         # ax[0].plot([0, 80, 80], [0, 0, 100])
-        ax[0].fill([-10, 100, 100, -10], [0, 0, 100, 100], "grey", alpha=0.6)
+        # ax[0].fill([-10, 100, 100, -10], [0, 0, 100, 100], "grey", alpha=0.6)
+        x1_smaller = 39
+        y1 =1
+        ax[0].plot([0, x1_smaller],[0, y1], 'k:')
 
     if False:
         # print all tap locations
@@ -527,14 +571,14 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         # Arc(xy, width, height, angle=0.0, theta1=0.0, theta2=360.0, **kwargs
         # w2 = Wedge((x_offset, y_offset), radius, 90, -90, fc="tab:brown", alpha=0.5)
         w2 = Rectangle((x_offset, y_offset), radius * 2, -10, fc="tab:brown", alpha=0.5)
-        ax.add_artist(w2)
+        ax[1].add_artist(w2)
 
     elif meta["stimuli_name"] == "flower":
         img = plt.imread("/home/lizzie/Pictures/stimulus-flower.png")
         img_cropped = img[:, 0 : int(img.shape[0] / 2), :]
         f_size = 126
         f_y_offset = -5.2
-        ax.imshow(
+        ax[1].imshow(
             img_cropped,
             extent=[-f_size / 2, 0, 0 + f_y_offset, f_size + f_y_offset],
             alpha=0.5,
@@ -555,7 +599,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         desired_height = int(img_height / (img_width / desired_width))
         desired_y_offset = -52 - 10 - 30 - 1
         desired_x_offset = -10 - 70 - 40 + 5 + 5 - 1.5
-        ax.imshow(
+        ax[1].imshow(
             img_cropped,
             extent=[
                 desired_x_offset + 0,
@@ -586,7 +630,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
 
         desired_y_offset = -83 - 0.5 + 46.5 - 5 + 21 - 5
         desired_x_offset = -60 + 6 + 10 - 2 + 3 - 2.5 + 1 + 3.4 - 3 + 1.6 + 15
-        ax.imshow(
+        ax[1].imshow(
             img_cropped,
             extent=[
                 desired_x_offset + 0,
@@ -624,7 +668,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         desired_x_offset = (
             -60 + 6 + 10 - 2 + 3 - 2.5 + 1 + 3.4 - 3 + 1.6 + 15 - 40 - 12 + 1.5
         )
-        ax.imshow(
+        ax[1].imshow(
             img_cropped,
             extent=[
                 desired_x_offset + 0,
@@ -653,7 +697,7 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
 
         desired_y_offset = -44.5
         desired_x_offset = -52 + 3
-        ax.imshow(
+        ax[1].imshow(
             img_cropped,
             extent=[
                 desired_x_offset + 0,
@@ -700,20 +744,20 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
     else:
         ax[1].fill([-10, 100, 100, -10], [0, 0, -100, -100], "grey", alpha=0.6)
 
-    if meta["stimuli_name"] == "tilt-05deg-down":
-        ax[1].plot([0, 100], [0, -8.7], ":k")
-    elif meta["stimuli_name"] == "tilt-10deg-down":
-        ax[1].plot([0, 100], [0, -17.6], ":k")
-    elif meta["stimuli_name"] == "tilt-20deg-down":
-        ax[1].plot([0, 100], [0, -36.4], ":k")
-    elif meta["stimuli_name"] == "tilt-05deg-up":
-        ax[1].plot([0, 100], [0, 8.7], ":k")
-    elif meta["stimuli_name"] == "tilt-10deg-up":
-        ax[1].plot([0, 100], [0, 17.6], ":k")
-    elif meta["stimuli_name"] == "tilt-20deg-up":
-        ax[1].plot([0, 100], [0, 36.4], ":k")
-    elif meta["stimuli_name"] == "tilt-0deg":
-        ax[1].plot([0, 100], [0, 0], ":k")
+    # if meta["stimuli_name"] == "tilt-05deg-down":
+    #     ax[1].plot([0, 100], [0, -8.7], ":k")
+    # elif meta["stimuli_name"] == "tilt-10deg-down":
+    #     ax[1].plot([0, 100], [0, -17.6], ":k")
+    # elif meta["stimuli_name"] == "tilt-20deg-down":
+    #     ax[1].plot([0, 100], [0, -36.4], ":k")
+    # elif meta["stimuli_name"] == "tilt-05deg-up":
+    #     ax[1].plot([0, 100], [0, 8.7], ":k")
+    # elif meta["stimuli_name"] == "tilt-10deg-up":
+    #     ax[1].plot([0, 100], [0, 17.6], ":k")
+    # elif meta["stimuli_name"] == "tilt-20deg-up":
+    #     ax[1].plot([0, 100], [0, 36.4], ":k")
+    # elif meta["stimuli_name"] == "tilt-0deg":
+    #     ax[1].plot([0, 100], [0, 0], ":k")
 
     if False:
         # print all tap locations
@@ -791,7 +835,6 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         #     # Don't allow the axis to be on top of your data
         ax[i].set_axisbelow(True)
 
-
         # plot_size = plt.rcParams['figure.figsize']
         # x, y = ax[i].yaxis.get_position()
         # thingy = ax[i].xaxis.get_label()
@@ -800,29 +843,44 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
 
     # axis labels
     # ax[0].set_xlabel("y displacement (mm)", fontsize=font_size, va="top")
-    ax[0].set_ylabel("x displacement (mm)", fontsize=7, va="bottom")
-    ax[1].set_xlabel("y displacement (mm)", fontsize=7, va="top")
+    ax[0].set_ylabel("x (mm)", fontsize=7, va="bottom")
+    ax[1].set_xlabel("y (mm)", fontsize=7, va="top")
     ax[1].set_ylabel("height (mm)", fontsize=7, va="bottom")
 
+    ### y axis sizing ###
+    if fig_ax is None:
+        ax[0].set_ylim([max(robots_xs)+5, min(robots_xs)-5])
+        ax[1].set_ylim([min(robots_heights)-5, max(robots_heights)+5])
+    else:
+        if (
+            meta["stimuli_name"].split("-")[0] == "wavy"
+            and meta["stimuli_name"].split("-")[-1] == "3d"
+        ):
+            ax[0].set_ylim([70,-5])
+            ax[1].set_ylim([min(robots_heights), max(robots_heights)])
+
+        elif meta["stimuli_name"].split("-")[0] == "tilt":
+            ax[0].set_ylim([5, -5])
+            ax[1].set_ylim([-5, 10])
 
     ### x axis resizing ###
     # ax[1].set_xlim([-10, 100])
     # ax[0].set_xlim([-10, 100])
 
-
     if meta["stimuli_name"] == "banana-screwed":
         ax[0].set_xlim(
             [
-                min(robots_ys) - 10,
-                max(robots_ys) + 10,
+                min(robots_ys) - 15,
+                max(robots_ys) + 15,
             ]
         )
         ax[1].set_xlim(
             [
-                min(robots_ys) - 10,
-                max(robots_ys) + 10,
+                min(robots_ys) - 15,
+                max(robots_ys) + 15,
             ]
         )
+
     elif (
         meta["stimuli_name"] == "wavy-line-thin"
         or meta["stimuli_name"] == "wavy-line-thick"
@@ -837,14 +895,14 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
         ax[0].set_xlim([-10, 100])
         ax[1].set_xlim([-10, 100])
     elif meta["stimuli_name"].split("-")[0] == "tilt":
-        ax[0].set_xlim([-2, 40])
-        ax[1].set_xlim([-2, 40])
+        ax[0].set_xlim([-2, 45])
+        ax[1].set_xlim([-2, 45])
     elif meta["stimuli_name"] == "cap-mid":
         ax[0].set_xlim([-5, 65])
         ax[1].set_xlim([-5, 65])
     elif meta["stimuli_name"] == "lid-screwed":
-        ax[0].set_xlim([-5, 45])
-        ax[1].set_xlim([-5, 45])
+        ax[0].set_xlim([-5, 50])
+        ax[1].set_xlim([-5, 50])
     else:
         ax[0].set_xlim(
             [
@@ -859,10 +917,12 @@ def plot_all_movements_both(ex, meta, show_figs=True, save_figs=True):
             ]
         )
 
-
-    ### y axis sizing ###
-    ax[0].set_ylim([max(robots_xs), min(robots_xs)])
-    ax[1].set_ylim([min(robots_heights), max(robots_heights)])
+    fig.set_size_inches(
+        real_width,
+        real_width * ((plot_0_height + plot_1_height) / (plot_width)),
+        forward=True
+    )
+    print(f"here3 {plt.rcParams['figure.figsize']}")
 
     if save_figs:
         # save graphs automatically
