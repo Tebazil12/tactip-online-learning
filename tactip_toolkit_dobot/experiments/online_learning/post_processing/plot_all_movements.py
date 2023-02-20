@@ -15,6 +15,7 @@ import tactip_toolkit_dobot.experiments.min_example.common as common
 #     parse_exp_name
 # )
 import tactip_toolkit_dobot.experiments.online_learning.contour_following_3d as online
+import tactip_toolkit_dobot.experiments.online_learning.plots_test as plots_test
 
 def plot_all_movements(ex, meta, show_figs=True, save_figs=True):
     line_width = 0.5
@@ -522,8 +523,11 @@ def main(ex,meta, data_home, current_experiment, show_figs=False):
     ex.edge_height = common.load_data(data_home + current_experiment + "all_edge_heights_final.json")
     ex.edge_height = np.array(ex.edge_height)
 
-    online.plot_all_movements(ex,meta, show_figs)
-    online.plot_all_movements_3d(ex,meta, show_figs)
+    plots_test.plot_all_movements_both(ex,meta, show_figs)
+    # plots_test.plot_all_movements_basic_test(ex,meta, show_figs)
+    # online.plot_all_movements(ex,meta, show_figs)
+    # online.plot_all_movements_3d(ex,meta, show_figs)
+
 
 if __name__ == "__main__":
 
@@ -563,6 +567,8 @@ if __name__ == "__main__":
     # current_experiment = "contour_following_3d_2022y-09m-10d_16h29m37s/"
     # current_experiment = "contour_following_3d_2022y-08m-08d_15h05m19s/"
     # current_experiment = "contour_following_3d_2022y-08m-05d_14h58m18s/"
+
+    ### white lid thesis ###
     # current_experiment = "contour_following_3d_2022y-09m-13d_14h38m49s/"
 
     # current_experiment = "contour_following_3d_2022y-08m-04d_15h44m53s/"
@@ -572,14 +578,39 @@ if __name__ == "__main__":
     # current_experiment = "contour_following_3d_2022y-08m-16d_14h06m41s/"
     # current_experiment = "contour_following_3d_2022y-08m-16d_14h17m02s/"
     # current_experiment = "contour_following_3d_2022y-08m-08d_15h15m18s/"
+
+    ### Groove 2d thesis ###
     # current_experiment = "contour_following_3d_2023y-02m-01d_15h20m26s/"
     # current_experiment = "contour_following_3d_2023y-02m-01d_15h03m56s/"
     # current_experiment = "contour_following_3d_2023y-02m-01d_15h10m31s/"
-    current_experiment = "contour_following_3d_2023y-02m-01d_15h26m36s/"
+    # current_experiment = "contour_following_3d_2023y-02m-01d_15h26m36s/"
 
-    state = online.State(meta=common.load_data(data_home + current_experiment + "meta.json"))
+    ### Failed saddle thesis ###
+    # current_experiment = "contour_following_3d_2022y-08m-04d_15h44m53s/"
 
-    print(state.meta["stimuli_name"])
+    ### Banana 3d thesisi ###
+    # current_experiment = "contour_following_3d_2023y-02m-01d_10h56m31s/"
+    # current_experiment = "contour_following_3d_2023y-02m-01d_11h05m16s/"
 
-    state.ex = online.Experiment()
-    main(state.ex,state.meta, data_home, current_experiment, show_figs=True)
+    experiments = {
+        "contour_following_3d_2023y-02m-01d_15h20m26s/",
+        "contour_following_3d_2023y-02m-01d_15h03m56s/",
+        "contour_following_3d_2023y-02m-01d_15h10m31s/",
+        "contour_following_3d_2023y-02m-01d_15h26m36s/",
+        "contour_following_3d_2022y-08m-08d_15h05m19s/",
+        "contour_following_3d_2022y-08m-08d_15h15m18s/",
+        "contour_following_3d_2023y-02m-01d_10h56m31s/",
+        "contour_following_3d_2023y-02m-01d_11h05m16s/",
+        "contour_following_3d_2022y-08m-04d_15h44m53s/",
+        "contour_following_3d_2022y-09m-13d_14h38m49s/"
+
+    }
+
+    for current_experiment in experiments:
+
+        state = online.State(meta=common.load_data(data_home + current_experiment + "meta.json"))
+
+        print(state.meta["stimuli_name"])
+
+        state.ex = online.Experiment()
+        main(state.ex,state.meta, data_home, current_experiment, show_figs=False)
