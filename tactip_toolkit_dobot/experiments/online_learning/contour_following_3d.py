@@ -888,7 +888,7 @@ def make_meta(file_name=None, stimuli_name=None, extra_dict=None):
         ref_plat_height = stimuli_height
 
     elif stimuli_name == "lid-screwed":
-        stimuli_height = -193 + 30 -1-1
+        stimuli_height = -193 + 30 -1-1-0.5
         # x_y_offset = [57.5, -57.5]
         x_y_offset = [-6+48-57, (15-30) - 50 +2+2, 0]
         max_steps = 60 -10
@@ -3040,7 +3040,7 @@ class State:
         }
 
         if meta is None:
-            self.meta = make_meta(stimuli_name="wavy-line-thin", extra_dict=extra_dict)
+            self.meta = make_meta(stimuli_name="lid-screwed", extra_dict=extra_dict)
         else:
             self.meta = meta
 

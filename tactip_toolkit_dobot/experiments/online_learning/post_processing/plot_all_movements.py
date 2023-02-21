@@ -602,7 +602,9 @@ if __name__ == "__main__":
         "contour_following_3d_2023y-02m-01d_10h56m31s/",
         "contour_following_3d_2023y-02m-01d_11h05m16s/",
         "contour_following_3d_2022y-08m-04d_15h44m53s/",
-        "contour_following_3d_2022y-09m-13d_14h38m49s/"
+        "contour_following_3d_2022y-09m-13d_14h38m49s/",
+        "contour_following_3d_2023y-02m-20d_15h11m38s/",
+        "contour_following_3d_2023y-02m-20d_15h25m58s/"
 
     }
 
