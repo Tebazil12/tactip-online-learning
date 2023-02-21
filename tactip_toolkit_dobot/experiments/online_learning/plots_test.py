@@ -216,25 +216,25 @@ def plot_all_movements_both(
             line_colour = [1-color_line, 0, color_line]
             label=tilt_angle
 
-        ax[0].plot(
-            robots_ys,
-            robots_xs,
-            color=line_colour,
-            marker="",
-            markersize=marker_size + 1,
-            linewidth=line_width,
-            linestyle=line_style,
-        )
-
-        ax[1].plot(
-            robots_ys,
-            robots_heights,
-            color=line_colour,
-            marker="",
-            markersize=marker_size + 1,
-            linewidth=line_width,
-            linestyle=line_style,
-        )
+        # ax[0].plot(
+        #     robots_ys,
+        #     robots_xs,
+        #     color=line_colour,
+        #     marker="",
+        #     markersize=marker_size + 1,
+        #     linewidth=line_width,
+        #     linestyle=line_style,
+        # )
+        #
+        # ax[1].plot(
+        #     robots_ys,
+        #     robots_heights,
+        #     color=line_colour,
+        #     marker="",
+        #     markersize=marker_size + 1,
+        #     linewidth=line_width,
+        #     linestyle=line_style,
+        # )
 
     # images for birds eye view
     if meta["stimuli_name"] == "70mm-circle":
@@ -788,6 +788,27 @@ def plot_all_movements_both(
             )
             for x in np.array([n, pos_ys, heights]).T
         ]
+
+    ax[0].plot(
+        robots_ys,
+        robots_xs,
+        color=line_colour,
+        marker="",
+        markersize=marker_size + 1,
+        linewidth=line_width,
+        linestyle=line_style,
+    )
+
+    ax[1].plot(
+        robots_ys,
+        robots_heights,
+        color=line_colour,
+        marker="",
+        markersize=marker_size + 1,
+        linewidth=line_width,
+        linestyle=line_style,
+    )
+
 
     # for each axis
     for i in [0, 1]:
