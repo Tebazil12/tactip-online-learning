@@ -124,15 +124,22 @@ def plot_all_movements_both(
 
     # get sizes for plots and fig
     if plot_size is None:
-        plot_0_height = (max(robots_xs)) - (min(robots_xs))
-        plot_1_height = (max(robots_heights)) - (min(robots_heights))
-        plot_width = (max(robots_ys)) - (min(robots_ys))
+        if False: #online
+            plot_0_height = (max(robots_xs)) - (min(robots_xs))
+            plot_1_height = (max(robots_heights)) - (min(robots_heights))
+            plot_width = (max(robots_ys)) - (min(robots_ys))
+        else: #offline
+            plot_0_height = (max(robots_ys)) - (min(robots_ys))
+            plot_1_height = (max(robots_heights)) - (min(robots_heights))
+            plot_width = (max(robots_xs)) - (min(robots_xs))
+
 
         # set min size
-        if plot_0_height < 15:
-            plot_0_height = 15
-        if plot_1_height < 15:
-            plot_1_height = 15
+        min_size = 3 #15
+        if plot_0_height < min_size:
+            plot_0_height = min_size
+        if plot_1_height < min_size:
+            plot_1_height = min_size
     else:
         plot_0_height = plot_size[0]
         plot_1_height = plot_size[1]
@@ -163,6 +170,8 @@ def plot_all_movements_both(
         )
     else:
         fig, ax = fig_ax
+
+
     fig.subplots_adjust(hspace=2 / (plot_0_height + plot_1_height))
 
     line_width = 1.5
@@ -307,13 +316,11 @@ def plot_all_movements_both(
         img_width = img.shape[1]
         img_height = img.shape[0]
 
-        # desired_width = 150
-        # desired_height = int(img_height / (img_width/desired_width))
-        desired_height = 150
+        desired_height = 145 # 150
         desired_width = int(img_width / (img_height / desired_height))
 
-        desired_y_offset = -78
-        desired_x_offset = -78
+        desired_y_offset = -78 +3
+        desired_x_offset = -78 +4
         ax[0].imshow(
             img_cropped,
             extent=[
@@ -322,7 +329,7 @@ def plot_all_movements_both(
                 desired_height + desired_y_offset,
                 0 + desired_y_offset,
             ],
-            alpha=0.6,
+            alpha=0.4,
         )
 
     elif meta["stimuli_name"] == "cap-mid":
@@ -341,8 +348,8 @@ def plot_all_movements_both(
         desired_height = 150 * (5 / 15.7) * (125 / 35) * (125 / 127)
         desired_width = int(img_width / (img_height / desired_height))
 
-        desired_y_offset = -23.5 - 55 + 10 - 1
-        desired_x_offset = -50 - 7 + 1 - 15 + 1
+        desired_y_offset = -23.5 - 55 + 10 - 1 -2
+        desired_x_offset = -50 - 7 + 1 - 15 + 1 -2
         ax[0].imshow(
             img_cropped,
             extent=[
@@ -558,7 +565,7 @@ def plot_all_movements_both(
     elif meta["stimuli_name"] == "105mm-circle":
         # print large circle location
         radius = 50
-        x_offset = -radius
+        x_offset = 0#-radius
         y_offset = 0
         # --- https://uk.mathworks.com/matlabcentral/answers/3058-plotting-circles
         ang = np.linspace(np.pi / 2, -np.pi / 2, 100)
@@ -607,7 +614,7 @@ def plot_all_movements_both(
                 0 + desired_y_offset,
                 desired_height + desired_y_offset,
             ],
-            alpha=0.6,
+            alpha=0.4,
         )
 
     elif meta["stimuli_name"] == "wavy-edge-3d":
@@ -666,7 +673,7 @@ def plot_all_movements_both(
 
         desired_y_offset = -83 - 0.5 + 46.5 - 5 + 21 - 5 - 15 - 3
         desired_x_offset = (
-            -60 + 6 + 10 - 2 + 3 - 2.5 + 1 + 3.4 - 3 + 1.6 + 15 - 40 - 12 + 1.5
+            -60 + 6 + 10 - 2 + 3 - 2.5 + 1 + 3.4 - 3 + 1.6 + 15 - 40 - 12 + 1.5 -2 -2
         )
         ax[1].imshow(
             img_cropped,
@@ -681,7 +688,7 @@ def plot_all_movements_both(
 
     elif meta["stimuli_name"] == "lid-screwed":
         img = plt.imread(
-            "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/lid-side.jpg"
+            "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/lid-side-2.jpg"
         )
         img_cropped = img  # [:, 0 : int(img.shape[0] / 2), :]
 
@@ -789,25 +796,50 @@ def plot_all_movements_both(
             for x in np.array([n, pos_ys, heights]).T
         ]
 
-    ax[0].plot(
-        robots_ys,
-        robots_xs,
-        color=line_colour,
-        marker="",
-        markersize=marker_size + 1,
-        linewidth=line_width,
-        linestyle=line_style,
-    )
+    if False: # True=online
+        ax[0].plot(
+        # ax[0].scatter(
+            robots_ys,
+            robots_xs,
+            color=line_colour,
+            marker="",
+            markersize=marker_size + 1,
+            linewidth=line_width,
+            linestyle=line_style,
+        )
 
-    ax[1].plot(
-        robots_ys,
-        robots_heights,
-        color=line_colour,
-        marker="",
-        markersize=marker_size + 1,
-        linewidth=line_width,
-        linestyle=line_style,
-    )
+        ax[1].plot(
+        # ax[1].scatter(
+            robots_ys,
+            robots_heights,
+            color=line_colour,
+            marker="",
+            markersize=marker_size + 1,
+            linewidth=line_width,
+            linestyle=line_style,
+        )
+    else: #offline
+         # ax[0].plot(
+        ax[0].scatter(
+            robots_xs,
+            robots_ys,
+            color=line_colour,
+            # marker="",
+            # s=marker_size + 5,
+            # linewidth=line_width,
+            # linestyle=line_style,
+        )
+
+        # ax[1].plot(
+        ax[1].scatter(
+            robots_xs,
+            robots_heights,
+            color=line_colour,
+            # marker="",
+            # s=marker_size + 5,
+            # linewidth=line_width,
+            # linestyle=line_style,
+        )
 
 
     # for each axis
@@ -825,9 +857,7 @@ def plot_all_movements_both(
         ax[i].xaxis.set_minor_locator(ticker.MultipleLocator(1))
         ax[i].yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
-        # set axis font size
-        font_size = 8
-        ax[i].tick_params(labelsize=font_size)
+
 
         if i == 0:
             # add identifier labels
@@ -864,14 +894,34 @@ def plot_all_movements_both(
 
     # axis labels
     # ax[0].set_xlabel("y displacement (mm)", fontsize=font_size, va="top")
-    ax[0].set_ylabel("x (mm)", fontsize=7, va="bottom")
-    ax[1].set_xlabel("y (mm)", fontsize=7, va="top")
-    ax[1].set_ylabel("height (mm)", fontsize=7, va="bottom")
+    if meta["stimuli_name"].split("-")[0] == "banana":
+        label_size = 4
+    elif meta["stimuli_name"].split('-')[0] == "lid" or meta["stimuli_name"].split('-')[1] == "lid":
+        label_size = 10
+    else:
+        label_size = 7
+
+    # set axis font size
+    # font_size = 8
+    ax[0].tick_params(labelsize=label_size+1)
+    ax[1].tick_params(labelsize=label_size+1)
+    if False: #online
+        ax[0].set_ylabel("x (mm)", fontsize=label_size, va="bottom")
+        ax[1].set_xlabel("y (mm)", fontsize=label_size, va="top")
+    else: #offline
+        ax[0].set_ylabel("y (mm)", fontsize=label_size, va="bottom")
+        ax[1].set_xlabel("x (mm)", fontsize=label_size, va="top")
+
+    ax[1].set_ylabel("height (mm)", fontsize=label_size, va="bottom")
 
     ### y axis sizing ###
     if fig_ax is None:
-        ax[0].set_ylim([max(robots_xs)+5, min(robots_xs)-5])
-        ax[1].set_ylim([min(robots_heights)-5, max(robots_heights)+5])
+        if False: #online
+            ax[0].set_ylim([max(robots_xs)+5, min(robots_xs)-5])
+            ax[1].set_ylim([min(robots_heights)-5, max(robots_heights)+5])
+        else: #offline
+            ax[0].set_ylim([max(robots_ys)+5, min(robots_ys)-5])
+            ax[1].set_ylim([min(robots_heights)-5, max(robots_heights)+5])
     else:
         if (
             meta["stimuli_name"].split("-")[0] == "wavy"
@@ -883,6 +933,18 @@ def plot_all_movements_both(
         elif meta["stimuli_name"].split("-")[0] == "tilt":
             ax[0].set_ylim([5, -5])
             ax[1].set_ylim([-5, 10])
+
+        elif meta["stimuli_name"].split("-")[0] == "banana":
+            ax[0].set_ylim([10, 0])
+            ax[1].set_ylim([-7, 3])
+
+        elif meta["stimuli_name"].split("-")[0] == "cap":
+            ax[0].set_ylim([0, -12])
+            ax[1].set_ylim([-5, 0])
+
+        elif meta["stimuli_name"].split('-')[0] == "lid" or meta["stimuli_name"].split('-')[1] == "lid":
+            ax[0].set_ylim([48, -1])
+            ax[1].set_ylim([-9, 0])
 
     ### x axis resizing ###
     # ax[1].set_xlim([-10, 100])
@@ -925,18 +987,32 @@ def plot_all_movements_both(
         ax[0].set_xlim([-5, 50])
         ax[1].set_xlim([-5, 50])
     else:
-        ax[0].set_xlim(
-            [
-                min(robots_ys) - 2,
-                max(robots_ys) + 2,
-            ]
-        )
-        ax[1].set_xlim(
-            [
-                min(robots_ys) - 2,
-                max(robots_ys) + 2,
-            ]
-        )
+        if False: #online
+            ax[0].set_xlim(
+                [
+                    min(robots_ys) - 2,
+                    max(robots_ys) + 2,
+                ]
+            )
+            ax[1].set_xlim(
+                [
+                    min(robots_ys) - 2,
+                    max(robots_ys) + 2,
+                ]
+            )
+        else:
+            ax[0].set_xlim(
+                [
+                    min(robots_xs) - 2,
+                    max(robots_xs) + 2,
+                ]
+            )
+            ax[1].set_xlim(
+                [
+                    min(robots_xs) - 2,
+                    max(robots_xs) + 2,
+                ]
+            )
 
     fig.set_size_inches(
         real_width,

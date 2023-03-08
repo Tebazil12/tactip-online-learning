@@ -517,13 +517,53 @@ def main(ex,meta, data_home, current_experiment, show_figs=False):
     print(type(ex.line_locations))
     print(np.shape(ex.line_locations))
 
-    ex.edge_locations = common.load_data(data_home + current_experiment + "all_edge_locs_final.json")
-    ex.edge_locations = np.array(ex.edge_locations)
+    if False:
+        ex.edge_locations = common.load_data(data_home + current_experiment + "all_edge_locs_final.json")
+        ex.edge_locations = np.array(ex.edge_locations)
 
-    ex.edge_height = common.load_data(data_home + current_experiment + "all_edge_heights_final.json")
-    ex.edge_height = np.array(ex.edge_height)
+        ex.edge_height = common.load_data(data_home + current_experiment + "all_edge_heights_final.json")
+        ex.edge_height = np.array(ex.edge_height)
 
-    plots_test.plot_all_movements_both(ex,meta, show_figs)
+        plots_test.plot_all_movements_both(ex,meta, show_figs)
+    else:
+        all_positions_final = common.load_data(data_home + current_experiment + "all_positions_final.json")
+        all_positions_final = np.array(all_positions_final[2:])
+
+        print(all_positions_final)
+        # x_positions = all_positions_final[:,0]
+        # y_positions = all_positions_final[:,1]
+        # z_positions = all_positions_final[:,3]
+        # angles_positions = all_positions_final[:,2]
+
+        ex.edge_locations = all_positions_final[:,0:2]
+        ex.edge_height = all_positions_final[:,3]
+
+        meta["plane_method"] = "full_grid"
+
+        # height_range = np.array(meta["height_range"])
+        # line_range =np.array( meta["line_range"])
+        # angle_range =np.array( meta["angle_range"])
+        #
+        # # grid_thing = np.meshgrid(line_range,angle_range, height_range)
+        #
+        # grid_thing = []
+        # for i in height_range:
+        #     for j in angle_range:
+        #         for k in line_range:
+        #             grid_thing.append([i,j, i])
+        #
+        # print(grid_thing)
+        # asdf
+
+        # ex.edge_locations = common.load_data(data_home + current_experiment + "all_edge_locs_final.json")
+        # ex.edge_locations = np.array(ex.edge_locations)
+        #
+        # ex.edge_height = common.load_data(data_home + current_experiment + "all_edge_heights_final.json")
+        # ex.edge_height = np.array(ex.edge_height)
+        plots_test.plot_all_movements_both(ex,meta, show_figs)
+
+
+    # plots_test.plot_all_movements_both(ex,meta, show_figs)
     # plots_test.plot_all_movements_basic_test(ex,meta, show_figs)
     # online.plot_all_movements(ex,meta, show_figs)
     # online.plot_all_movements_3d(ex,meta, show_figs)
@@ -593,18 +633,20 @@ if __name__ == "__main__":
     # current_experiment = "contour_following_3d_2023y-02m-01d_11h05m16s/"
 
     experiments = {
-        "contour_following_3d_2023y-02m-01d_15h20m26s/",
-        "contour_following_3d_2023y-02m-01d_15h03m56s/",
-        "contour_following_3d_2023y-02m-01d_15h10m31s/",
-        "contour_following_3d_2023y-02m-01d_15h26m36s/",
-        "contour_following_3d_2022y-08m-08d_15h05m19s/",
-        "contour_following_3d_2022y-08m-08d_15h15m18s/",
-        "contour_following_3d_2023y-02m-01d_10h56m31s/",
-        "contour_following_3d_2023y-02m-01d_11h05m16s/",
-        "contour_following_3d_2022y-08m-04d_15h44m53s/",
-        "contour_following_3d_2022y-09m-13d_14h38m49s/",
-        "contour_following_3d_2023y-02m-20d_15h11m38s/",
-        "contour_following_3d_2023y-02m-20d_15h25m58s/"
+        "collect_dataset_3d_21y-03m-03d_15h18m06s/"
+        #
+        # "contour_following_3d_2023y-02m-01d_15h20m26s/",
+        # "contour_following_3d_2023y-02m-01d_15h03m56s/",
+        # "contour_following_3d_2023y-02m-01d_15h10m31s/",
+        # "contour_following_3d_2023y-02m-01d_15h26m36s/",
+        # "contour_following_3d_2022y-08m-08d_15h05m19s/",
+        # "contour_following_3d_2022y-08m-08d_15h15m18s/",
+        # "contour_following_3d_2023y-02m-01d_10h56m31s/",
+        # "contour_following_3d_2023y-02m-01d_11h05m16s/",
+        # "contour_following_3d_2022y-08m-04d_15h44m53s/",
+        # "contour_following_3d_2022y-09m-13d_14h38m49s/",
+        # "contour_following_3d_2023y-02m-20d_15h11m38s/",
+        # "contour_following_3d_2023y-02m-20d_15h25m58s/"
 
     }
 

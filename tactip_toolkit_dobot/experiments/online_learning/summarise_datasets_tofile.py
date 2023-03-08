@@ -66,8 +66,8 @@ def main(ex, meta):
 if __name__ == "__main__":
 
     data_home = (
-        # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/"
-        "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
+        "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/"
+        # "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
     )
 
 

@@ -43,8 +43,12 @@ if __name__ == "__main__":
         "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/icra2023/"
     )
 
-    stimuli_to_graph = "waves3d"
+    # stimuli_to_graph = "waves3d"
     # stimuli_to_graph = "tilt"
+    # stimuli_to_graph = "banana"
+    stimuli_to_graph = "blue-cap"
+    # stimuli_to_graph = "white-lid"
+
     # method_type = "full_grid"
     # method_type = "cross"
     method_type = "both"
@@ -52,18 +56,28 @@ if __name__ == "__main__":
 
     base_x_location= -16
     averages_array =[]
+
+    # if  stimuli_to_graph == "waves3d" or stimuli_to_graph == "tilt":
     if stimuli_to_graph == "waves3d":
         plot_size = [75,20,90]
     elif stimuli_to_graph == "tilt":
         plot_size = [7,27,45]
+    elif stimuli_to_graph == "banana":
+        plot_size = [30,15,120]
+    elif stimuli_to_graph == "blue-cap":
+        plot_size = [17,10,45]
+    elif stimuli_to_graph == "white-lid":
+        plot_size = [50,11,43]
+
 
     fig, ax = plt.subplots(
             2, 1, sharex=True, gridspec_kw={"height_ratios": [plot_size[0], plot_size[1]]}
         )
 
     for subdir, dirs, files in os.walk(data_home):
-        # print(subdir)
-        if subdir.split('/')[-1] != "post_processing" and subdir.split('/')[-1] != "":
+        print(subdir)
+        print(subdir == "old")
+        if subdir.split('/')[-1] != "post_processing" and subdir.split('/')[-1] != "" and subdir.split('/')[-1] != "old" and subdir.split('/')[-2] != "old":
             # print(subdir.split('/')[-1])
             current_experiment = subdir.split('/')[-1] + "/"
             print(current_experiment)
@@ -102,7 +116,7 @@ if __name__ == "__main__":
                     ex.edge_height = common.load_data(data_home + current_experiment + "all_edge_heights_final.json")
                     ex.edge_height = np.array(ex.edge_height)
             else:
-                ex.edge_locations = np.array(ex.edge_locations)# + np.array([meta['work_frame_offset'][0] - base_x_location, 0])
+                ex.edge_locations = np.array(ex.edge_locations) -  np.array(ex.edge_locations)[0]# + np.array([meta['work_frame_offset'][0] - base_x_location, 0])
                 ex.edge_height = common.load_data(data_home + current_experiment + "all_edge_heights_final.json")
                 ex.edge_height = np.array(ex.edge_height)
 
@@ -153,6 +167,27 @@ if __name__ == "__main__":
 
                 # except:
                 #     print("Plot all failed, moving on")
+                elif stimuli_to_graph == "banana":
+                    if meta["stimuli_name"].split('-')[0] == "banana":
+                        save_as_sub_name = "banana"
+                        # if save_as_name == "all_movements_final":
+                        # if meta["plane_method"] == "cross":
+                        plots_test.plot_all_movements_both(ex,meta, show_figs, save_figs=False, fig_ax=(fig,ax),plot_size=plot_size)
+
+                elif stimuli_to_graph == "blue-cap":
+                    if meta["stimuli_name"].split('-')[0] == "cap":
+                        save_as_sub_name = "blue-cap"
+                        # if save_as_name == "all_movements_final":
+                        # if meta["plane_method"] == "cross":
+                        plots_test.plot_all_movements_both(ex,meta, show_figs, save_figs=False, fig_ax=(fig,ax),plot_size=plot_size)
+
+                elif stimuli_to_graph == "white-lid":
+                    if meta["stimuli_name"].split('-')[0] == "lid" or meta["stimuli_name"].split('-')[1] == "lid":
+                        save_as_sub_name = "white-lid"
+                        # if save_as_name == "all_movements_final":
+                        # if meta["plane_method"] == "cross":
+                        plots_test.plot_all_movements_both(ex,meta, show_figs, save_figs=False, fig_ax=(fig,ax),plot_size=plot_size)
+
 
     if False:
         print(f"averages array: {averages_array}")

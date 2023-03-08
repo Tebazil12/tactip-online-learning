@@ -100,17 +100,22 @@ if __name__ == "__main__":
         real = np.array(results["real"])
         optm = np.array(results["optm"])
 
-        things = np.where((real[:, 1] < -15) | (real[:, 1] > 15))[0]
+        # # 0 = height 1 = angle 2 = disp
+        # things = np.where((real[:, 1] < -15) | (real[:, 1] > 15))[0] ## original
+        # things = np.where((real[:, 0] < -1) | (real[:, 0] > 0.5))[0]
+        things = np.where((real[:, 2] < -4) | (real[:, 2] > 4))[0]
         print(things)
 
-        reduced_real = np.delete(real, things, axis=0)
-        reduced_optm =np.delete(optm, things, axis=0)
+
 
         #map angle to phi
         # -45:45 , 0:2
-        # real[:,1] = (real[:,1]+45) /45
-        optm[:,1] = (optm[:,1]*45) - 45
-        reduced_real[:,1] = (reduced_real[:,1]+45) /45
+        real[:,1] = (real[:,1]+45) /45
+        # optm[:,1] = (optm[:,1]*45) - 45
+        # reduced_real[:,1] = (reduced_real[:,1]+45) /45
+
+        reduced_real = np.delete(real, things, axis=0)
+        reduced_optm =np.delete(optm, things, axis=0)
         print("optm",optm)
         print(real)
         print(reduced_real)
@@ -143,18 +148,23 @@ if __name__ == "__main__":
     # print("\n")
     np.set_printoptions(precision=1)
     print("all")
+    # all_end =np.array(means).T
     all_end =np.concatenate((np.array(means).T ,np.array( perc50).T,np.array( perc75).T,np.array( perc90).T), axis=1)
+
     print( all_end)
+    print(tabulate(np.round(all_end,1), tablefmt="latex"))
     print("reduced")
-    all_end_reduced = np.concatenate((np.array(means_r).T ,np.array( perc50_r).T,np.array( perc75_r).T,np.array( perc90_r).T), axis=1)
+    # all_end_reduced = np.array(means_r).T
+    all_end_reduced =np.concatenate((np.array(means_r).T ,np.array( perc50_r).T,np.array( perc75_r).T,np.array( perc90_r).T), axis=1)
     print( all_end_reduced)
+    print(tabulate(np.round(all_end_reduced,1), tablefmt="latex"))
         # print(np.array([means, perc50, perc75, perc90]).T)
     print("diff")
-    reduced_diff = all_end_reduced- all_end
-    print(reduced_diff)
-
-    # reduced_diff[ np.where((reduced_diff <= -0.05))] = 'a'
-    print(type(reduced_diff))
-    reduced_diff[reduced_diff >= 0.05] = 1
-    reduced_diff[reduced_diff <= -0.05] = -1
-    print(reduced_diff)
+    # reduced_diff = all_end_reduced- all_end
+    # print(reduced_diff)
+    #
+    # # reduced_diff[ np.where((reduced_diff <= -0.05))] = 'a'
+    # print(type(reduced_diff))
+    # reduced_diff[reduced_diff >= 0.05] = 1
+    # reduced_diff[reduced_diff <= -0.05] = -1
+    # print(reduced_diff)
