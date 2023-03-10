@@ -2662,7 +2662,9 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True
         else:
             plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 1000, cmap="turbo")
             # plt.contourf(disps_meshed, heights_meshed, dissims_meshed, 100, cmap="hot_r")
-            plt.colorbar(shrink=0.3, aspect=20*0.3, label="dissimilarity", ticks=np.round(np.linspace(min(plane.dissims),max(plane.dissims),11),0))
+            # plt.colorbar(shrink=0.3, aspect=20*0.3, label="dissimilarity", ticks=np.round(np.linspace(min(plane.dissims),max(plane.dissims),11),0))
+            plt.colorbar(shrink=0.2, aspect=20*0.3, label="dissimilarity", ticks=np.round(np.linspace(min(plane.dissims),max(plane.dissims),11),0))
+
 
         plt.scatter(plane.disps, plane.heights, s=5, marker='+', edgecolors='k', facecolors='k', linewidths=.5  )
         # # plt.scatter(plane.disps, plane.heights, c=colour, cmap="viridis_r", edgecolors='k')
@@ -2676,7 +2678,7 @@ def plot_dissim_grid(plane, meta, step_num_str=None, show_fig=False, filled=True
 
     plt.xlabel("Displacment (mm)")
     plt.ylabel("Height (mm)")
-    plt.title("Dissimilarity Field at varying Proximity to Edge")
+    # plt.title("Dissimilarity Field at varying Proximity to Edge")
 
     plt.xticks(meta["line_range"], labels=meta["line_range"])
     plt.yticks(meta["height_range"][::2], labels=meta["height_range"][::2])

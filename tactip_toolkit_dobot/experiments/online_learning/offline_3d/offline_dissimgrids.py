@@ -207,6 +207,7 @@ def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_ex
         ready_plane.make_x()
 
         if grid_graphs_on:
+            print("making grid graphs")
             # make the grid graphs
             plot_dissim_grid(
                 ready_plane,
@@ -275,7 +276,7 @@ def main(ex, meta, alt_ref=None, grid_graphs_on=True, data_home=None, current_ex
         heights_at_mins.append(height_at_min)
         disps_at_mins.append(disp_at_min)
 
-    plot_minimas_graph(heights_at_mins, disps_at_mins, angles, meta, alt_ref=alt_ref, show_fig=show_fig)
+    # plot_minimas_graph(heights_at_mins, disps_at_mins, angles, meta, alt_ref=alt_ref, show_fig=show_fig)
 
 
 if __name__ == "__main__":
@@ -283,7 +284,7 @@ if __name__ == "__main__":
     data_home = (
         "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
     )
-    # current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
+    current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
     # current_experiment = "collect_dataset_3d_21y-11m-19d_12h24m42s/"
     # current_experiment = "collect_dataset_3d_21y-11m-22d_16h10m54s/"
     #
@@ -291,7 +292,7 @@ if __name__ == "__main__":
     # current_experiment = "collect_dataset_3d_21y-12m-07d_15h24m32s/"
     # current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
 
-    current_experiment = "collect_dataset_3d_22y-08m-09d_10h18m30s/"
+    # current_experiment = "collect_dataset_3d_22y-08m-09d_10h18m30s/"
 
 
     # current_experiment = "contour_following_3d_2022y-07m-29d_11h50m44s/"

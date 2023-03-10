@@ -676,7 +676,8 @@ if __name__ == "__main__":
     data_home = (
         "/home/lizzie/git/tactip_toolkit_dobot/data/TacTip_dobot/online_learning/"
     )
-    current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
+    # current_experiment = "collect_dataset_3d_21y-03m-03d_15h18m06s/"
+    current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
@@ -696,6 +697,6 @@ if __name__ == "__main__":
     # main(state.ex, state.meta,train_or_test="test_line_angles",train_folder="model_one_grid/")
     # main(state.ex, state.meta,train_or_test="test_single_taps", train_folder="model_one_grid/")
 
-    # main(state.ex, state.meta,train_or_test="train", train_folder="model_two_grid/")
+    main(state.ex, state.meta,train_or_test="train", train_folder="model_two_grid/")
     # main(state.ex, state.meta,train_or_test="test_line_angles",train_folder="model_two_grid/")
-    main(state.ex, state.meta,train_or_test="test_single_taps", train_folder="model_two_grid/")
+    # main(state.ex, state.meta,train_or_test="test_single_taps", train_folder="model_two_grid/")

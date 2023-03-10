@@ -33,7 +33,7 @@ def plot_flat(dissims, meta, data_home=None, current_experiment=None):
     ax = plt.gca()
 
     for line_num, dissim in enumerate(dissims):
-        if line_num < 19:
+        if line_num < num_angles:
             angle = (line_num % num_angles) * 5 - 45  # todo, extract from meta
 
             label = str(angle) + "°"
@@ -118,11 +118,11 @@ def plot_seperate_heights(dissims, meta, data_home=None, current_experiment=None
 
     real_disp = meta["line_range"]
 
-    the_figure = plt.figure(figsize=(20, 5))
+    the_figure = plt.figure(figsize=(20, 5/3))
 
     for line_num, dissim in enumerate(dissims):
-        if line_num < 19:
-            angle = (line_num % num_angles) * 5 - 45  # todo, extract from meta
+        if line_num < num_angles:
+            angle = (line_num % num_angles) * (meta["angle_range"][0]-meta["angle_range"][1]) - meta["angle_range"][0]  # todo, extract from meta
 
             label = str(angle) + "°"
 
@@ -145,8 +145,9 @@ def plot_seperate_heights(dissims, meta, data_home=None, current_experiment=None
             subplot_num = 1
         else:
             subplot_num = int(np.ceil((line_num + 1) / num_angles))
+            print(f"subplot_num {subplot_num} line num {line_num} num angs {num_angles}")
 
-        ax = the_figure.add_subplot(1, 5, subplot_num)
+        ax = the_figure.add_subplot(1, num_heights, subplot_num)
         # f.set_figheight(3)
         # f.set_figwidth(3)
         # plt.subplots(1,5,figsize=(15,15))
@@ -156,10 +157,11 @@ def plot_seperate_heights(dissims, meta, data_home=None, current_experiment=None
         plt.plot(
             real_disp, dissim, color=(line_colour, 0, 1 - line_colour), label=label
         )
-        plt.axis([-11, 11, 0, 70])
+        # plt.axis([-11, 11, 0, 70])
+        plt.axis([-11, 11, 0, 1])
 
         font_size = 5
-        if line_num % 19 == 1:
+        if line_num % num_angles == 1:
 
             # Show the major grid lines with dark grey lines
             plt.grid(b=True, which="major", color="#666666", linestyle="-", alpha=0.5)
@@ -210,7 +212,7 @@ def plot_seperate_heights(dissims, meta, data_home=None, current_experiment=None
             #     # Don't allow the axis to be on top of your data
             ax.set_axisbelow(True)
 
-        if line_num <= 19:
+        if line_num <= num_angles:
             plt.legend(fontsize=font_size)
 
     full_path_png = os.path.join(
@@ -832,7 +834,8 @@ def plot_seperate_angles(
     # reshaped_dissims = np.reshape(dissims.T, (num_angles * num_disps, num_heights))
     reshaped_dissims = dissims_height(dissims, meta)
 
-    the_figure = plt.figure(figsize=(20, 5))
+    the_figure = plt.figure(figsize=(20, 5/3))
+
 
     max_dissim = np.max(reshaped_dissims)
     min_dissim = np.min(reshaped_dissims)
@@ -868,7 +871,9 @@ def plot_seperate_angles(
             # else:
             #     subplot_num = int(np.ceil((line_num + 1) / num_angles))
             subplot_num = disp_index + 1
-            ax = the_figure.add_subplot(3, 10, subplot_num)
+            # ax = the_figure.add_subplot(3, 10, subplot_num)
+            ax = the_figure.add_subplot(1, num_disps , subplot_num)
+
             # f.set_figheight(3)
             # f.set_figwidth(3)
             # plt.subplots(1,5,figsize=(15,15))
@@ -881,7 +886,7 @@ def plot_seperate_angles(
                 color=(line_colour, 0, 1 - line_colour),
                 label=label,
             )
-            plt.axis([-1.1, 1.1, min_dissim - 5, max_dissim + 5])
+            plt.axis([heights[0]-0.1, heights[-1]+0.1, min_dissim - (max_dissim/10.0), max_dissim + (max_dissim/10.0)])
 
             font_size = 5
             if angle_index == 1:
@@ -890,16 +895,16 @@ def plot_seperate_angles(
                 plt.grid(
                     b=True, which="major", color="#666666", linestyle="-", alpha=0.5
                 )
-                ax.xaxis.set_major_locator(ticker.MultipleLocator(10))
-                ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+                ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+                ax.yaxis.set_major_locator(ticker.MultipleLocator(1))
 
                 # Show the minor grid lines with very faint and almost transparent grey lines
                 plt.minorticks_on()
                 plt.grid(
                     b=True, which="minor", color="#999999", linestyle="-", alpha=0.2
                 )
-                ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
-                ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
+                ax.xaxis.set_minor_locator(ticker.MultipleLocator(0.2))
+                ax.yaxis.set_minor_locator(ticker.MultipleLocator(0.2))
 
                 # set axis font size
                 plt.tick_params(labelsize=font_size)
@@ -1019,14 +1024,14 @@ def main(
         # plot_seperate_heights(
         #     dissims, meta, data_home=data_home, current_experiment=current_experiment
         # )
-        plot_minimas(
-            dissims,
-            meta,
-            gp_extrap=False,
-            data_home=data_home,
-            current_experiment=current_experiment,
-            show_figs=False
-        )
+        # plot_minimas(
+        #     dissims,
+        #     meta,
+        #     gp_extrap=False,
+        #     data_home=data_home,
+        #     current_experiment=current_experiment,
+        #     show_figs=False
+        # )
         # plot_height_flat(
         #     dissims,
         #     meta,
@@ -1034,13 +1039,13 @@ def main(
         #     current_experiment=current_experiment,
         #     show_fig=show_figs,
         # )
-        # plot_seperate_angles(
-        #     dissims,
-        #     meta,
-        #     data_home=data_home,
-        #     current_experiment=current_experiment,
-        #     show_fig=show_figs
-        # )
+        plot_seperate_angles(
+            dissims,
+            meta,
+            data_home=data_home,
+            current_experiment=current_experiment,
+            show_fig=show_figs
+        )
         # plot_height_minimas(
         #     dissims, meta, data_home=data_home, current_experiment=current_experiment, gp_extrap=False
         # )
@@ -1117,9 +1122,9 @@ if __name__ == "__main__":
 
     # current_experiment = "collect_dataset_3d_21y-12m-07d_16h00m01s/"
     # current_experiment = "collect_dataset_3d_21y-12m-07d_15h24m32s/"
-    # current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
+    current_experiment = "collect_dataset_3d_21y-12m-07d_12h33m47s/"
 
-    current_experiment = "collect_dataset_3d_22y-08m-09d_10h18m30s/"
+    # current_experiment = "collect_dataset_3d_22y-08m-09d_10h18m30s/"
 
     state = State(meta=common.load_data(data_home + current_experiment + "meta.json"))
 
